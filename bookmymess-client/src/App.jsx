@@ -7,8 +7,6 @@ import {
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import AddMess from "./pages/AddMess";
-import ViewMess from "./pages/ViewMess";
 
 function App() {
 
@@ -26,14 +24,6 @@ function App() {
         <Route
           path="/dashboard"
           element={<Dashboard />}
-        />
-        <Route
-          path="/view-mess"
-          element={<ViewMess />}
-        />
-        <Route
-          path="/add-mess"
-          element={<AddMess />}
         />
 
       </Routes>

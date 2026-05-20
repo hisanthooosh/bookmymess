@@ -8,12 +8,15 @@ function Login() {
 
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
 
         e.preventDefault();
 
         try {
+
+            setLoading(true);
 
             const res = await API.post(
                 "/auth/login",
@@ -35,8 +38,6 @@ function Login() {
                 )
             );
 
-            console.log(res.data);
-
             navigate("/dashboard");
 
         }
@@ -48,59 +49,190 @@ function Login() {
             );
 
         }
+        finally {
+
+            setLoading(false);
+
+        }
 
     }
 
     return (
 
-        <div className="min-h-screen flex justify-center items-center bg-gray-100">
+        <div
+            className="min-h-screen 
+        bg-gradient-to-br
+        from-slate-950
+        via-gray-900
+        to-black
+        flex
+        justify-center
+        items-center
+        px-5"
+        >
 
-            <div className="bg-white shadow-lg p-8 rounded-lg w-[350px]">
+            <div
+                className="w-full
+            max-w-md
+            bg-white/10
+            backdrop-blur-xl
+            border
+            border-white/20
+            rounded-[30px]
+            p-8
+            shadow-2xl"
+            >
 
-                <h1 className="text-3xl font-bold mb-2 text-center">
+                <div className="text-center mb-8">
 
-                    BookMyMess
+                    <div
+                        className="w-20
+                    h-20
+                    rounded-full
+                    bg-white
+                    flex
+                    items-center
+                    justify-center
+                    mx-auto
+                    mb-4"
+                    >
 
-                </h1>
+                        <span
+                            className="text-3xl"
+                        >
+                            🍽️
+                        </span>
 
-                <p className="text-center text-gray-500 mb-6">
+                    </div>
 
-                    Login to continue
+                    <h1
+                        className="text-4xl
+                    font-bold
+                    text-white"
+                    >
+                        BookMyMess
+                    </h1>
 
-                </p>
+                    <p
+                        className="text-gray-300 mt-2"
+                    >
+                        Smart Meal Booking Platform
+                    </p>
 
-                <form onSubmit={handleLogin}>
+                </div>
 
-                    <input
-                        type="text"
-                        placeholder="Phone Number"
-                        value={phone}
-                        onChange={(e) =>
-                            setPhone(e.target.value)
-                        }
-                        className="border w-full p-3 mb-4 rounded"
-                    />
+                <form
+                    onSubmit={handleLogin}
+                    className="space-y-5"
+                >
 
-                    <input
-                        type="password"
-                        placeholder="Passcode"
-                        value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-                        className="border w-full p-3 mb-4 rounded"
-                    />
+                    <div>
+
+                        <label
+                            className="text-gray-300
+                        text-sm"
+                        >
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="text"
+                            placeholder="Enter phone number"
+                            value={phone}
+                            onChange={(e) =>
+                                setPhone(e.target.value)
+                            }
+                            className="
+                        w-full
+                        mt-2
+                        p-4
+                        rounded-xl
+                        bg-white/10
+                        border
+                        border-gray-500
+                        text-white
+                        outline-none
+                        focus:border-blue-500
+                        focus:ring-2
+                        focus:ring-blue-500"
+                        />
+
+                    </div>
+
+                    <div>
+
+                        <label
+                            className="text-gray-300
+                        text-sm"
+                        >
+                            Passcode
+                        </label>
+
+                        <input
+                            type="password"
+                            placeholder="Enter passcode"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(
+                                    e.target.value
+                                )
+                            }
+                            className="
+                        w-full
+                        mt-2
+                        p-4
+                        rounded-xl
+                        bg-white/10
+                        border
+                        border-gray-500
+                        text-white
+                        outline-none
+                        focus:border-blue-500
+                        focus:ring-2
+                        focus:ring-blue-500"
+                        />
+
+                    </div>
 
                     <button
                         type="submit"
-                        className="bg-black text-white w-full p-3 rounded"
+                        disabled={loading}
+                        className="
+                    w-full
+                    p-4
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-blue-600
+                    to-purple-600
+                    text-white
+                    font-semibold
+                    hover:scale-[1.02]
+                    duration-300
+                    disabled:opacity-50"
                     >
 
-                        Login
+                        {
+                            loading
+                                ?
+                                "Logging in..."
+                                :
+                                "Login"
+                        }
 
                     </button>
 
                 </form>
+
+                <div
+                    className="mt-8
+                text-center
+                text-sm
+                text-gray-400"
+                >
+
+                    Book smarter • Reduce food wastage
+
+                </div>
 
             </div>
 
