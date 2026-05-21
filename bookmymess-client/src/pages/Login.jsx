@@ -52,6 +52,15 @@ function Login() {
                 );
 
             }
+            else if (
+                res.data.user.role === "student"
+            ) {
+
+                navigate(
+                    "/student-dashboard"
+                );
+
+            }
 
         }
         catch (error) {

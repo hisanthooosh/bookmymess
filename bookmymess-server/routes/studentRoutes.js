@@ -15,7 +15,9 @@ router.post(
                 name,
                 phone,
                 password,
-                messId
+                messId,
+                startDate,
+                endDate
             } = req.body;
 
             // check existing phone
@@ -70,7 +72,10 @@ router.post(
                     password: hashedPassword,
                     messId,
                     studentId,
-                    role: "student"
+                    role: "student",
+
+                    studentStartDate: startDate,
+                    studentEndDate: endDate
 
                 });
 
@@ -102,5 +107,41 @@ router.post(
 
     }
 );
+router.get(
+    "/:messId",
+    async (req, res) => {
 
+        try {
+
+            const students =
+
+                await User.find({
+
+                    messId: req.params.messId,
+                    role: "student"
+
+                }).select("-password");
+
+            res.status(200).json({
+
+                success: true,
+                students
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+                message: "Failed to fetch students"
+
+            });
+
+        }
+
+    }
+);
 module.exports = router;
