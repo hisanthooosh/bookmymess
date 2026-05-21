@@ -691,6 +691,323 @@ shadow-lg
 
                         </div>
 
+<<<<<<< HEAD
+
+                        <div>
+
+                            <label className="font-semibold">
+
+                                Select Day
+
+                            </label>
+
+                            <select
+                                value={selectedDay}
+                                onChange={(e) =>
+                                    setSelectedDay(
+                                        e.target.value
+                                    )
+                                }
+                                className="w-full mt-2 p-4 rounded-xl border"
+                            >
+
+                                <option>Sunday</option>
+                                <option>Monday</option>
+                                <option>Tuesday</option>
+                                <option>Wednesday</option>
+                                <option>Thursday</option>
+                                <option>Friday</option>
+                                <option>Saturday</option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        {
+                            [
+                                {
+                                    title: "🍳 Breakfast",
+                                    data: breakfast,
+                                    type: "breakfast"
+                                },
+                                {
+                                    title: "🍛 Lunch",
+                                    data: lunch,
+                                    type: "lunch"
+                                },
+                                {
+                                    title: "🌙 Dinner",
+                                    data: dinner,
+                                    type: "dinner"
+                                }
+                            ].map((meal) => (
+
+                                <div
+                                    key={meal.type}
+                                    className="mt-8 bg-slate-50 p-6 rounded-3xl"
+                                >
+
+                                    <div className="
+flex
+flex-col
+sm:flex-row
+justify-between
+gap-4
+items-center
+">
+
+                                        <h2 className="font-bold text-xl">
+
+                                            {meal.title}
+
+                                        </h2>
+
+                                        <button
+                                            onClick={() =>
+                                                addItem(meal.type)
+                                            }
+                                            className="
+w-full
+sm:w-auto
+bg-blue-600
+text-white
+px-5
+py-3
+rounded-xl
+"
+                                        >
+
+                                            + Add Item
+
+                                        </button>
+
+                                    </div>
+
+
+
+                                    <div className="space-y-4 mt-5">
+
+                                        {
+
+                                            meal.data.map((item, index) => (
+
+                                                <div
+                                                    key={index}
+                                                    className="
+flex
+flex-col
+sm:flex-row
+gap-3
+"
+                                                >
+
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter item"
+                                                        value={item}
+                                                        onChange={(e) =>
+
+                                                            updateItem(
+                                                                meal.type,
+                                                                index,
+                                                                e.target.value
+                                                            )
+
+                                                        }
+                                                        className="
+flex-1
+p-4
+border
+rounded-xl
+"
+                                                    />
+
+                                                    <button
+                                                        onClick={() =>
+
+                                                            removeItem(
+                                                                meal.type,
+                                                                index
+                                                            )
+
+                                                        }
+                                                        className="
+w-full
+sm:w-auto
+bg-red-500
+text-white
+px-6
+rounded-xl
+"
+                                                    >
+
+                                                        ✕
+
+                                                    </button>
+
+                                                </div>
+
+                                            ))
+
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            ))
+
+                        }
+
+
+
+                        <button
+
+                            onClick={saveMenu}
+
+                            className="
+mt-10
+w-full
+md:w-auto
+bg-gradient-to-r
+from-blue-600
+to-purple-600
+text-white
+px-10
+py-4
+rounded-2xl
+hover:scale-105
+duration-300
+"
+
+                        >
+
+                           📋  Save Menu
+
+                        </button>
+
+
+                        <div className="mt-12">
+
+                            <h1 className="text-2xl font-bold">
+
+                                📋 Saved Menus
+
+                            </h1>
+
+                            <div className="
+grid
+grid-cols-1
+md:grid-cols-2
+xl:grid-cols-3
+gap-6
+mt-6
+">
+
+                                {
+                                    savedMenus.length === 0 ?
+
+                                        <div className="col-span-full text-center p-10">
+
+                                            <p className="text-gray-500">
+
+                                                No menu created yet
+
+                                            </p>
+
+                                        </div>
+
+                                        :
+
+                                        savedMenus.map((menu, index) => (
+
+                                            <div
+                                                key={index}
+                                                className="
+bg-slate-100
+rounded-3xl
+p-6
+shadow
+"
+                                            >
+
+                                                <h2 className="font-bold text-xl">
+
+                                                    {menu.day}
+
+                                                </h2>
+
+
+                                                <div className="mt-4">
+
+                                                    <p className="font-semibold">
+                                                        🍳 Breakfast
+                                                    </p>
+
+                                                    {
+                                                        menu.breakfast.map((item, i) => (
+
+                                                            <p key={i}>
+                                                                • {item}
+                                                            </p>
+
+                                                        ))
+                                                    }
+
+                                                </div>
+
+
+                                                <div className="mt-4">
+
+                                                    <p className="font-semibold">
+                                                        🍛 Lunch
+                                                    </p>
+
+                                                    {
+                                                        menu.lunch.map((item, i) => (
+
+                                                            <p key={i}>
+                                                                • {item}
+                                                            </p>
+
+                                                        ))
+                                                    }
+
+                                                </div>
+
+
+                                                <div className="mt-4">
+
+                                                    <p className="font-semibold">
+                                                        🌙 Dinner
+                                                    </p>
+
+                                                    {
+                                                        menu.dinner.map((item, i) => (
+
+                                                            <p key={i}>
+                                                                • {item}
+                                                            </p>
+
+                                                        ))
+                                                    }
+
+                                                </div>
+
+                                            </div>
+
+                                        ))
+
+                                }
+
+                            </div>
+
+                        </div>
+
+=======
+>>>>>>> main
                     </div>
                 }
 
