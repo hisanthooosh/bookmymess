@@ -376,7 +376,10 @@ lg:translate-x-0
 
 
                     <button
-                        onClick={() => setActivePage("bookings")}
+                        onClick={() => {
+                            setActivePage("bookings");
+                            setSidebarOpen(false);
+                        }}
                         className="w-full p-4 bg-slate-800 rounded-xl text-left"
                     >
 
