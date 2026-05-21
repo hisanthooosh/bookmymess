@@ -7,6 +7,8 @@ import {
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";
+
 
 function App() {
 
@@ -24,6 +26,11 @@ function App() {
         <Route
           path="/dashboard"
           element={<Dashboard />}
+        />
+
+        <Route
+          path="/owner-dashboard"
+          element={<OwnerDashboard />}
         />
 
       </Routes>

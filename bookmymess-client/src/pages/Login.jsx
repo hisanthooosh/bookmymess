@@ -38,7 +38,20 @@ function Login() {
                 )
             );
 
-            navigate("/dashboard");
+            if (res.data.user.role === "superadmin") {
+
+                navigate("/dashboard");
+
+            }
+            else if (
+                res.data.user.role === "owner"
+            ) {
+
+                navigate(
+                    "/owner-dashboard"
+                );
+
+            }
 
         }
         catch (error) {
