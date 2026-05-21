@@ -209,7 +209,10 @@ lg:translate-x-0
                     <div className="p-5 space-y-4">
 
                         <button
-                            onClick={() => setActivePage("dashboard")}
+                            onClick={() => {
+                                setActivePage("dashboard");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
@@ -240,7 +243,10 @@ ${activePage === "dashboard"
 
 
                         <button
-                            onClick={() => setActivePage("addmess")}
+                            onClick={() => {
+                                setActivePage("addmess");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
@@ -271,7 +277,10 @@ ${activePage === "addmess"
 
 
                         <button
-                            onClick={() => setActivePage("viewmess")}
+                            onClick={() => {
+                                setActivePage("viewmess");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
