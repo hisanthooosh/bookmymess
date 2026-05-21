@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
-import { useEffect } from "react";
 
 function Dashboard() {
 
@@ -17,21 +16,52 @@ function Dashboard() {
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
 
+    const [messName, setMessName] =
+        useState("");
+
+    const [ownerName, setOwnerName] =
+        useState("");
+
+    const [ownerPhone, setOwnerPhone] =
+        useState("");
+
+    const [pin, setPin] =
+        useState("");
+
+    const [messes, setMesses] =
+        useState([]);
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [editModal, setEditModal] =
+        useState(false);
+
+    const [selectedMess, setSelectedMess] =
+        useState(null);
+
+    const [editMessName, setEditMessName] =
+        useState("");
+
+    const [editOwnerName, setEditOwnerName] =
+        useState("");
+
+    const [editOwnerPhone, setEditOwnerPhone] =
+        useState("");
+
+
+
     const logout = () => {
 
         localStorage.removeItem("token");
+
         localStorage.removeItem("user");
 
         navigate("/");
 
-    }
+    };
 
-    const [messName, setMessName] = useState("");
-    const [ownerName, setOwnerName] = useState("");
-    const [ownerPhone, setOwnerPhone] = useState("");
-    const [pin, setPin] = useState("");
-    const [messes, setMesses] = useState([]);
-    const [loading, setLoading] = useState(false);
+
 
     const handleAddMess = async (e) => {
 
@@ -45,6 +75,7 @@ function Dashboard() {
         ) {
 
             alert("Please fill all fields");
+
             return;
 
         }
@@ -72,13 +103,16 @@ function Dashboard() {
         try {
 
             const res = await API.post(
+
                 "/mess/add",
+
                 {
                     messName,
                     ownerName,
                     ownerPhone,
                     pin
                 }
+
             );
 
             alert(
@@ -86,23 +120,32 @@ function Dashboard() {
             );
 
             setMessName("");
+
             setOwnerName("");
+
             setOwnerPhone("");
+
             setPin("");
+
+            fetchMesses();
 
         }
 
         catch (error) {
 
             alert(
+
                 error.response?.data?.message
                 ||
                 "Something went wrong"
+
             );
 
         }
 
     };
+
+
 
     const fetchMesses = async () => {
 
@@ -133,7 +176,120 @@ function Dashboard() {
 
         }
 
-    }
+    };
+
+
+
+    const openEditModal = (mess) => {
+
+        setSelectedMess(mess);
+
+        setEditMessName(
+            mess.messName
+        );
+
+        setEditOwnerName(
+            mess.ownerName
+        );
+
+        setEditOwnerPhone(
+            mess.ownerPhone
+        );
+
+        setEditModal(true);
+
+    };
+
+
+
+    const handleUpdateMess = async (e) => {
+
+        e.preventDefault();
+
+        try {
+
+            const res = await API.put(
+
+                `/mess/update/${selectedMess._id}`,
+
+                {
+                    messName: editMessName,
+                    ownerName: editOwnerName,
+                    ownerPhone: editOwnerPhone
+                }
+
+            );
+
+            alert(
+                res.data.message
+            );
+
+            setEditModal(false);
+
+            fetchMesses();
+
+        }
+
+        catch (error) {
+
+            alert(
+
+                error.response?.data?.message
+                ||
+                "Update failed"
+
+            );
+
+        }
+
+    };
+
+
+
+    const handleDeleteMess = async (id) => {
+
+        const confirmDelete =
+            window.confirm(
+                "Are you sure you want to delete this mess?"
+            );
+
+        if (!confirmDelete) {
+
+            return;
+
+        }
+
+        try {
+
+            const res = await API.delete(
+
+                `/mess/delete/${id}`
+
+            );
+
+            alert(
+                res.data.message
+            );
+
+            fetchMesses();
+
+        }
+
+        catch (error) {
+
+            alert(
+
+                error.response?.data?.message
+                ||
+                "Delete failed"
+
+            );
+
+        }
+
+    };
+
+
 
     useEffect(() => {
 
@@ -147,18 +303,20 @@ function Dashboard() {
 
     }, [activePage]);
 
+
+
     return (
 
         <div className="min-h-screen flex bg-slate-100">
-
-            {/* Mobile overlay */}
 
             {
                 sidebarOpen &&
 
                 <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() =>
+                        setSidebarOpen(false)
+                    }
                 ></div>
             }
 
@@ -216,8 +374,13 @@ lg:translate-x-0
 
                         <button
                             onClick={() => {
-                                setActivePage("dashboard");
+
+                                setActivePage(
+                                    "dashboard"
+                                );
+
                                 setSidebarOpen(false);
+
                             }}
                             className={`
 
@@ -250,8 +413,13 @@ ${activePage === "dashboard"
 
                         <button
                             onClick={() => {
-                                setActivePage("addmess");
+
+                                setActivePage(
+                                    "addmess"
+                                );
+
                                 setSidebarOpen(false);
+
                             }}
                             className={`
 
@@ -284,8 +452,13 @@ ${activePage === "addmess"
 
                         <button
                             onClick={() => {
-                                setActivePage("viewmess");
+
+                                setActivePage(
+                                    "viewmess"
+                                );
+
                                 setSidebarOpen(false);
+
                             }}
                             className={`
 
@@ -319,13 +492,16 @@ ${activePage === "viewmess"
                 </div>
 
 
+
                 <div className="p-5 border-t border-slate-800">
 
                     <div className="flex items-center gap-4 mb-5">
 
                         <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex justify-center items-center text-xl font-bold">
 
-                            {user?.name?.charAt(0)}
+                            {
+                                user?.name?.charAt(0)
+                            }
 
                         </div>
 
@@ -362,6 +538,7 @@ ${activePage === "viewmess"
             </div>
 
 
+
             {/* Main */}
 
             <div className="flex-1 overflow-x-hidden">
@@ -375,7 +552,9 @@ ${activePage === "viewmess"
 
                         <button
                             className="lg:hidden text-3xl"
-                            onClick={() => setSidebarOpen(true)}
+                            onClick={() =>
+                                setSidebarOpen(true)
+                            }
                         >
 
                             ☰
@@ -404,7 +583,9 @@ ${activePage === "viewmess"
 
                     <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center">
 
-                        {user?.name?.charAt(0)}
+                        {
+                            user?.name?.charAt(0)
+                        }
 
                     </div>
 
@@ -530,12 +711,6 @@ ${activePage === "viewmess"
 
                                     </h1>
 
-                                    <p className="text-gray-500 mt-2">
-
-                                        Create a mess and automatically generate an owner login account
-
-                                    </p>
-
                                 </div>
 
 
@@ -546,123 +721,65 @@ ${activePage === "viewmess"
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                                        <div>
-
-                                            <label
-                                                className="font-semibold text-gray-700"
-                                            >
-
-                                                Mess Name
-
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                placeholder="Enter mess name"
-                                                value={messName}
-                                                onChange={(e) =>
-                                                    setMessName(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="w-full mt-2 p-4 border rounded-2xl outline-none focus:border-blue-500"
-                                            />
-
-                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Mess Name"
+                                            value={messName}
+                                            onChange={(e) =>
+                                                setMessName(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
 
 
-                                        <div>
-
-                                            <label
-                                                className="font-semibold text-gray-700"
-                                            >
-
-                                                Owner Name
-
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                placeholder="Enter owner name"
-                                                value={ownerName}
-                                                onChange={(e) =>
-                                                    setOwnerName(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="w-full mt-2 p-4 border rounded-2xl outline-none focus:border-blue-500"
-                                            />
-
-                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Owner Name"
+                                            value={ownerName}
+                                            onChange={(e) =>
+                                                setOwnerName(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
 
 
-
-                                        <div>
-
-                                            <label
-                                                className="font-semibold text-gray-700"
-                                            >
-
-                                                Owner Phone Number
-
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                placeholder="Enter phone number"
-                                                maxLength="10"
-                                                value={ownerPhone}
-                                                onChange={(e) =>
-                                                    setOwnerPhone(
-                                                        e.target.value.replace(/\D/g, "")
-                                                    )
-                                                }
-                                                className="w-full mt-2 p-4 border rounded-2xl outline-none focus:border-blue-500"
-                                            />
-
-                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Phone Number"
+                                            maxLength="10"
+                                            value={ownerPhone}
+                                            onChange={(e) =>
+                                                setOwnerPhone(
+                                                    e.target.value.replace(/\D/g, "")
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
 
 
-
-                                        <div>
-
-                                            <label
-                                                className="font-semibold text-gray-700"
-                                            >
-
-                                                6 Digit PIN
-
-                                            </label>
-
-                                            <input
-                                                type="password"
-                                                placeholder="Enter 6 digit PIN"
-                                                maxLength="6"
-                                                value={pin}
-                                                onChange={(e) =>
-                                                    setPin(
-                                                        e.target.value
-                                                            .replace(/\D/g, "")
-                                                    )
-                                                }
-                                                className="w-full mt-2 p-4 border rounded-2xl outline-none focus:border-blue-500"
-                                            />
-
-                                            <p className="text-sm text-gray-500 mt-2">
-
-                                                This PIN will be used by owner for login
-
-                                            </p>
-
-                                        </div>
+                                        <input
+                                            type="password"
+                                            placeholder="6 Digit PIN"
+                                            maxLength="6"
+                                            value={pin}
+                                            onChange={(e) =>
+                                                setPin(
+                                                    e.target.value.replace(/\D/g, "")
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
 
                                     </div>
 
 
-
                                     <button
                                         type="submit"
-                                        className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl text-white font-semibold hover:scale-105 duration-300"
+                                        className="px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl text-white"
                                     >
 
                                         Create Mess
@@ -682,8 +799,6 @@ ${activePage === "viewmess"
                         activePage === "viewmess" && (
 
                             <>
-
-                                {/* Stats Cards */}
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
@@ -723,27 +838,22 @@ ${activePage === "viewmess"
                                 </div>
 
 
-                                {/* View Messes Card */}
 
                                 <div className="bg-white p-6 rounded-[30px] shadow-lg">
 
-                                    <div className="flex justify-between items-center mb-6">
+                                    <div className="mb-6">
 
-                                        <div>
+                                        <h1 className="text-3xl font-bold">
 
-                                            <h1 className="text-3xl font-bold">
+                                            📋 View Messes
 
-                                                📋 View Messes
+                                        </h1>
 
-                                            </h1>
+                                        <p className="text-gray-500">
 
-                                            <p className="text-gray-500">
+                                            Manage all messes
 
-                                                Manage all messes
-
-                                            </p>
-
-                                        </div>
+                                        </p>
 
                                     </div>
 
@@ -795,7 +905,6 @@ ${activePage === "viewmess"
                                                     <tbody>
 
                                                         {
-
                                                             messes.map((mess) => (
 
                                                                 <tr
@@ -838,6 +947,9 @@ ${activePage === "viewmess"
                                                                     <td className="p-4 flex gap-3">
 
                                                                         <button
+                                                                            onClick={() =>
+                                                                                openEditModal(mess)
+                                                                            }
                                                                             className="bg-blue-500 px-4 py-2 rounded-xl text-white"
                                                                         >
 
@@ -845,7 +957,11 @@ ${activePage === "viewmess"
 
                                                                         </button>
 
+
                                                                         <button
+                                                                            onClick={() =>
+                                                                                handleDeleteMess(mess._id)
+                                                                            }
                                                                             className="bg-red-500 px-4 py-2 rounded-xl text-white"
                                                                         >
 
@@ -858,7 +974,6 @@ ${activePage === "viewmess"
                                                                 </tr>
 
                                                             ))
-
                                                         }
 
                                                     </tbody>
@@ -877,14 +992,107 @@ ${activePage === "viewmess"
                         )
                     }
 
+
+
+                    {
+                        editModal && (
+
+                            <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+
+                                <div className="bg-white w-full max-w-lg rounded-[30px] p-8">
+
+                                    <h1 className="text-3xl font-bold mb-6">
+
+                                        Edit Mess
+
+                                    </h1>
+
+
+                                    <form
+                                        onSubmit={handleUpdateMess}
+                                        className="space-y-5"
+                                    >
+
+                                        <input
+                                            type="text"
+                                            value={editMessName}
+                                            onChange={(e) =>
+                                                setEditMessName(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
+
+
+                                        <input
+                                            type="text"
+                                            value={editOwnerName}
+                                            onChange={(e) =>
+                                                setEditOwnerName(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
+
+
+                                        <input
+                                            type="text"
+                                            maxLength="10"
+                                            value={editOwnerPhone}
+                                            onChange={(e) =>
+                                                setEditOwnerPhone(
+                                                    e.target.value.replace(/\D/g, "")
+                                                )
+                                            }
+                                            className="w-full p-4 border rounded-2xl"
+                                        />
+
+
+                                        <div className="flex gap-4">
+
+                                            <button
+                                                type="submit"
+                                                className="flex-1 bg-blue-600 text-white py-4 rounded-2xl"
+                                            >
+
+                                                Update
+
+                                            </button>
+
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setEditModal(false)
+                                                }
+                                                className="flex-1 bg-gray-300 py-4 rounded-2xl"
+                                            >
+
+                                                Cancel
+
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    }
+
                 </div>
 
             </div>
 
         </div>
 
-    )
+    );
 
 }
 
-export default Dashboard
+export default Dashboard;
