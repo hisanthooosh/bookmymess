@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+
 function OwnerDashboard() {
 
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ function OwnerDashboard() {
         }, 500);
 
     }
+
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
 
@@ -41,35 +43,51 @@ function OwnerDashboard() {
 
     const [dinner, setDinner] =
         useState([""]);
+
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
 
     const [savedMenus, setSavedMenus] =
         useState([]);
+    const [studentName, setStudentName] =
+        useState("");
+
+    const [studentPhone, setStudentPhone] =
+        useState("");
+
+    const [studentPassword, setStudentPassword] =
+        useState("");
     const addItem = (type) => {
 
         if (type === "breakfast") {
+
             setBreakfast([
                 ...breakfast,
                 ""
             ]);
+
         }
 
         if (type === "lunch") {
+
             setLunch([
                 ...lunch,
                 ""
             ]);
+
         }
 
         if (type === "dinner") {
+
             setDinner([
                 ...dinner,
                 ""
             ]);
+
         }
 
     }
+
     useEffect(() => {
 
         const menu =
@@ -97,6 +115,7 @@ function OwnerDashboard() {
             );
 
         }
+
         else {
 
             setBreakfast([""]);
@@ -109,6 +128,7 @@ function OwnerDashboard() {
         selectedDay,
         savedMenus
     ]);
+
     const saveMenu = async () => {
 
         try {
@@ -120,7 +140,9 @@ function OwnerDashboard() {
                 {
 
                     messId: user.messId,
+
                     day: selectedDay,
+
                     breakfast:
                         breakfast.filter(
                             item => item.trim()
@@ -147,6 +169,7 @@ function OwnerDashboard() {
             );
 
         }
+
         catch (error) {
 
             toast.error(
@@ -156,6 +179,7 @@ function OwnerDashboard() {
         }
 
     }
+
     const fetchMenus = async () => {
 
         try {
@@ -171,6 +195,7 @@ function OwnerDashboard() {
             );
 
         }
+
         catch (error) {
 
             toast.error(
@@ -186,6 +211,7 @@ function OwnerDashboard() {
         fetchMenus();
 
     }, []);
+
     const updateItem = (
 
         type,
@@ -204,7 +230,6 @@ function OwnerDashboard() {
 
         }
 
-
         if (type === "lunch") {
 
             const data = [...lunch];
@@ -214,7 +239,6 @@ function OwnerDashboard() {
             setLunch(data);
 
         }
-
 
         if (type === "dinner") {
 
@@ -227,8 +251,49 @@ function OwnerDashboard() {
         }
 
     }
+    const addStudent = async () => {
 
+        try {
 
+            const res =
+                await API.post(
+
+                    "/student/add",
+
+                    {
+
+                        name: studentName,
+                        phone: studentPhone,
+                        password: studentPassword,
+                        messId: user.messId
+
+                    }
+
+                );
+
+            toast.success(
+                "Student Added Successfully 🎉"
+            );
+
+            setStudentName("");
+            setStudentPhone("");
+            setStudentPassword("");
+
+        }
+
+        catch (error) {
+
+            toast.error(
+
+                error.response?.data?.message ||
+
+                "Failed to add student"
+
+            );
+
+        }
+
+    }
     const removeItem = (
 
         type,
@@ -248,7 +313,6 @@ function OwnerDashboard() {
 
         }
 
-
         if (type === "lunch") {
 
             setLunch(
@@ -260,7 +324,6 @@ function OwnerDashboard() {
             );
 
         }
-
 
         if (type === "dinner") {
 
@@ -275,8 +338,11 @@ function OwnerDashboard() {
         }
 
     }
+
     return (
+
         <div className="min-h-screen flex bg-slate-100 relative">
+
             {
                 sidebarOpen &&
 
@@ -295,6 +361,8 @@ lg:hidden
 
             }
 
+            {/* Sidebar */}
+
             <div className={`
 fixed
 lg:fixed
@@ -302,13 +370,15 @@ top-0
 left-0
 h-screen
 w-[280px]
-overflow-y-auto
 bg-slate-950
 text-white
 p-6
 z-50
 duration-300
 shadow-2xl
+flex
+flex-col
+justify-between
 
 ${sidebarOpen
                     ?
@@ -321,64 +391,79 @@ lg:translate-x-0
 
 `}>
 
-                <h1 className="text-3xl font-bold">
+                {/* Top Section */}
 
-                    🍽 Owner Panel
+                <div>
 
-                </h1>
+                    <h1 className="text-3xl font-bold">
 
-                <p className="text-gray-400 mt-2">
+                        🍽 Owner Panel
 
-                    {user?.name}
+                    </h1>
 
-                </p>
+                    <p className="text-gray-400 mt-2">
 
+                        {user?.name}
 
-                <div className="space-y-3 mt-10">
+                    </p>
 
-                    <button
-                        onClick={() => setActivePage("dashboard")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                    <div className="space-y-3 mt-10">
 
-                        🏠 Dashboard
+                        <button
+                            onClick={() => setActivePage("dashboard")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                    </button>
+                            🏠 Dashboard
 
+                        </button>
 
-                    <button
-                        onClick={() => setActivePage("students")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                        <button
+                            onClick={() => setActivePage("students")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                        👨‍🎓 Students
+                            👨‍🎓 Students
 
-                    </button>
+                        </button>
 
+                        <button
+                            onClick={() => setActivePage("menu")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                    <button
-                        onClick={() => setActivePage("menu")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                            🍛 Menu
 
-                        🍛 Menu
+                        </button>
 
-                    </button>
+                        <button
+                            onClick={() => setActivePage("bookings")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
+                            📋 Meal Bookings
 
-                    <button
-                        onClick={() => setActivePage("bookings")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                        </button>
 
-                        📋 Meal Bookings
+                    </div>
 
-                    </button>
+                </div>
 
+                {/* Bottom Logout Button */}
+
+                <div className="pt-6">
 
                     <button
                         onClick={logout}
-                        className="w-full p-4 bg-red-500 rounded-xl"
+                        className="
+w-full
+p-4
+bg-red-500
+hover:bg-red-600
+rounded-xl
+font-semibold
+duration-300
+"
                     >
 
                         🚪 Logout
@@ -389,6 +474,7 @@ lg:translate-x-0
 
             </div>
 
+            {/* Main Content */}
 
             <div className="
 flex-1
@@ -397,6 +483,9 @@ p-4
 md:p-8
 overflow-x-hidden
 ">
+
+                {/* Top Navbar */}
+
                 <div className="
 sticky
 top-0
@@ -442,8 +531,32 @@ z-30
 
                     </div>
 
-                    <div
-                        className="
+                    {/* Right Profile Section */}
+
+                    <div className="flex items-center gap-3">
+
+                        {/* Desktop Mess Name */}
+
+                        <div className="hidden md:block text-right">
+
+                            <h2 className="font-bold text-lg text-slate-800">
+
+                                {user?.name}
+
+                            </h2>
+
+                            <p className="text-sm text-gray-500">
+
+                                Mess Owner
+
+                            </p>
+
+                        </div>
+
+                        {/* Mobile + Desktop Circle */}
+
+                        <div
+                            className="
 w-12
 h-12
 rounded-full
@@ -455,10 +568,13 @@ flex
 justify-center
 items-center
 font-bold
+text-lg
 "
-                    >
+                        >
 
-                        {user?.name?.charAt(0)}
+                            {user?.name?.charAt(0).toUpperCase()}
+
+                        </div>
 
                     </div>
 
@@ -477,13 +593,66 @@ font-bold
                 }
 
                 {
-                    activePage === "students"
-
-                    &&
+                    activePage === "students" &&
 
                     <div className="bg-white p-6 rounded-3xl">
 
-                        Student Management
+                        <h1 className="text-2xl font-bold mb-6">
+
+                            👨‍🎓 Student Management
+
+                        </h1>
+
+                        <div className="space-y-4">
+
+                            <input
+                                type="text"
+                                placeholder="Student Name"
+                                value={studentName}
+                                onChange={(e) =>
+                                    setStudentName(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <input
+                                type="text"
+                                placeholder="Phone Number"
+                                value={studentPhone}
+                                onChange={(e) =>
+                                    setStudentPhone(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <input
+                                type="password"
+                                placeholder="6 Digit Password"
+                                value={studentPassword}
+                                onChange={(e) =>
+                                    setStudentPassword(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <button
+                                onClick={addStudent}
+                                className="
+bg-blue-600
+text-white
+px-6
+py-4
+rounded-xl
+">
+
+                                Add Student
+
+                            </button>
+
+                        </div>
 
                     </div>
                 }
@@ -522,6 +691,7 @@ shadow-lg
 
                         </div>
 
+<<<<<<< HEAD
 
                         <div>
 
@@ -836,6 +1006,8 @@ shadow
 
                         </div>
 
+=======
+>>>>>>> main
                     </div>
                 }
 

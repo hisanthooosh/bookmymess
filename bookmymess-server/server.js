@@ -16,20 +16,33 @@ app.use(express.json());
 app.get("/", (req, res) => {
     res.send("BookMyMess API Running 🚀");
 });
-
 app.use(
     "/api/auth",
     require("./routes/authRoutes")
 );
+
 app.use(
     "/api/mess",
     require("./routes/messRoutes")
 );
-const PORT = process.env.PORT || 5000;
+
 app.use(
     "/api/owner",
     require("./routes/ownerRoutes")
 );
+
+app.use(
+    "/api/student",
+    require("./routes/studentRoutes")
+);
+
+app.use(
+    "/api/menu",
+    require("./routes/menuRoutes")
+);
+
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
 
     console.log(
@@ -37,7 +50,3 @@ app.listen(PORT, () => {
     );
 
 });
-app.use(
-    "/api/menu",
-    require("./routes/menuRoutes")
-);

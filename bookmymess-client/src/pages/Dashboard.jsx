@@ -25,6 +25,7 @@ function Dashboard() {
         navigate("/");
 
     }
+
     const [messName, setMessName] = useState("");
     const [ownerName, setOwnerName] = useState("");
     const [ownerPhone, setOwnerPhone] = useState("");
@@ -102,6 +103,7 @@ function Dashboard() {
         }
 
     };
+
     const fetchMesses = async () => {
 
         try {
@@ -118,11 +120,13 @@ function Dashboard() {
             );
 
         }
+
         catch (error) {
 
             console.log(error);
 
         }
+
         finally {
 
             setLoading(false);
@@ -130,6 +134,7 @@ function Dashboard() {
         }
 
     }
+
     useEffect(() => {
 
         if (
@@ -141,6 +146,7 @@ function Dashboard() {
         }
 
     }, [activePage]);
+
     return (
 
         <div className="min-h-screen flex bg-slate-100">
@@ -209,7 +215,10 @@ lg:translate-x-0
                     <div className="p-5 space-y-4">
 
                         <button
-                            onClick={() => setActivePage("dashboard")}
+                            onClick={() => {
+                                setActivePage("dashboard");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
@@ -240,7 +249,10 @@ ${activePage === "dashboard"
 
 
                         <button
-                            onClick={() => setActivePage("addmess")}
+                            onClick={() => {
+                                setActivePage("addmess");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
@@ -271,7 +283,10 @@ ${activePage === "addmess"
 
 
                         <button
-                            onClick={() => setActivePage("viewmess")}
+                            onClick={() => {
+                                setActivePage("viewmess");
+                                setSidebarOpen(false);
+                            }}
                             className={`
 
 w-full
@@ -531,8 +546,6 @@ ${activePage === "viewmess"
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                                        {/* Mess Name */}
-
                                         <div>
 
                                             <label
@@ -557,8 +570,6 @@ ${activePage === "viewmess"
 
                                         </div>
 
-
-                                        {/* Owner Name */}
 
                                         <div>
 
@@ -586,8 +597,6 @@ ${activePage === "viewmess"
 
 
 
-                                        {/* Phone */}
-
                                         <div>
 
                                             <label
@@ -614,8 +623,6 @@ ${activePage === "viewmess"
                                         </div>
 
 
-
-                                        {/* PIN */}
 
                                         <div>
 
@@ -674,154 +681,198 @@ ${activePage === "viewmess"
                     {
                         activePage === "viewmess" && (
 
-                            <div className="bg-white p-6 rounded-[30px] shadow-lg">
+                            <>
 
-                                <div className="flex justify-between items-center mb-6">
+                                {/* Stats Cards */}
 
-                                    <div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
-                                        <h1 className="text-3xl font-bold">
+                                    <div className="bg-white p-6 rounded-[30px] shadow-lg">
 
-                                            📋 View Messes
+                                        <p className="text-gray-500 text-lg">
+
+                                            Total Messes
+
+                                        </p>
+
+                                        <h1 className="text-4xl font-bold mt-4 text-blue-600">
+
+                                            {messes.length}
 
                                         </h1>
 
-                                        <p className="text-gray-500">
+                                    </div>
 
-                                            Manage all messes
+
+                                    <div className="bg-white p-6 rounded-[30px] shadow-lg">
+
+                                        <p className="text-gray-500 text-lg">
+
+                                            Total Students
 
                                         </p>
+
+                                        <h1 className="text-4xl font-bold mt-4 text-purple-600">
+
+                                            0
+
+                                        </h1>
 
                                     </div>
 
                                 </div>
 
 
-                                {
-                                    loading
+                                {/* View Messes Card */}
 
-                                        ?
+                                <div className="bg-white p-6 rounded-[30px] shadow-lg">
 
-                                        <div className="text-center py-10">
+                                    <div className="flex justify-between items-center mb-6">
 
-                                            Loading...
+                                        <div>
 
-                                        </div>
+                                            <h1 className="text-3xl font-bold">
 
-                                        :
+                                                📋 View Messes
 
-                                        <div className="overflow-x-auto">
+                                            </h1>
 
-                                            <table className="w-full">
+                                            <p className="text-gray-500">
 
-                                                <thead>
+                                                Manage all messes
 
-                                                    <tr className="border-b">
-
-                                                        <th className="text-left p-4">
-                                                            Mess
-                                                        </th>
-
-                                                        <th className="text-left p-4">
-                                                            Owner
-                                                        </th>
-
-                                                        <th className="text-left p-4">
-                                                            Phone
-                                                        </th>
-
-                                                        <th className="text-left p-4">
-                                                            Created
-                                                        </th>
-
-                                                        <th className="text-left p-4">
-                                                            Actions
-                                                        </th>
-
-                                                    </tr>
-
-                                                </thead>
-
-
-                                                <tbody>
-
-                                                    {
-
-                                                        messes.map((mess) => (
-
-                                                            <tr
-                                                                key={mess._id}
-                                                                className="border-b hover:bg-gray-50"
-                                                            >
-
-                                                                <td className="p-4">
-
-                                                                    {mess.messName}
-
-                                                                </td>
-
-
-                                                                <td className="p-4">
-
-                                                                    {mess.ownerName}
-
-                                                                </td>
-
-
-                                                                <td className="p-4">
-
-                                                                    {mess.ownerPhone}
-
-                                                                </td>
-
-
-                                                                <td className="p-4">
-
-                                                                    {
-                                                                        new Date(
-                                                                            mess.createdAt
-                                                                        )
-                                                                            .toLocaleDateString()
-                                                                    }
-
-                                                                </td>
-
-
-                                                                <td className="p-4 flex gap-3">
-
-                                                                    <button
-                                                                        className="bg-blue-500 px-4 py-2 rounded-xl text-white"
-                                                                    >
-
-                                                                        Edit
-
-                                                                    </button>
-
-                                                                    <button
-                                                                        className="bg-red-500 px-4 py-2 rounded-xl text-white"
-                                                                    >
-
-                                                                        Delete
-
-                                                                    </button>
-
-                                                                </td>
-
-                                                            </tr>
-
-                                                        ))
-
-                                                    }
-
-                                                </tbody>
-
-                                            </table>
+                                            </p>
 
                                         </div>
 
-                                }
+                                    </div>
 
-                            </div>
+
+                                    {
+                                        loading ? (
+
+                                            <div className="text-center py-10">
+
+                                                Loading...
+
+                                            </div>
+
+                                        ) : (
+
+                                            <div className="overflow-x-auto">
+
+                                                <table className="w-full">
+
+                                                    <thead>
+
+                                                        <tr className="border-b">
+
+                                                            <th className="text-left p-4">
+                                                                Mess
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Owner
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Phone
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Created
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Actions
+                                                            </th>
+
+                                                        </tr>
+
+                                                    </thead>
+
+
+                                                    <tbody>
+
+                                                        {
+
+                                                            messes.map((mess) => (
+
+                                                                <tr
+                                                                    key={mess._id}
+                                                                    className="border-b hover:bg-gray-50"
+                                                                >
+
+                                                                    <td className="p-4">
+
+                                                                        {mess.messName}
+
+                                                                    </td>
+
+
+                                                                    <td className="p-4">
+
+                                                                        {mess.ownerName}
+
+                                                                    </td>
+
+
+                                                                    <td className="p-4">
+
+                                                                        {mess.ownerPhone}
+
+                                                                    </td>
+
+
+                                                                    <td className="p-4">
+
+                                                                        {
+                                                                            new Date(
+                                                                                mess.createdAt
+                                                                            ).toLocaleDateString()
+                                                                        }
+
+                                                                    </td>
+
+
+                                                                    <td className="p-4 flex gap-3">
+
+                                                                        <button
+                                                                            className="bg-blue-500 px-4 py-2 rounded-xl text-white"
+                                                                        >
+
+                                                                            Edit
+
+                                                                        </button>
+
+                                                                        <button
+                                                                            className="bg-red-500 px-4 py-2 rounded-xl text-white"
+                                                                        >
+
+                                                                            Delete
+
+                                                                        </button>
+
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            ))
+
+                                                        }
+
+                                                    </tbody>
+
+                                                </table>
+
+                                            </div>
+
+                                        )
+                                    }
+
+                                </div>
+
+                            </>
 
                         )
                     }
