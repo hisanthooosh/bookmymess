@@ -7,8 +7,8 @@ import {
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import AddMess from "./pages/AddMess";
-import ViewMess from "./pages/ViewMess";
+import OwnerDashboard from "./pages/OwnerDashboard";
+
 
 function App() {
 
@@ -27,13 +27,10 @@ function App() {
           path="/dashboard"
           element={<Dashboard />}
         />
+
         <Route
-          path="/view-mess"
-          element={<ViewMess />}
-        />
-        <Route
-          path="/add-mess"
-          element={<AddMess />}
+          path="/owner-dashboard"
+          element={<OwnerDashboard />}
         />
 
       </Routes>

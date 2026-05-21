@@ -18,9 +18,9 @@ new mongoose.Schema({
         required:true
     },
 
-    address:{
-        type:String,
-        required:true
+    ownerId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
     }
 
 },

@@ -37,3 +37,7 @@ app.listen(PORT, () => {
     );
 
 });
+app.use(
+    "/api/menu",
+    require("./routes/menuRoutes")
+);
