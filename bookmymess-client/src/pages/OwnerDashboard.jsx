@@ -49,7 +49,14 @@ function OwnerDashboard() {
 
     const [savedMenus, setSavedMenus] =
         useState([]);
+    const [studentName, setStudentName] =
+        useState("");
 
+    const [studentPhone, setStudentPhone] =
+        useState("");
+
+    const [studentPassword, setStudentPassword] =
+        useState("");
     const addItem = (type) => {
 
         if (type === "breakfast") {
@@ -244,7 +251,49 @@ function OwnerDashboard() {
         }
 
     }
+    const addStudent = async () => {
 
+        try {
+
+            const res =
+                await API.post(
+
+                    "/student/add",
+
+                    {
+
+                        name: studentName,
+                        phone: studentPhone,
+                        password: studentPassword,
+                        messId: user.messId
+
+                    }
+
+                );
+
+            toast.success(
+                "Student Added Successfully 🎉"
+            );
+
+            setStudentName("");
+            setStudentPhone("");
+            setStudentPassword("");
+
+        }
+
+        catch (error) {
+
+            toast.error(
+
+                error.response?.data?.message ||
+
+                "Failed to add student"
+
+            );
+
+        }
+
+    }
     const removeItem = (
 
         type,
@@ -544,13 +593,66 @@ text-lg
                 }
 
                 {
-                    activePage === "students"
-
-                    &&
+                    activePage === "students" &&
 
                     <div className="bg-white p-6 rounded-3xl">
 
-                        Student Management
+                        <h1 className="text-2xl font-bold mb-6">
+
+                            👨‍🎓 Student Management
+
+                        </h1>
+
+                        <div className="space-y-4">
+
+                            <input
+                                type="text"
+                                placeholder="Student Name"
+                                value={studentName}
+                                onChange={(e) =>
+                                    setStudentName(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <input
+                                type="text"
+                                placeholder="Phone Number"
+                                value={studentPhone}
+                                onChange={(e) =>
+                                    setStudentPhone(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <input
+                                type="password"
+                                placeholder="6 Digit Password"
+                                value={studentPassword}
+                                onChange={(e) =>
+                                    setStudentPassword(
+                                        e.target.value
+                                    )}
+                                className="w-full p-4 border rounded-xl"
+                            />
+
+                            <button
+                                onClick={addStudent}
+                                className="
+bg-blue-600
+text-white
+px-6
+py-4
+rounded-xl
+">
+
+                                Add Student
+
+                            </button>
+
+                        </div>
 
                     </div>
                 }
