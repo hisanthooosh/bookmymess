@@ -1,4 +1,6 @@
 const Mess = require("../models/Mess");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 const addMess = async (req, res) => {
 
@@ -8,17 +10,60 @@ const addMess = async (req, res) => {
             messName,
             ownerName,
             ownerPhone,
-            address
+            pin
         } = req.body;
 
-        const mess = await Mess.create({
 
-            messName,
-            ownerName,
-            ownerPhone,
-            address
+        const existingOwner =
+            await User.findOne({
+                phone: ownerPhone
+            });
 
-        });
+        if (existingOwner) {
+
+            return res.status(400).json({
+
+                success: false,
+                message: "Phone already exists"
+
+            });
+
+        }
+
+
+        const hashedPin =
+            await bcrypt.hash(
+                pin,
+                10
+            );
+
+
+        const owner =
+            await User.create({
+
+                name: ownerName,
+                phone: ownerPhone,
+                password: hashedPin,
+                role: "owner"
+
+            });
+
+
+        const mess =
+            await Mess.create({
+
+                messName,
+                ownerName,
+                ownerPhone,
+                ownerId: owner._id
+
+            });
+
+
+        owner.messId = mess._id;
+
+        await owner.save();
+
 
         res.status(201).json({
 
@@ -30,6 +75,8 @@ const addMess = async (req, res) => {
 
     }
     catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -48,7 +95,11 @@ const getAllMesses = async (req, res) => {
     try {
 
         const messes =
-            await Mess.find();
+            await Mess.find()
+                .populate(
+                    "ownerId",
+                    "name phone"
+                );
 
         res.status(200).json({
 
