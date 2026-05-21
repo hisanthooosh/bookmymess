@@ -691,7 +691,7 @@ shadow-lg
 
                         </div>
 
-<<<<<<< HEAD
+
 
                         <div>
 
@@ -1006,8 +1006,7 @@ shadow
 
                         </div>
 
-=======
->>>>>>> main
+
                     </div>
                 }
 
