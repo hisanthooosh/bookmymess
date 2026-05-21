@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+
 function OwnerDashboard() {
 
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ function OwnerDashboard() {
         }, 500);
 
     }
+
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
 
@@ -41,35 +43,44 @@ function OwnerDashboard() {
 
     const [dinner, setDinner] =
         useState([""]);
+
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
 
     const [savedMenus, setSavedMenus] =
         useState([]);
+
     const addItem = (type) => {
 
         if (type === "breakfast") {
+
             setBreakfast([
                 ...breakfast,
                 ""
             ]);
+
         }
 
         if (type === "lunch") {
+
             setLunch([
                 ...lunch,
                 ""
             ]);
+
         }
 
         if (type === "dinner") {
+
             setDinner([
                 ...dinner,
                 ""
             ]);
+
         }
 
     }
+
     useEffect(() => {
 
         const menu =
@@ -97,6 +108,7 @@ function OwnerDashboard() {
             );
 
         }
+
         else {
 
             setBreakfast([""]);
@@ -109,6 +121,7 @@ function OwnerDashboard() {
         selectedDay,
         savedMenus
     ]);
+
     const saveMenu = async () => {
 
         try {
@@ -120,7 +133,9 @@ function OwnerDashboard() {
                 {
 
                     messId: user.messId,
+
                     day: selectedDay,
+
                     breakfast:
                         breakfast.filter(
                             item => item.trim()
@@ -147,6 +162,7 @@ function OwnerDashboard() {
             );
 
         }
+
         catch (error) {
 
             toast.error(
@@ -156,6 +172,7 @@ function OwnerDashboard() {
         }
 
     }
+
     const fetchMenus = async () => {
 
         try {
@@ -171,6 +188,7 @@ function OwnerDashboard() {
             );
 
         }
+
         catch (error) {
 
             toast.error(
@@ -186,6 +204,7 @@ function OwnerDashboard() {
         fetchMenus();
 
     }, []);
+
     const updateItem = (
 
         type,
@@ -204,7 +223,6 @@ function OwnerDashboard() {
 
         }
 
-
         if (type === "lunch") {
 
             const data = [...lunch];
@@ -214,7 +232,6 @@ function OwnerDashboard() {
             setLunch(data);
 
         }
-
 
         if (type === "dinner") {
 
@@ -227,7 +244,6 @@ function OwnerDashboard() {
         }
 
     }
-
 
     const removeItem = (
 
@@ -248,7 +264,6 @@ function OwnerDashboard() {
 
         }
 
-
         if (type === "lunch") {
 
             setLunch(
@@ -260,7 +275,6 @@ function OwnerDashboard() {
             );
 
         }
-
 
         if (type === "dinner") {
 
@@ -275,8 +289,11 @@ function OwnerDashboard() {
         }
 
     }
+
     return (
+
         <div className="min-h-screen flex bg-slate-100 relative">
+
             {
                 sidebarOpen &&
 
@@ -295,6 +312,8 @@ lg:hidden
 
             }
 
+            {/* Sidebar */}
+
             <div className={`
 fixed
 lg:fixed
@@ -302,13 +321,15 @@ top-0
 left-0
 h-screen
 w-[280px]
-overflow-y-auto
 bg-slate-950
 text-white
 p-6
 z-50
 duration-300
 shadow-2xl
+flex
+flex-col
+justify-between
 
 ${sidebarOpen
                     ?
@@ -321,64 +342,79 @@ lg:translate-x-0
 
 `}>
 
-                <h1 className="text-3xl font-bold">
+                {/* Top Section */}
 
-                    🍽 Owner Panel
+                <div>
 
-                </h1>
+                    <h1 className="text-3xl font-bold">
 
-                <p className="text-gray-400 mt-2">
+                        🍽 Owner Panel
 
-                    {user?.name}
+                    </h1>
 
-                </p>
+                    <p className="text-gray-400 mt-2">
 
+                        {user?.name}
 
-                <div className="space-y-3 mt-10">
+                    </p>
 
-                    <button
-                        onClick={() => setActivePage("dashboard")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                    <div className="space-y-3 mt-10">
 
-                        🏠 Dashboard
+                        <button
+                            onClick={() => setActivePage("dashboard")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                    </button>
+                            🏠 Dashboard
 
+                        </button>
 
-                    <button
-                        onClick={() => setActivePage("students")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                        <button
+                            onClick={() => setActivePage("students")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                        👨‍🎓 Students
+                            👨‍🎓 Students
 
-                    </button>
+                        </button>
 
+                        <button
+                            onClick={() => setActivePage("menu")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
-                    <button
-                        onClick={() => setActivePage("menu")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                            🍛 Menu
 
-                        🍛 Menu
+                        </button>
 
-                    </button>
+                        <button
+                            onClick={() => setActivePage("bookings")}
+                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
+                        >
 
+                            📋 Meal Bookings
 
-                    <button
-                        onClick={() => setActivePage("bookings")}
-                        className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                    >
+                        </button>
 
-                        📋 Meal Bookings
+                    </div>
 
-                    </button>
+                </div>
 
+                {/* Bottom Logout Button */}
+
+                <div className="pt-6">
 
                     <button
                         onClick={logout}
-                        className="w-full p-4 bg-red-500 rounded-xl"
+                        className="
+w-full
+p-4
+bg-red-500
+hover:bg-red-600
+rounded-xl
+font-semibold
+duration-300
+"
                     >
 
                         🚪 Logout
@@ -389,6 +425,7 @@ lg:translate-x-0
 
             </div>
 
+            {/* Main Content */}
 
             <div className="
 flex-1
@@ -397,6 +434,9 @@ p-4
 md:p-8
 overflow-x-hidden
 ">
+
+                {/* Top Navbar */}
+
                 <div className="
 sticky
 top-0
@@ -442,8 +482,32 @@ z-30
 
                     </div>
 
-                    <div
-                        className="
+                    {/* Right Profile Section */}
+
+                    <div className="flex items-center gap-3">
+
+                        {/* Desktop Mess Name */}
+
+                        <div className="hidden md:block text-right">
+
+                            <h2 className="font-bold text-lg text-slate-800">
+
+                                {user?.name}
+
+                            </h2>
+
+                            <p className="text-sm text-gray-500">
+
+                                Mess Owner
+
+                            </p>
+
+                        </div>
+
+                        {/* Mobile + Desktop Circle */}
+
+                        <div
+                            className="
 w-12
 h-12
 rounded-full
@@ -455,10 +519,13 @@ flex
 justify-center
 items-center
 font-bold
+text-lg
 "
-                    >
+                        >
 
-                        {user?.name?.charAt(0)}
+                            {user?.name?.charAt(0).toUpperCase()}
+
+                        </div>
 
                     </div>
 
@@ -519,320 +586,6 @@ shadow-lg
                                 Create and manage weekly menu
 
                             </p>
-
-                        </div>
-
-
-                        <div>
-
-                            <label className="font-semibold">
-
-                                Select Day
-
-                            </label>
-
-                            <select
-                                value={selectedDay}
-                                onChange={(e) =>
-                                    setSelectedDay(
-                                        e.target.value
-                                    )
-                                }
-                                className="w-full mt-2 p-4 rounded-xl border"
-                            >
-
-                                <option>Sunday</option>
-                                <option>Monday</option>
-                                <option>Tuesday</option>
-                                <option>Wednesday</option>
-                                <option>Thursday</option>
-                                <option>Friday</option>
-                                <option>Saturday</option>
-
-                            </select>
-
-                        </div>
-
-
-
-                        {
-                            [
-                                {
-                                    title: "🍳 Breakfast",
-                                    data: breakfast,
-                                    type: "breakfast"
-                                },
-                                {
-                                    title: "🍛 Lunch",
-                                    data: lunch,
-                                    type: "lunch"
-                                },
-                                {
-                                    title: "🌙 Dinner",
-                                    data: dinner,
-                                    type: "dinner"
-                                }
-                            ].map((meal) => (
-
-                                <div
-                                    key={meal.type}
-                                    className="mt-8 bg-slate-50 p-6 rounded-3xl"
-                                >
-
-                                    <div className="
-flex
-flex-col
-sm:flex-row
-justify-between
-gap-4
-items-center
-">
-
-                                        <h2 className="font-bold text-xl">
-
-                                            {meal.title}
-
-                                        </h2>
-
-                                        <button
-                                            onClick={() =>
-                                                addItem(meal.type)
-                                            }
-                                            className="
-w-full
-sm:w-auto
-bg-blue-600
-text-white
-px-5
-py-3
-rounded-xl
-"
-                                        >
-
-                                            + Add Item
-
-                                        </button>
-
-                                    </div>
-
-
-
-                                    <div className="space-y-4 mt-5">
-
-                                        {
-
-                                            meal.data.map((item, index) => (
-
-                                                <div
-                                                    key={index}
-                                                    className="
-flex
-flex-col
-sm:flex-row
-gap-3
-"
-                                                >
-
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Enter item"
-                                                        value={item}
-                                                        onChange={(e) =>
-
-                                                            updateItem(
-                                                                meal.type,
-                                                                index,
-                                                                e.target.value
-                                                            )
-
-                                                        }
-                                                        className="
-flex-1
-p-4
-border
-rounded-xl
-"
-                                                    />
-
-                                                    <button
-                                                        onClick={() =>
-
-                                                            removeItem(
-                                                                meal.type,
-                                                                index
-                                                            )
-
-                                                        }
-                                                        className="
-w-full
-sm:w-auto
-bg-red-500
-text-white
-px-6
-rounded-xl
-"
-                                                    >
-
-                                                        ✕
-
-                                                    </button>
-
-                                                </div>
-
-                                            ))
-
-                                        }
-
-                                    </div>
-
-                                </div>
-
-                            ))
-
-                        }
-
-
-
-                        <button
-
-                            onClick={saveMenu}
-
-                            className="
-mt-10
-w-full
-md:w-auto
-bg-gradient-to-r
-from-blue-600
-to-purple-600
-text-white
-px-10
-py-4
-rounded-2xl
-hover:scale-105
-duration-300
-"
-
-                        >
-
-                            Save Menu
-
-                        </button>
-
-
-                        <div className="mt-12">
-
-                            <h1 className="text-2xl font-bold">
-
-                                📋 Saved Menus
-
-                            </h1>
-
-                            <div className="
-grid
-grid-cols-1
-md:grid-cols-2
-xl:grid-cols-3
-gap-6
-mt-6
-">
-
-                                {
-                                    savedMenus.length === 0 ?
-
-                                        <div className="col-span-full text-center p-10">
-
-                                            <p className="text-gray-500">
-
-                                                No menu created yet
-
-                                            </p>
-
-                                        </div>
-
-                                        :
-
-                                        savedMenus.map((menu, index) => (
-
-                                            <div
-                                                key={index}
-                                                className="
-bg-slate-100
-rounded-3xl
-p-6
-shadow
-"
-                                            >
-
-                                                <h2 className="font-bold text-xl">
-
-                                                    {menu.day}
-
-                                                </h2>
-
-
-                                                <div className="mt-4">
-
-                                                    <p className="font-semibold">
-                                                        🍳 Breakfast
-                                                    </p>
-
-                                                    {
-                                                        menu.breakfast.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-
-                                                <div className="mt-4">
-
-                                                    <p className="font-semibold">
-                                                        🍛 Lunch
-                                                    </p>
-
-                                                    {
-                                                        menu.lunch.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-
-                                                <div className="mt-4">
-
-                                                    <p className="font-semibold">
-                                                        🌙 Dinner
-                                                    </p>
-
-                                                    {
-                                                        menu.dinner.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-                                            </div>
-
-                                        ))
-
-                                }
-
-                            </div>
 
                         </div>
 
