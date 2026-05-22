@@ -9,16 +9,43 @@ function StudentDashboard() {
     const user = JSON.parse(
         localStorage.getItem("user")
     );
-    console.log(user);
+    const [breakfast, setBreakfast] =
+        useState(null);
+
+    const [lunch, setLunch] =
+        useState(null);
+
+    const [dinner, setDinner] =
+        useState(null);
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
     const [todayMenu, setTodayMenu] =
         useState(null);
+
+    const [bookingSaved, setBookingSaved] =
+        useState(false);
+    const [isEditing, setIsEditing] =
+        useState(true);
+    const now = new Date();
+
+    const closeTime = new Date();
+
+    closeTime.setHours(
+        21,
+        0,
+        0,
+        0
+    );
+
+    const bookingClosed =
+        now > closeTime;
+
     const [activePage, setActivePage] =
         useState("dashboard");
 
     const [weeklyMenus, setWeeklyMenus] =
         useState([]);
+
     const fetchTodayMenu =
         async () => {
 
@@ -85,12 +112,145 @@ function StudentDashboard() {
         navigate("/");
 
     }
+
+    const fetchTomorrowBooking =
+        async () => {
+
+            try {
+
+                const res =
+                    await API.get(
+
+                        `/booking/tomorrow/${user._id}`
+
+                    );
+
+                if (res.data) {
+
+                    setBreakfast(
+                        res.data.breakfast
+                    );
+
+                    setLunch(
+                        res.data.lunch
+                    );
+
+                    setDinner(
+                        res.data.dinner
+                    );
+
+                    setBookingSaved(
+                        true
+                    );
+
+                    setIsEditing(
+                        false
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.log(error);
+
+            }
+
+        };
     useEffect(() => {
 
         fetchTodayMenu();
         fetchWeeklyMenus();
 
+        fetchTomorrowBooking();
+
     }, []);
+    const saveBooking =
+        async () => {
+
+            try {
+                if (
+
+                    breakfast === null ||
+                    lunch === null ||
+                    dinner === null
+
+                ) {
+
+                    return alert(
+                        "Please select all meals"
+                    );
+
+                }
+                await API.post(
+                    "/booking/save",
+                    {
+
+                        studentId:
+                            user._id,
+
+                        messId:
+                            user.messId,
+
+                        breakfast,
+                        lunch,
+                        dinner
+
+                    }
+                );
+
+                setBookingSaved(true);
+
+                setIsEditing(false);
+                alert(
+                    bookingSaved
+                        ?
+                        "Booking Updated ✅"
+                        :
+                        "Booking Saved ✅"
+                );
+
+            }
+
+            catch (error) {
+
+                alert(
+
+                    error?.response
+                        ?.data?.message
+                    ||
+                    "Error"
+
+                );
+
+            }
+
+        };
+
+    const endDate =
+        new Date(
+            user?.studentEndDate
+        );
+
+    const remainingDays =
+        Math.ceil(
+
+            (
+                endDate -
+                new Date()
+            )
+
+            /
+
+            (
+                1000 * 60 * 60 * 24
+            )
+
+        );
+
+    const isExpired =
+        remainingDays <= 0;
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -319,7 +479,104 @@ xl:grid-cols-3
 gap-6
 ">
 
+
+                    <div className="
+bg-purple-500
+text-white
+p-6
+rounded-3xl
+space-y-4
+">
+
+                        <h2 className="
+text-2xl
+font-bold
+">
+
+                            🎓 Subscription
+
+                        </h2>
+
+                        <p>
+
+                            🆔 Student ID:
+
+                            <b>
+
+                                {user?.studentId}
+
+                            </b>
+
+                        </p>
+
+
+                        <div>
+
+                            <span className={`
+
+px-4
+py-2
+rounded-full
+text-sm
+font-bold
+
+${isExpired
+                                    ?
+                                    "bg-red-600"
+                                    :
+                                    "bg-green-600"
+                                }
+
+`}>
+
+                                {
+                                    isExpired
+                                        ?
+                                        "🔴 Expired"
+                                        :
+                                        "🟢 Active"
+                                }
+
+                            </span>
+
+                        </div>
+
+
+                        <p>
+
+                            📅 Ends:
+
+                            {
+                                endDate.toLocaleDateString()
+                            }
+
+                        </p>
+
+                        <p className="
+text-3xl
+font-bold
+">
+
+                            ⏳ {
+
+                                isExpired
+                                    ?
+                                    0
+                                    :
+                                    remainingDays
+
+                            }
+
+                            Days Left
+
+                        </p>
+
+                    </div>
+
+                    <div className="
+
                         <div className="
+
 bg-blue-500
 text-white
 p-6
@@ -411,11 +668,371 @@ bg-green-500
 text-white
 p-6
 rounded-3xl
+space-y-6
 ">
+
+                        <h2 className="
+text-2xl
+font-bold
+">
+
+
+                            📋 Tomorrow Meal Booking
+
+                        </h2>
+
+                        <p className="opacity-80">
+
+                            {
+                                new Date(
+                                    Date.now() + 86400000
+                                ).toDateString()
+                            }
+
+                        </p>
+
+
+                        {/* Breakfast */}
+
+                        <div>
+
+                            <p className="
+font-bold
+mb-2
+">
+
+                                🍳 Breakfast
+
+                            </p>
+
+                            <div className="
+grid
+grid-cols-2
+gap-3
+">
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setBreakfast(true)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${breakfast
+                                            ?
+                                            "bg-green-700"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ✅ I am Coming
+
+                                </button>
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setBreakfast(false)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${breakfast === false
+                                            ?
+                                            "bg-red-600"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ❌ Not Coming
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        {/* Lunch */}
+
+                        <div>
+
+                            <p className="
+font-bold
+mb-2
+">
+
+                                🍛 Lunch
+
+                            </p>
+
+                            <div className="
+grid
+grid-cols-2
+gap-3
+">
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setLunch(true)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${lunch
+                                            ?
+                                            "bg-green-700"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ✅ I am Coming
+
+                                </button>
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setLunch(false)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${lunch === false
+                                            ?
+                                            "bg-red-600"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ❌ Not Coming
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        {/* Dinner */}
+
+                        <div>
+
+                            <p className="
+font-bold
+mb-2
+">
+
+                                🌙 Dinner
+
+                            </p>
+
+                            <div className="
+grid
+grid-cols-2
+gap-3
+">
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setDinner(true)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${dinner
+                                            ?
+                                            "bg-green-700"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ✅ I am Coming
+
+                                </button>
+
+                                <button
+
+                                    onClick={() => {
+
+                                        if (isEditing) {
+
+                                            setDinner(false)
+
+                                        }
+
+                                    }}
+
+                                    className={`
+
+p-4
+rounded-xl
+font-bold
+
+${dinner === false
+                                            ?
+                                            "bg-red-600"
+                                            :
+                                            "bg-white text-black"
+                                        }
+
+`}
+
+                                >
+
+                                    ❌ Not Coming
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        {
+                            bookingClosed ?
+
+                                <div className="
+bg-red-600
+text-white
+p-4
+rounded-xl
+text-center
+font-bold
+">
+
+                                    🔒 Booking Closed
+
+                                </div>
+
+                                :
+
+                                !bookingSaved ?
+
+                                    <button
+
+                                        onClick={saveBooking}
+
+                                        className="
+w-full
+bg-blue-600
+p-4
+rounded-xl
+font-bold
+"
+
+                                    >
+
+                                        Save Booking
+
+                                    </button>
+
+                                    :
+
+                                    <button
+
+                                        onClick={() => {
+
+                                            setBookingSaved(false);
+
+                                            setIsEditing(true);
+
+                                        }}
+
+                                        className="
+w-full
+bg-orange-500
+p-4
+rounded-xl
+font-bold
+"
+
+                                    >
+
+                                        ✏ Update Booking
+
+                                    </button>
+
+                        }
 
                             📋 Book Meal
 
                         </div>
+
 
                     </div>
                 }

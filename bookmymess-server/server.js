@@ -6,6 +6,9 @@ const connectDB = require("./config/db");
 dotenv.config();
 
 connectDB();
+const bookingRoutes =
+    require("./routes/bookingRoutes");
+
 
 const app = express();
 
@@ -40,7 +43,10 @@ app.use(
     "/api/menu",
     require("./routes/menuRoutes")
 );
-
+app.use(
+    "/api/booking",
+    bookingRoutes
+);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
