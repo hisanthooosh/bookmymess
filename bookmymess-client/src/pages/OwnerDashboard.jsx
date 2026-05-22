@@ -78,6 +78,14 @@ function OwnerDashboard() {
         useState(false);
     const [endDate, setEndDate] =
         useState("");
+        // ✅ ADD THIS (Step 1)
+const getTodayDayName = () => {
+    return new Date().toLocaleDateString("en-US", { weekday: "long" });
+};
+
+const getTodayDate = () => {
+    return new Date().toLocaleDateString("en-GB");
+};
     const addItem = (type) => {
 
         if (type === "breakfast") {
@@ -792,17 +800,422 @@ text-lg
                 </div>
 
                 {
-                    activePage === "dashboard"
+    activePage === "dashboard"
 
-                    &&
+    &&
 
-                    <h1 className="text-4xl font-bold">
+    <div className="space-y-6">
 
-                        Welcome {user?.name}
+        {/* Top Welcome Section */}
 
-                    </h1>
-                }
+        <div className="
+bg-white
+rounded-3xl
+shadow-md
+p-6
+flex
+flex-col
+md:flex-row
+justify-between
+items-start
+md:items-center
+gap-4
+">
 
+            <div>
+
+                <h1 className="text-3xl md:text-4xl font-bold text-slate-800">
+
+                    Welcome {user?.name}
+
+                </h1>
+
+                <p className="text-gray-500 mt-2">
+
+                    Here's today's mess menu
+
+                </p>
+
+            </div>
+
+            <div className="
+bg-gradient-to-r
+from-blue-500
+to-purple-600
+text-white
+px-6
+py-4
+rounded-2xl
+shadow-lg
+text-center
+min-w-[220px]
+">
+
+                <h2 className="text-2xl font-bold">
+
+                    {getTodayDayName()}
+
+                </h2>
+
+                <p className="mt-1 text-sm">
+
+                    {getTodayDate()}
+
+                </p>
+
+            </div>
+
+        </div>
+
+        {/* Today's Menu */}
+
+        {
+            savedMenus.find(
+                menu => menu.day === getTodayDayName()
+            ) ? (
+
+                <div className="
+bg-white
+rounded-3xl
+shadow-md
+p-6
+">
+
+                    <div className="
+flex
+justify-between
+items-center
+mb-6
+">
+
+                        <h2 className="
+text-2xl
+md:text-3xl
+font-bold
+text-slate-800
+">
+
+                            🍛 Today's Menu
+
+                        </h2>
+
+                    </div>
+
+                    {
+                        (() => {
+
+                            const todayMenu =
+                                savedMenus.find(
+                                    menu =>
+                                        menu.day === getTodayDayName()
+                                );
+
+                            return (
+
+                                <div className="
+grid
+grid-cols-1
+md:grid-cols-3
+gap-6
+">
+
+                                    {/* Breakfast */}
+
+                                    <div className="
+bg-gradient-to-br
+from-orange-100
+to-orange-50
+p-6
+rounded-3xl
+shadow-sm
+hover:shadow-lg
+duration-300
+">
+
+                                        <div className="
+flex
+items-center
+gap-3
+mb-5
+">
+
+                                            <div className="
+w-12
+h-12
+rounded-full
+bg-orange-500
+text-white
+flex
+justify-center
+items-center
+text-2xl
+">
+
+                                                🍳
+
+                                            </div>
+
+                                            <h3 className="
+text-2xl
+font-bold
+text-slate-800
+">
+
+                                                Breakfast
+
+                                            </h3>
+
+                                        </div>
+
+                                        <div className="space-y-3">
+
+                                            {
+                                                todayMenu.breakfast.length > 0 ?
+
+                                                    todayMenu.breakfast.map((item, index) => (
+
+                                                        <div
+                                                            key={index}
+                                                            className="
+bg-white
+p-3
+rounded-xl
+shadow-sm
+"
+                                                        >
+
+                                                            • {item}
+
+                                                        </div>
+
+                                                    ))
+
+                                                    :
+
+                                                    <p className="text-gray-500">
+
+                                                        No breakfast items
+
+                                                    </p>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* Lunch */}
+
+                                    <div className="
+bg-gradient-to-br
+from-green-100
+to-green-50
+p-6
+rounded-3xl
+shadow-sm
+hover:shadow-lg
+duration-300
+">
+
+                                        <div className="
+flex
+items-center
+gap-3
+mb-5
+">
+
+                                            <div className="
+w-12
+h-12
+rounded-full
+bg-green-500
+text-white
+flex
+justify-center
+items-center
+text-2xl
+">
+
+                                                🍛
+
+                                            </div>
+
+                                            <h3 className="
+text-2xl
+font-bold
+text-slate-800
+">
+
+                                                Lunch
+
+                                            </h3>
+
+                                        </div>
+
+                                        <div className="space-y-3">
+
+                                            {
+                                                todayMenu.lunch.length > 0 ?
+
+                                                    todayMenu.lunch.map((item, index) => (
+
+                                                        <div
+                                                            key={index}
+                                                            className="
+bg-white
+p-3
+rounded-xl
+shadow-sm
+"
+                                                        >
+
+                                                            • {item}
+
+                                                        </div>
+
+                                                    ))
+
+                                                    :
+
+                                                    <p className="text-gray-500">
+
+                                                        No lunch items
+
+                                                    </p>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* Dinner */}
+
+                                    <div className="
+bg-gradient-to-br
+from-purple-100
+to-purple-50
+p-6
+rounded-3xl
+shadow-sm
+hover:shadow-lg
+duration-300
+">
+
+                                        <div className="
+flex
+items-center
+gap-3
+mb-5
+">
+
+                                            <div className="
+w-12
+h-12
+rounded-full
+bg-purple-500
+text-white
+flex
+justify-center
+items-center
+text-2xl
+">
+
+                                                🌙
+
+                                            </div>
+
+                                            <h3 className="
+text-2xl
+font-bold
+text-slate-800
+">
+
+                                                Dinner
+
+                                            </h3>
+
+                                        </div>
+
+                                        <div className="space-y-3">
+
+                                            {
+                                                todayMenu.dinner.length > 0 ?
+
+                                                    todayMenu.dinner.map((item, index) => (
+
+                                                        <div
+                                                            key={index}
+                                                            className="
+bg-white
+p-3
+rounded-xl
+shadow-sm
+"
+                                                        >
+
+                                                            • {item}
+
+                                                        </div>
+
+                                                    ))
+
+                                                    :
+
+                                                    <p className="text-gray-500">
+
+                                                        No dinner items
+
+                                                    </p>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            )
+
+                        })()
+                    }
+
+                </div>
+
+            )
+
+                :
+
+                <div className="
+bg-white
+rounded-3xl
+shadow-md
+p-10
+text-center
+">
+
+                    <h2 className="
+text-3xl
+font-bold
+text-slate-700
+">
+
+                        🍽 No Menu Added For Today
+
+                    </h2>
+
+                    <p className="
+text-gray-500
+mt-3
+">
+
+                        Please add today's menu from Menu section
+
+                    </p>
+
+                </div>
+        }
+
+    </div>
+}
                 {
                     activePage === "students" &&
 
