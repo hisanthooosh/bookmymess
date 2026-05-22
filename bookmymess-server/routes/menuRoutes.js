@@ -3,10 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const {
-
     saveMenu,
-    getMenus
-
+    getMenus,
+    getTodayMenu
 } = require(
     "../controllers/menuController"
 );
@@ -14,6 +13,11 @@ const {
 router.post(
     "/save",
     saveMenu
+);
+
+router.get(
+    "/today/:id",
+    getTodayMenu
 );
 
 router.get(

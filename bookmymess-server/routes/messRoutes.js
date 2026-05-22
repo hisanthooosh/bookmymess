@@ -5,8 +5,9 @@ const router = express.Router();
 const {
     addMess,
     getAllMesses
-} = require("../controllers/messController");
-
+} = require(
+    "../controllers/messController"
+);
 
 router.post(
     "/add",
