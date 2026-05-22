@@ -13,7 +13,6 @@ const addMess = async (req, res) => {
             pin
         } = req.body;
 
-
         const existingOwner =
             await User.findOne({
                 phone: ownerPhone
@@ -30,13 +29,11 @@ const addMess = async (req, res) => {
 
         }
 
-
         const hashedPin =
             await bcrypt.hash(
                 pin,
                 10
             );
-
 
         const owner =
             await User.create({
@@ -48,7 +45,6 @@ const addMess = async (req, res) => {
 
             });
 
-
         const mess =
             await Mess.create({
 
@@ -59,11 +55,9 @@ const addMess = async (req, res) => {
 
             });
 
-
         owner.messId = mess._id;
 
         await owner.save();
-
 
         res.status(201).json({
 
@@ -74,6 +68,7 @@ const addMess = async (req, res) => {
         });
 
     }
+
     catch (error) {
 
         console.log(error);
@@ -109,6 +104,7 @@ const getAllMesses = async (req, res) => {
         });
 
     }
+
     catch (error) {
 
         res.status(500).json({
@@ -122,9 +118,143 @@ const getAllMesses = async (req, res) => {
 
 };
 
+
+const updateMess = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            messName,
+            ownerName,
+            ownerPhone
+        } = req.body;
+
+        const mess = await Mess.findById(id);
+
+        if (!mess) {
+
+            return res.status(404).json({
+
+                success: false,
+                message: "Mess not found"
+
+            });
+
+        }
+
+        const existingUser = await User.findOne({
+
+            phone: ownerPhone,
+            _id: { $ne: mess.ownerId }
+
+        });
+
+        if (existingUser) {
+
+            return res.status(400).json({
+
+                success: false,
+                message: "Phone already exists"
+
+            });
+
+        }
+
+        mess.messName = messName;
+        mess.ownerName = ownerName;
+        mess.ownerPhone = ownerPhone;
+
+        await mess.save();
+
+        await User.findByIdAndUpdate(
+
+            mess.ownerId,
+
+            {
+                name: ownerName,
+                phone: ownerPhone
+            }
+
+        );
+
+        res.status(200).json({
+
+            success: true,
+            message: "Mess updated successfully"
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+
+const deleteMess = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const mess = await Mess.findById(id);
+
+        if (!mess) {
+
+            return res.status(404).json({
+
+                success: false,
+                message: "Mess not found"
+
+            });
+
+        }
+
+        await User.findByIdAndDelete(
+            mess.ownerId
+        );
+
+        await Mess.findByIdAndDelete(id);
+
+        res.status(200).json({
+
+            success: true,
+            message: "Mess deleted successfully"
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+
 module.exports = {
 
     addMess,
-    getAllMesses
+    getAllMesses,
+    updateMess,
+    deleteMess
 
 };

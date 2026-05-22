@@ -4,8 +4,12 @@ const router = express.Router();
 
 const {
     addMess,
-    getAllMesses
+    getAllMesses,
+    updateMess,
+    deleteMess
 } = require("../controllers/messController");
+
+
 
 
 router.post(
@@ -16,6 +20,16 @@ router.post(
 router.get(
     "/all",
     getAllMesses
+);
+
+router.put(
+    "/update/:id",
+    updateMess
+);
+
+router.delete(
+    "/delete/:id",
+    deleteMess
 );
 
 module.exports = router;
