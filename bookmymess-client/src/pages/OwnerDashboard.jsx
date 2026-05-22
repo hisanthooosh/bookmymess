@@ -609,7 +609,10 @@ lg:translate-x-0
                     <div className="space-y-3 mt-10">
 
                         <button
-                            onClick={() => setActivePage("dashboard")}
+                            onClick={() => {
+                                setActivePage("dashboard");
+                                setSidebarOpen(false);}
+                            }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
@@ -618,7 +621,10 @@ lg:translate-x-0
                         </button>
 
                         <button
-                            onClick={() => setActivePage("students")}
+                            onClick={() => {
+                                setActivePage("students");
+                                setSidebarOpen(false);}
+                            }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
@@ -627,7 +633,10 @@ lg:translate-x-0
                         </button>
 
                         <button
-                            onClick={() => setActivePage("menu")}
+                            onClick={() => {
+                                setActivePage("menu")
+                                setSidebarOpen(false);}
+                            }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
@@ -636,7 +645,10 @@ lg:translate-x-0
                         </button>
 
                         <button
-                            onClick={() => setActivePage("bookings")}
+                            onClick={() => {
+                                setActivePage("bookings")
+                            setSidebarOpen(false);}
+                        }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
