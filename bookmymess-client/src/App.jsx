@@ -8,6 +8,7 @@ import {
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 
 
 function App() {
@@ -32,7 +33,10 @@ function App() {
           path="/owner-dashboard"
           element={<OwnerDashboard />}
         />
-
+        <Route
+          path="/student-dashboard"
+          element={<StudentDashboard />}
+        />
       </Routes>
 
     </BrowserRouter>

@@ -15,7 +15,9 @@ router.post(
                 name,
                 phone,
                 password,
-                messId
+                messId,
+                startDate,
+                endDate
             } = req.body;
 
             // check existing phone
@@ -36,21 +38,56 @@ router.post(
             }
 
             // count students only in same mess
-            const totalStudents =
+            const students =
 
-                await User.countDocuments({
+                await User.find({
 
                     messId,
                     role: "student"
 
+                })
+                    .select("studentId");
+
+            const usedNumbers =
+
+                students.map(student => {
+
+                    return parseInt(
+
+                        student.studentId
+                            ?.replace(
+                                "STU-",
+                                ""
+                            )
+
+                    ) || 0;
+
                 });
 
-            // create student ID
+            let nextNumber = 1;
+
+            while (
+
+                usedNumbers.includes(
+                    nextNumber
+                )
+
+            ) {
+
+                nextNumber++;
+
+            }
+
             const studentId =
 
                 `STU-${String(
-                    totalStudents + 1
-                ).padStart(3, "0")}`;
+                    nextNumber
+                ).padStart(
+                    3,
+                    "0"
+                )}`;
+            // create student ID
+            
 
             // hash password
             const hashedPassword =
@@ -70,7 +107,10 @@ router.post(
                     password: hashedPassword,
                     messId,
                     studentId,
-                    role: "student"
+                    role: "student",
+
+                    studentStartDate: startDate,
+                    studentEndDate: endDate
 
                 });
 
@@ -102,5 +142,179 @@ router.post(
 
     }
 );
+router.get(
+    "/:messId",
+    async (req, res) => {
 
+        try {
+
+            const students =
+
+                await User.find({
+
+                    messId: req.params.messId,
+                    role: "student"
+
+                }).select("-password");
+
+            res.status(200).json({
+
+                success: true,
+                students
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+                message: "Failed to fetch students"
+
+            });
+
+        }
+
+    }
+);
+router.put(
+    "/update/:id",
+    async (req, res) => {
+
+        try {
+
+            const {
+                name,
+                phone,
+                studentStartDate,
+                studentEndDate
+            } = req.body;
+
+            const student =
+
+                await User.findByIdAndUpdate(
+
+                    req.params.id,
+
+                    {
+                        name,
+                        phone,
+                        studentStartDate,
+                        studentEndDate
+                    },
+
+                    {
+                        new: true
+                    }
+
+                );
+
+            res.status(200).json({
+
+                success: true,
+                student
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+                message: "Failed to update student"
+
+            });
+
+        }
+
+    }
+);
+router.delete(
+    "/delete/:id",
+    async (req, res) => {
+
+        try {
+
+            await User.findByIdAndDelete(
+                req.params.id
+            );
+
+            res.status(200).json({
+
+                success: true,
+                message: "Student deleted successfully"
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+                message: "Failed to delete student"
+
+            });
+
+        }
+
+    }
+
+);
+router.put(
+    "/reactivate/:id",
+    async (req, res) => {
+
+        try {
+
+            const {
+                studentStartDate,
+                studentEndDate
+            } = req.body;
+
+            const student =
+
+                await User.findByIdAndUpdate(
+
+                    req.params.id,
+
+                    {
+                        studentStartDate,
+                        studentEndDate
+                    },
+
+                    {
+                        new: true
+                    }
+
+                );
+
+            res.status(200).json({
+
+                success: true,
+                message: "Student reactivated successfully",
+                student
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+                message: "Failed to reactivate student"
+
+            });
+
+        }
+
+    }
+);
 module.exports = router;

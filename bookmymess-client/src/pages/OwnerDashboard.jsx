@@ -31,7 +31,17 @@ function OwnerDashboard() {
         }, 500);
 
     }
+    const [reactivateModal, setReactivateModal] =
+        useState(false);
 
+    const [selectedStudentId, setSelectedStudentId] =
+        useState("");
+
+    const [newStartDate, setNewStartDate] =
+        useState("");
+
+    const [newEndDate, setNewEndDate] =
+        useState("");
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
 
@@ -49,6 +59,8 @@ function OwnerDashboard() {
 
     const [savedMenus, setSavedMenus] =
         useState([]);
+    const [students, setStudents] =
+        useState([]);
     const [studentName, setStudentName] =
         useState("");
 
@@ -56,6 +68,15 @@ function OwnerDashboard() {
         useState("");
 
     const [studentPassword, setStudentPassword] =
+        useState("");
+    const [startDate, setStartDate] =
+        useState("");
+    const [editingStudentId, setEditingStudentId] =
+        useState(null);
+
+    const [isEditing, setIsEditing] =
+        useState(false);
+    const [endDate, setEndDate] =
         useState("");
     const addItem = (type) => {
 
@@ -205,10 +226,36 @@ function OwnerDashboard() {
         }
 
     }
+    const fetchStudents = async () => {
 
+        try {
+
+            const res =
+
+                await API.get(
+                    `/student/${user.messId}`
+                );
+
+            setStudents(
+                res.data.students
+            );
+
+        }
+
+        catch (error) {
+
+            toast.error(
+                "Failed to load students"
+            );
+
+        }
+
+    }
     useEffect(() => {
 
         fetchMenus();
+
+        fetchStudents();
 
     }, []);
 
@@ -253,6 +300,57 @@ function OwnerDashboard() {
     }
     const addStudent = async () => {
 
+        if (isEditing) {
+
+            try {
+
+                await API.put(
+
+                    `/student/update/${editingStudentId}`,
+
+                    {
+
+                        name: studentName,
+                        phone: studentPhone,
+                        studentStartDate: startDate,
+                        studentEndDate: endDate
+
+                    }
+
+                );
+
+                toast.success(
+                    "Student Updated 🎉"
+                );
+
+                setIsEditing(false);
+
+                setEditingStudentId(null);
+
+                setStudentName("");
+                setStudentPhone("");
+                setStudentPassword("");
+                setStartDate("");
+                setEndDate("");
+
+                fetchStudents();
+
+                return;
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Update failed"
+                );
+
+                return;
+
+            }
+
+        }
+
         try {
 
             const res =
@@ -261,12 +359,12 @@ function OwnerDashboard() {
                     "/student/add",
 
                     {
-
                         name: studentName,
                         phone: studentPhone,
                         password: studentPassword,
+                        startDate,
+                        endDate,
                         messId: user.messId
-
                     }
 
                 );
@@ -274,7 +372,7 @@ function OwnerDashboard() {
             toast.success(
                 "Student Added Successfully 🎉"
             );
-
+            await fetchStudents();
             setStudentName("");
             setStudentPhone("");
             setStudentPassword("");
@@ -338,7 +436,108 @@ function OwnerDashboard() {
         }
 
     }
+    const deleteStudent = async (id) => {
 
+        try {
+
+            await API.delete(
+                `/student/delete/${id}`
+            );
+
+            toast.success(
+                "Student Deleted"
+            );
+
+            fetchStudents();
+
+        }
+
+        catch (error) {
+
+            toast.error(
+                "Delete failed"
+            );
+
+        }
+
+    }
+
+    const reactivateStudent = (id) => {
+
+        setSelectedStudentId(id);
+
+        setReactivateModal(true);
+
+    }
+    const editStudent = (student) => {
+
+        setIsEditing(true);
+
+        setEditingStudentId(
+            student._id
+        );
+
+        setStudentName(
+            student.name
+        );
+
+        setStudentPhone(
+            student.phone
+        );
+
+        setStartDate(
+            student.studentStartDate
+                ?.split("T")[0]
+        );
+
+        setEndDate(
+            student.studentEndDate
+                ?.split("T")[0]
+        );
+
+    }
+    const submitReactivate =
+        async () => {
+
+            try {
+
+                await API.put(
+
+                    `/student/reactivate/${selectedStudentId}`,
+
+                    {
+                        studentStartDate:
+                            newStartDate,
+
+                        studentEndDate:
+                            newEndDate
+                    }
+
+                );
+
+                toast.success(
+                    "Student Reactivated"
+                );
+
+                setReactivateModal(false);
+
+                setNewStartDate("");
+
+                setNewEndDate("");
+
+                fetchStudents();
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Reactivate Failed"
+                );
+
+            }
+
+        }
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -637,7 +836,35 @@ text-lg
                                     )}
                                 className="w-full p-4 border rounded-xl"
                             />
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) =>
+                                    setStartDate(
+                                        e.target.value
+                                    )
+                                }
+                                className="
+w-full
+p-4
+border
+rounded-xl"
+                            />
 
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) =>
+                                    setEndDate(
+                                        e.target.value
+                                    )
+                                }
+                                className="
+w-full
+p-4
+border
+rounded-xl"
+                            />
                             <button
                                 onClick={addStudent}
                                 className="
@@ -648,12 +875,236 @@ py-4
 rounded-xl
 ">
 
-                                Add Student
+                                {
+                                    isEditing
+                                        ?
+                                        "Update Student"
+                                        :
+                                        "Add Student"
+                                }
 
                             </button>
 
                         </div>
+                        <div className="mt-10">
 
+                            <h2 className="text-2xl font-bold mb-5">
+
+                                📋 Students List
+
+                            </h2>
+
+                            <div className="overflow-x-auto">
+
+                                <table className="w-full border-collapse">
+
+                                    <thead>
+
+                                        <tr className="bg-slate-800 text-white">
+
+                                            <th className="p-4 text-left">
+                                                No
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                Student ID
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                Name
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                Phone
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                Start Date
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                End Date
+                                            </th>
+
+                                            <th className="p-4 text-left">
+                                                Status
+                                            </th>
+                                            <th className="p-4 text-left">
+                                                Actions
+                                            </th>
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody>
+
+                                        {
+                                            students.map((student, index) => (
+
+                                                <tr
+                                                    key={student._id}
+                                                    className="
+border-b
+hover:bg-slate-100
+"
+                                                >
+
+                                                    <td className="p-4">
+
+                                                        {index + 1}
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        {student.studentId}
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        {student.name}
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        {student.phone}
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        {
+                                                            new Date(
+                                                                student.studentStartDate
+                                                            ).toLocaleDateString()
+                                                        }
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        {
+                                                            new Date(
+                                                                student.studentEndDate
+                                                            ).toLocaleDateString()
+                                                        }
+
+                                                    </td>
+
+                                                    <td className="p-4">
+
+                                                        <span
+                                                            className={`
+
+px-3
+py-1
+rounded-full
+text-white
+
+${new Date(
+                                                                student.studentEndDate
+                                                            ) > new Date()
+
+                                                                    ?
+
+                                                                    "bg-green-500"
+
+                                                                    :
+
+                                                                    "bg-red-500"
+
+                                                                }
+
+`}
+                                                        >
+
+                                                            {
+                                                                new Date(
+                                                                    student.studentEndDate
+                                                                ) > new Date()
+
+                                                                    ?
+
+                                                                    "Active"
+
+                                                                    :
+
+                                                                    "Expired"
+
+                                                            }
+
+                                                        </span>
+
+                                                    </td>
+                                                    <td className="p-4 flex gap-2">
+
+                                                        <button
+                                                            onClick={() =>
+                                                                editStudent(student)
+                                                            }
+                                                            className="
+bg-blue-500
+text-white
+px-3
+py-2
+rounded-lg"
+                                                        >
+
+                                                            ✏️ Edit
+
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() =>
+                                                                deleteStudent(
+                                                                    student._id
+                                                                )
+                                                            }
+                                                            className="
+bg-red-500
+text-white
+px-3
+py-2
+rounded-lg"
+                                                        >
+
+                                                            🗑 Delete
+
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() =>
+                                                                reactivateStudent(
+                                                                    student._id
+                                                                )
+                                                            }
+                                                            className="
+bg-green-500
+text-white
+px-3
+py-2
+rounded-lg"
+                                                        >
+
+                                                            🔄 Reactivate
+
+                                                        </button>
+
+                                                    </td>
+                                                </tr>
+
+                                            ))
+                                        }
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
                     </div>
                 }
 
@@ -691,7 +1142,7 @@ shadow-lg
 
                         </div>
 
-<<<<<<< HEAD
+
 
                         <div>
 
@@ -884,7 +1335,7 @@ duration-300
 
                         >
 
-                           📋  Save Menu
+                            📋  Save Menu
 
                         </button>
 
@@ -1006,8 +1457,7 @@ shadow
 
                         </div>
 
-=======
->>>>>>> main
+
                     </div>
                 }
 
@@ -1024,7 +1474,104 @@ shadow
                 }
 
             </div>
+            {
+                reactivateModal &&
 
+                <div className="
+fixed
+inset-0
+bg-black/50
+flex
+justify-center
+items-center
+z-50
+">
+
+                    <div className="
+bg-white
+p-6
+rounded-3xl
+w-[400px]
+space-y-4
+">
+
+                        <h1 className="text-2xl font-bold">
+
+                            🔄 Reactivate Student
+
+                        </h1>
+
+                        <input
+                            type="date"
+                            value={newStartDate}
+                            onChange={(e) =>
+                                setNewStartDate(
+                                    e.target.value
+                                )
+                            }
+                            className="
+w-full
+p-4
+border
+rounded-xl"
+                        />
+
+                        <input
+                            type="date"
+                            value={newEndDate}
+                            onChange={(e) =>
+                                setNewEndDate(
+                                    e.target.value
+                                )
+                            }
+                            className="
+w-full
+p-4
+border
+rounded-xl"
+                        />
+
+                        <div className="
+flex
+gap-4
+">
+
+                            <button
+                                onClick={submitReactivate}
+                                className="
+flex-1
+bg-green-500
+text-white
+p-4
+rounded-xl"
+                            >
+
+                                Submit
+
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    setReactivateModal(false)
+                                }
+                                className="
+flex-1
+bg-red-500
+text-white
+p-4
+rounded-xl"
+                            >
+
+                                Cancel
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
         </div>
 
     )
