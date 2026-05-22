@@ -480,7 +480,7 @@ gap-6
 ">
 
 
-                    <div className="
+                        <div className="
 bg-purple-500
 text-white
 p-6
@@ -488,31 +488,31 @@ rounded-3xl
 space-y-4
 ">
 
-                        <h2 className="
+                            <h2 className="
 text-2xl
 font-bold
 ">
 
-                            🎓 Subscription
+                                🎓 Subscription
 
-                        </h2>
+                            </h2>
 
-                        <p>
+                            <p>
 
-                            🆔 Student ID:
+                                🆔 Student ID:
 
-                            <b>
+                                <b>
 
-                                {user?.studentId}
+                                    {user?.studentId}
 
-                            </b>
+                                </b>
 
-                        </p>
+                            </p>
 
 
-                        <div>
+                            <div>
 
-                            <span className={`
+                                <span className={`
 
 px-4
 py-2
@@ -521,62 +521,59 @@ text-sm
 font-bold
 
 ${isExpired
-                                    ?
-                                    "bg-red-600"
-                                    :
-                                    "bg-green-600"
-                                }
+                                        ?
+                                        "bg-red-600"
+                                        :
+                                        "bg-green-600"
+                                    }
 
 `}>
 
+                                    {
+                                        isExpired
+                                            ?
+                                            "🔴 Expired"
+                                            :
+                                            "🟢 Active"
+                                    }
+
+                                </span>
+
+                            </div>
+
+
+                            <p>
+
+                                📅 Ends:
+
                                 {
-                                    isExpired
-                                        ?
-                                        "🔴 Expired"
-                                        :
-                                        "🟢 Active"
+                                    endDate.toLocaleDateString()
                                 }
 
-                            </span>
+                            </p>
 
-                        </div>
-
-
-                        <p>
-
-                            📅 Ends:
-
-                            {
-                                endDate.toLocaleDateString()
-                            }
-
-                        </p>
-
-                        <p className="
+                            <p className="
 text-3xl
 font-bold
 ">
 
-                            ⏳ {
+                                ⏳ {
 
-                                isExpired
-                                    ?
-                                    0
-                                    :
-                                    remainingDays
+                                    isExpired
+                                        ?
+                                        0
+                                        :
+                                        remainingDays
 
-                            }
+                                }
 
-                            Days Left
+                                Days Left
 
-                        </p>
+                            </p>
 
-                    </div>
-
-                    <div className="
+                        </div>
 
                         <div className="
-
 bg-blue-500
 text-white
 p-6
@@ -671,302 +668,302 @@ rounded-3xl
 space-y-6
 ">
 
-                        <h2 className="
+                            <h2 className="
 text-2xl
 font-bold
 ">
 
 
-                            📋 Tomorrow Meal Booking
+                                📋 Tomorrow Meal Booking
 
-                        </h2>
+                            </h2>
 
-                        <p className="opacity-80">
+                            <p className="opacity-80">
 
-                            {
-                                new Date(
-                                    Date.now() + 86400000
-                                ).toDateString()
-                            }
+                                {
+                                    new Date(
+                                        Date.now() + 86400000
+                                    ).toDateString()
+                                }
 
-                        </p>
+                            </p>
 
 
-                        {/* Breakfast */}
+                            {/* Breakfast */}
 
-                        <div>
+                            <div>
 
-                            <p className="
+                                <p className="
 font-bold
 mb-2
 ">
 
-                                🍳 Breakfast
+                                    🍳 Breakfast
 
-                            </p>
+                                </p>
 
-                            <div className="
+                                <div className="
 grid
 grid-cols-2
 gap-3
 ">
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setBreakfast(true)
+                                                setBreakfast(true)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${breakfast
-                                            ?
-                                            "bg-green-700"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-green-700"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ✅ I am Coming
+                                        ✅ I am Coming
 
-                                </button>
+                                    </button>
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setBreakfast(false)
+                                                setBreakfast(false)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${breakfast === false
-                                            ?
-                                            "bg-red-600"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-red-600"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ❌ Not Coming
+                                        ❌ Not Coming
 
-                                </button>
+                                    </button>
+
+                                </div>
 
                             </div>
 
-                        </div>
 
 
+                            {/* Lunch */}
 
-                        {/* Lunch */}
+                            <div>
 
-                        <div>
-
-                            <p className="
+                                <p className="
 font-bold
 mb-2
 ">
 
-                                🍛 Lunch
+                                    🍛 Lunch
 
-                            </p>
+                                </p>
 
-                            <div className="
+                                <div className="
 grid
 grid-cols-2
 gap-3
 ">
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setLunch(true)
+                                                setLunch(true)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${lunch
-                                            ?
-                                            "bg-green-700"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-green-700"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ✅ I am Coming
+                                        ✅ I am Coming
 
-                                </button>
+                                    </button>
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setLunch(false)
+                                                setLunch(false)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${lunch === false
-                                            ?
-                                            "bg-red-600"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-red-600"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ❌ Not Coming
+                                        ❌ Not Coming
 
-                                </button>
+                                    </button>
+
+                                </div>
 
                             </div>
 
-                        </div>
 
 
+                            {/* Dinner */}
 
-                        {/* Dinner */}
+                            <div>
 
-                        <div>
-
-                            <p className="
+                                <p className="
 font-bold
 mb-2
 ">
 
-                                🌙 Dinner
+                                    🌙 Dinner
 
-                            </p>
+                                </p>
 
-                            <div className="
+                                <div className="
 grid
 grid-cols-2
 gap-3
 ">
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setDinner(true)
+                                                setDinner(true)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${dinner
-                                            ?
-                                            "bg-green-700"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-green-700"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ✅ I am Coming
+                                        ✅ I am Coming
 
-                                </button>
+                                    </button>
 
-                                <button
+                                    <button
 
-                                    onClick={() => {
+                                        onClick={() => {
 
-                                        if (isEditing) {
+                                            if (isEditing) {
 
-                                            setDinner(false)
+                                                setDinner(false)
 
-                                        }
+                                            }
 
-                                    }}
+                                        }}
 
-                                    className={`
+                                        className={`
 
 p-4
 rounded-xl
 font-bold
 
 ${dinner === false
-                                            ?
-                                            "bg-red-600"
-                                            :
-                                            "bg-white text-black"
-                                        }
+                                                ?
+                                                "bg-red-600"
+                                                :
+                                                "bg-white text-black"
+                                            }
 
 `}
 
-                                >
+                                    >
 
-                                    ❌ Not Coming
+                                        ❌ Not Coming
 
-                                </button>
+                                    </button>
+
+                                </div>
 
                             </div>
 
-                        </div>
+                            {
+                                bookingClosed ?
 
-                        {
-                            bookingClosed ?
-
-                                <div className="
+                                    <div className="
 bg-red-600
 text-white
 p-4
@@ -975,19 +972,19 @@ text-center
 font-bold
 ">
 
-                                    🔒 Booking Closed
+                                        🔒 Booking Closed
 
-                                </div>
+                                    </div>
 
-                                :
+                                    :
 
-                                !bookingSaved ?
+                                    !bookingSaved ?
 
-                                    <button
+                                        <button
 
-                                        onClick={saveBooking}
+                                            onClick={saveBooking}
 
-                                        className="
+                                            className="
 w-full
 bg-blue-600
 p-4
@@ -995,25 +992,25 @@ rounded-xl
 font-bold
 "
 
-                                    >
+                                        >
 
-                                        Save Booking
+                                            Save Booking
 
-                                    </button>
+                                        </button>
 
-                                    :
+                                        :
 
-                                    <button
+                                        <button
 
-                                        onClick={() => {
+                                            onClick={() => {
 
-                                            setBookingSaved(false);
+                                                setBookingSaved(false);
 
-                                            setIsEditing(true);
+                                                setIsEditing(true);
 
-                                        }}
+                                            }}
 
-                                        className="
+                                            className="
 w-full
 bg-orange-500
 p-4
@@ -1021,13 +1018,13 @@ rounded-xl
 font-bold
 "
 
-                                    >
+                                        >
 
-                                        ✏ Update Booking
+                                            ✏ Update Booking
 
-                                    </button>
+                                        </button>
 
-                        }
+                            }
 
                             📋 Book Meal
 
