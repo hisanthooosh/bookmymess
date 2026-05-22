@@ -45,6 +45,8 @@ function StudentDashboard() {
 
     const [weeklyMenus, setWeeklyMenus] =
         useState([]);
+    const [tomorrowMenu, setTomorrowMenu] =
+        useState(null);
 
     const fetchTodayMenu =
         async () => {
@@ -166,6 +168,33 @@ function StudentDashboard() {
         fetchTomorrowBooking();
 
     }, []);
+    useEffect(() => {
+
+        if (weeklyMenus.length > 0) {
+
+            const tomorrow = new Date(
+                Date.now() + 86400000
+            );
+
+            const tomorrowDay =
+                tomorrow.toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday: "long"
+                    }
+                );
+
+            const menu =
+                weeklyMenus.find(
+                    (item) =>
+                        item.day === tomorrowDay
+                );
+
+            setTomorrowMenu(menu);
+
+        }
+
+    }, [weeklyMenus]);
     const saveBooking =
         async () => {
 
@@ -693,14 +722,60 @@ font-bold
 
                             <div>
 
-                                <p className="
-font-bold
-mb-2
+                                <div className="
+bg-white/20
+backdrop-blur-md
+border
+border-white/20
+rounded-2xl
+p-4
+mb-3
+shadow-lg
 ">
 
-                                    🍳 Breakfast
+                                    <div className="
+flex
+flex-col
+sm:flex-row
+sm:items-center
+sm:justify-between
+gap-2
+">
 
-                                </p>
+                                        <h3 className="
+text-lg
+font-bold
+text-white
+">
+
+                                            🍳 Breakfast
+
+                                        </h3>
+
+                                        <span className="
+text-sm
+bg-white/20
+px-3
+py-1
+rounded-full
+font-medium
+break-words
+">
+
+                                            {
+
+                                                tomorrowMenu?.breakfast
+                                                    ?.join(", ")
+
+                                                || "No Menu"
+
+                                            }
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
 
                                 <div className="
 grid
@@ -784,14 +859,60 @@ ${breakfast === false
 
                             <div>
 
-                                <p className="
-font-bold
-mb-2
+                                <div className="
+bg-white/20
+backdrop-blur-md
+border
+border-white/20
+rounded-2xl
+p-4
+mb-3
+shadow-lg
 ">
 
-                                    🍛 Lunch
+                                    <div className="
+flex
+flex-col
+sm:flex-row
+sm:items-center
+sm:justify-between
+gap-2
+">
 
-                                </p>
+                                        <h3 className="
+text-lg
+font-bold
+text-white
+">
+
+                                            🍛 Lunch
+
+                                        </h3>
+
+                                        <span className="
+text-sm
+bg-white/20
+px-3
+py-1
+rounded-full
+font-medium
+break-words
+">
+
+                                            {
+
+                                                tomorrowMenu?.lunch
+                                                    ?.join(", ")
+
+                                                || "No Menu"
+
+                                            }
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
 
                                 <div className="
 grid
@@ -875,14 +996,60 @@ ${lunch === false
 
                             <div>
 
-                                <p className="
-font-bold
-mb-2
+                                <div className="
+bg-white/20
+backdrop-blur-md
+border
+border-white/20
+rounded-2xl
+p-4
+mb-3
+shadow-lg
 ">
 
-                                    🌙 Dinner
+                                    <div className="
+flex
+flex-col
+sm:flex-row
+sm:items-center
+sm:justify-between
+gap-2
+">
 
-                                </p>
+                                        <h3 className="
+text-lg
+font-bold
+text-white
+">
+
+                                            🌙 Dinner
+
+                                        </h3>
+
+                                        <span className="
+text-sm
+bg-white/20
+px-3
+py-1
+rounded-full
+font-medium
+break-words
+">
+
+                                            {
+
+                                                tomorrowMenu?.dinner
+                                                    ?.join(", ")
+
+                                                || "No Menu"
+
+                                            }
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
 
                                 <div className="
 grid
