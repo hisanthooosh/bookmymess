@@ -59,8 +59,13 @@ function OwnerDashboard() {
 
     const [savedMenus, setSavedMenus] =
         useState([]);
+
     const [students, setStudents] =
         useState([]);
+
+    const [searchTerm, setSearchTerm] =
+        useState("");
+
     const [studentName, setStudentName] =
         useState("");
 
@@ -69,15 +74,19 @@ function OwnerDashboard() {
 
     const [studentPassword, setStudentPassword] =
         useState("");
+
     const [startDate, setStartDate] =
         useState("");
+
     const [editingStudentId, setEditingStudentId] =
         useState(null);
 
     const [isEditing, setIsEditing] =
         useState(false);
+
     const [endDate, setEndDate] =
         useState("");
+
     const addItem = (type) => {
 
         if (type === "breakfast") {
@@ -496,6 +505,30 @@ function OwnerDashboard() {
         );
 
     }
+    const filteredStudents =
+        students.filter((student) =>
+
+            student.name
+                .toLowerCase()
+                .includes(
+                    searchTerm.toLowerCase()
+                )
+
+            ||
+
+            student.phone.includes(
+                searchTerm
+            )
+
+            ||
+
+            student.studentId
+                ?.toLowerCase()
+                .includes(
+                    searchTerm.toLowerCase()
+                )
+
+        );
     const submitReactivate =
         async () => {
 
@@ -611,7 +644,8 @@ lg:translate-x-0
                         <button
                             onClick={() => {
                                 setActivePage("dashboard");
-                                setSidebarOpen(false);}
+                                setSidebarOpen(false);
+                            }
                             }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
@@ -623,7 +657,8 @@ lg:translate-x-0
                         <button
                             onClick={() => {
                                 setActivePage("students");
-                                setSidebarOpen(false);}
+                                setSidebarOpen(false);
+                            }
                             }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
@@ -635,7 +670,8 @@ lg:translate-x-0
                         <button
                             onClick={() => {
                                 setActivePage("menu")
-                                setSidebarOpen(false);}
+                                setSidebarOpen(false);
+                            }
                             }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
@@ -647,8 +683,9 @@ lg:translate-x-0
                         <button
                             onClick={() => {
                                 setActivePage("bookings")
-                            setSidebarOpen(false);}
-                        }
+                                setSidebarOpen(false);
+                            }
+                            }
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
@@ -905,6 +942,23 @@ rounded-xl
                                 📋 Students List
 
                             </h2>
+                            <input
+                                type="text"
+                                placeholder="Search by Name, Phone or Student ID"
+                                value={searchTerm}
+                                onChange={(e) =>
+                                    setSearchTerm(
+                                        e.target.value
+                                    )
+                                }
+                                className="
+w-full
+p-4
+border
+rounded-xl
+mb-6
+"
+                            />
 
                             <div className="overflow-x-auto">
 
@@ -941,6 +995,11 @@ rounded-xl
                                             <th className="p-4 text-left">
                                                 Status
                                             </th>
+
+                                            <th className="p-4 text-left">
+                                                Remaining Days
+                                            </th>
+
                                             <th className="p-4 text-left">
                                                 Actions
                                             </th>
@@ -951,7 +1010,7 @@ rounded-xl
                                     <tbody>
 
                                         {
-                                            students.map((student, index) => (
+                                            filteredStudents.map((student, index) => (
 
                                                 <tr
                                                     key={student._id}
@@ -1005,6 +1064,7 @@ hover:bg-slate-100
 
                                                     </td>
 
+
                                                     <td className="p-4">
 
                                                         <span
@@ -1048,6 +1108,40 @@ ${new Date(
                                                             }
 
                                                         </span>
+
+                                                    </td>
+                                                    <td className="p-4">
+
+                                                        {
+
+                                                            Math.max(
+
+                                                                0,
+
+                                                                Math.ceil(
+
+                                                                    (
+                                                                        new Date(
+                                                                            student.studentEndDate
+                                                                        )
+
+                                                                        -
+
+                                                                        new Date()
+
+                                                                    )
+
+                                                                    /
+
+                                                                    (
+                                                                        1000 * 60 * 60 * 24
+                                                                    )
+
+                                                                )
+
+                                                            )
+
+                                                        } Days
 
                                                     </td>
                                                     <td className="p-4 flex gap-2">
