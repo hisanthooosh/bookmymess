@@ -9,7 +9,7 @@ function StudentDashboard() {
     const user = JSON.parse(
         localStorage.getItem("user")
     );
-    console.log(user);
+   
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
     const [todayMenu, setTodayMenu] =
