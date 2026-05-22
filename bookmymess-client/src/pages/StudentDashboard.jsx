@@ -9,6 +9,7 @@ function StudentDashboard() {
     const user = JSON.parse(
         localStorage.getItem("user")
     );
+
     const [breakfast, setBreakfast] =
         useState(null);
 
@@ -17,15 +18,19 @@ function StudentDashboard() {
 
     const [dinner, setDinner] =
         useState(null);
+
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
+
     const [todayMenu, setTodayMenu] =
         useState(null);
 
     const [bookingSaved, setBookingSaved] =
         useState(false);
+
     const [isEditing, setIsEditing] =
         useState(true);
+
     const now = new Date();
 
     const closeTime = new Date();
@@ -52,11 +57,8 @@ function StudentDashboard() {
             try {
 
                 const res =
-
                     await API.get(
-
                         `/menu/today/${user.messId}`
-
                     );
 
                 setTodayMenu(
@@ -73,7 +75,8 @@ function StudentDashboard() {
 
             }
 
-        }
+        };
+
     const fetchWeeklyMenus =
         async () => {
 
@@ -81,9 +84,7 @@ function StudentDashboard() {
 
                 const res =
                     await API.get(
-
                         `/menu/${user.messId}`
-
                     );
 
                 setWeeklyMenus(
@@ -98,7 +99,8 @@ function StudentDashboard() {
 
             }
 
-        }
+        };
+
     const logout = () => {
 
         localStorage.removeItem(
@@ -111,7 +113,7 @@ function StudentDashboard() {
 
         navigate("/");
 
-    }
+    };
 
     const fetchTomorrowBooking =
         async () => {
@@ -120,9 +122,7 @@ function StudentDashboard() {
 
                 const res =
                     await API.get(
-
                         `/booking/tomorrow/${user._id}`
-
                     );
 
                 if (res.data) {
@@ -158,24 +158,24 @@ function StudentDashboard() {
             }
 
         };
+
     useEffect(() => {
 
         fetchTodayMenu();
         fetchWeeklyMenus();
-
         fetchTomorrowBooking();
 
     }, []);
+
     const saveBooking =
         async () => {
 
             try {
-                if (
 
+                if (
                     breakfast === null ||
                     lunch === null ||
                     dinner === null
-
                 ) {
 
                     return alert(
@@ -183,10 +183,10 @@ function StudentDashboard() {
                     );
 
                 }
+
                 await API.post(
                     "/booking/save",
                     {
-
                         studentId:
                             user._id,
 
@@ -196,13 +196,13 @@ function StudentDashboard() {
                         breakfast,
                         lunch,
                         dinner
-
                     }
                 );
 
                 setBookingSaved(true);
 
                 setIsEditing(false);
+
                 alert(
                     bookingSaved
                         ?
@@ -216,12 +216,10 @@ function StudentDashboard() {
             catch (error) {
 
                 alert(
-
                     error?.response
                         ?.data?.message
                     ||
                     "Error"
-
                 );
 
             }
@@ -235,22 +233,19 @@ function StudentDashboard() {
 
     const remainingDays =
         Math.ceil(
-
             (
                 endDate -
                 new Date()
             )
-
             /
-
             (
                 1000 * 60 * 60 * 24
             )
-
         );
 
     const isExpired =
         remainingDays <= 0;
+
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -302,76 +297,83 @@ lg:translate-x-0
 
 `}>
 
-                <h1 className="text-3xl font-bold">
+                <div>
 
-                    👨‍🎓 Student
+                    <h1 className="text-3xl font-bold">
 
-                </h1>
+                        👨‍🎓 Student
 
-                <p className="mt-2 text-gray-400">
+                    </h1>
 
-                    {user?.name}
+                    <p className="mt-2 text-gray-400">
 
-                </p>
+                        {user?.name}
 
-                <div className="space-y-4 mt-10">
+                    </p>
 
-                    <button
-                        className="
+                    <div className="space-y-4 mt-10">
+
+                        <button
+                            className="
 w-full
 p-4
 bg-slate-800
 rounded-xl
 text-left
 "
-                        onClick={() => {
+                            onClick={() => {
 
-                            setActivePage("dashboard");
-                            setSidebarOpen(false);
+                                setActivePage("dashboard");
+                                setSidebarOpen(false);
 
-                        }}
-                    >
-                        🏠 Dashboard
-                    </button>
+                            }}
+                        >
 
-                    <button
-                        className="
+                            🏠 Dashboard
+
+                        </button>
+
+                        <button
+                            className="
 w-full
 p-4
 bg-slate-800
 rounded-xl
 text-left
 "
-                        onClick={() => {
+                            onClick={() => {
 
-                            setActivePage("menu");
-                            setSidebarOpen(false);
+                                setActivePage("menu");
+                                setSidebarOpen(false);
 
-                        }}
-                    >
+                            }}
+                        >
 
-                        🍛 Menu
+                            🍛 Menu
 
-                    </button>
+                        </button>
 
-                    <button
-                        className="
+                        <button
+                            className="
 w-full
 p-4
 bg-slate-800
 rounded-xl
 text-left
 "
-                        onClick={() =>
-                            setSidebarOpen(false)
-                        }
-                    >
+                            onClick={() =>
+                                setSidebarOpen(false)
+                            }
+                        >
 
-                        📋 Meal Booking
+                            📋 Meal Booking
 
-                    </button>
+                        </button>
+
+                    </div>
 
                 </div>
+
                 <div className="mt-auto pt-6">
 
                     <button
@@ -454,12 +456,21 @@ text-3xl
 w-12
 h-12
 rounded-full
-bg-blue-500
+bg-gradient-to-r
+from-blue-500
+to-indigo-600
 text-white
 flex
 justify-center
 items-center
 font-bold
+text-lg
+shadow-md
+border-2
+border-white
+hover:scale-105
+transition-all
+duration-300
 "
                     >
 
@@ -468,6 +479,7 @@ font-bold
                     </div>
 
                 </div>
+
                 {
                     activePage === "dashboard" &&
 
@@ -478,7 +490,6 @@ md:grid-cols-2
 xl:grid-cols-3
 gap-6
 ">
-
 
                         <div className="
 bg-purple-500
@@ -508,7 +519,6 @@ font-bold
                                 </b>
 
                             </p>
-
 
                             <div>
 
@@ -540,7 +550,6 @@ ${isExpired
                                 </span>
 
                             </div>
-
 
                             <p>
 
@@ -673,7 +682,6 @@ text-2xl
 font-bold
 ">
 
-
                                 📋 Tomorrow Meal Booking
 
                             </h2>
@@ -687,7 +695,6 @@ font-bold
                                 }
 
                             </p>
-
 
                             {/* Breakfast */}
 
@@ -709,17 +716,15 @@ gap-3
 ">
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setBreakfast(true)
+                                                setBreakfast(true);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -734,7 +739,6 @@ ${breakfast
                                             }
 
 `}
-
                                     >
 
                                         ✅ I am Coming
@@ -742,17 +746,15 @@ ${breakfast
                                     </button>
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setBreakfast(false)
+                                                setBreakfast(false);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -767,7 +769,6 @@ ${breakfast === false
                                             }
 
 `}
-
                                     >
 
                                         ❌ Not Coming
@@ -777,8 +778,6 @@ ${breakfast === false
                                 </div>
 
                             </div>
-
-
 
                             {/* Lunch */}
 
@@ -800,17 +799,15 @@ gap-3
 ">
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setLunch(true)
+                                                setLunch(true);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -825,7 +822,6 @@ ${lunch
                                             }
 
 `}
-
                                     >
 
                                         ✅ I am Coming
@@ -833,17 +829,15 @@ ${lunch
                                     </button>
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setLunch(false)
+                                                setLunch(false);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -858,7 +852,6 @@ ${lunch === false
                                             }
 
 `}
-
                                     >
 
                                         ❌ Not Coming
@@ -868,8 +861,6 @@ ${lunch === false
                                 </div>
 
                             </div>
-
-
 
                             {/* Dinner */}
 
@@ -891,17 +882,15 @@ gap-3
 ">
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setDinner(true)
+                                                setDinner(true);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -916,7 +905,6 @@ ${dinner
                                             }
 
 `}
-
                                     >
 
                                         ✅ I am Coming
@@ -924,17 +912,15 @@ ${dinner
                                     </button>
 
                                     <button
-
                                         onClick={() => {
 
                                             if (isEditing) {
 
-                                                setDinner(false)
+                                                setDinner(false);
 
                                             }
 
                                         }}
-
                                         className={`
 
 p-4
@@ -949,7 +935,6 @@ ${dinner === false
                                             }
 
 `}
-
                                     >
 
                                         ❌ Not Coming
@@ -981,9 +966,7 @@ font-bold
                                     !bookingSaved ?
 
                                         <button
-
                                             onClick={saveBooking}
-
                                             className="
 w-full
 bg-blue-600
@@ -991,7 +974,6 @@ p-4
 rounded-xl
 font-bold
 "
-
                                         >
 
                                             Save Booking
@@ -1001,7 +983,6 @@ font-bold
                                         :
 
                                         <button
-
                                             onClick={() => {
 
                                                 setBookingSaved(false);
@@ -1009,7 +990,6 @@ font-bold
                                                 setIsEditing(true);
 
                                             }}
-
                                             className="
 w-full
 bg-orange-500
@@ -1017,7 +997,6 @@ p-4
 rounded-xl
 font-bold
 "
-
                                         >
 
                                             ✏ Update Booking
@@ -1030,9 +1009,9 @@ font-bold
 
                         </div>
 
-
                     </div>
                 }
+
                 {
                     activePage === "menu" &&
 
@@ -1050,15 +1029,21 @@ gap-6
                                 <div
                                     key={menu._id}
                                     className="
-bg-blue-500
-text-white
+bg-white
+text-slate-800
 p-6
 rounded-3xl
 space-y-3
+border
+border-slate-200
+shadow-md
+hover:shadow-lg
+transition-all
+duration-300
 "
                                 >
 
-                                    <h2 className="text-2xl font-bold">
+                                    <h2 className="text-2xl font-bold text-blue-600">
 
                                         🍛 {menu.day}
 
@@ -1106,9 +1091,8 @@ space-y-3
 
         </div>
 
-    )
+    );
 
 }
-
 
 export default StudentDashboard;
