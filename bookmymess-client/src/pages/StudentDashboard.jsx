@@ -21,6 +21,7 @@ function StudentDashboard() {
         useState(false);
     const [todayMenu, setTodayMenu] =
         useState(null);
+
     const [bookingSaved, setBookingSaved] =
         useState(false);
     const [isEditing, setIsEditing] =
@@ -38,6 +39,13 @@ function StudentDashboard() {
 
     const bookingClosed =
         now > closeTime;
+
+    const [activePage, setActivePage] =
+        useState("dashboard");
+
+    const [weeklyMenus, setWeeklyMenus] =
+        useState([]);
+
     const fetchTodayMenu =
         async () => {
 
@@ -62,6 +70,31 @@ function StudentDashboard() {
                 console.log(
                     error
                 );
+
+            }
+
+        }
+    const fetchWeeklyMenus =
+        async () => {
+
+            try {
+
+                const res =
+                    await API.get(
+
+                        `/menu/${user.messId}`
+
+                    );
+
+                setWeeklyMenus(
+                    res.data.menus
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(error);
 
             }
 
@@ -128,6 +161,7 @@ function StudentDashboard() {
     useEffect(() => {
 
         fetchTodayMenu();
+        fetchWeeklyMenus();
 
         fetchTomorrowBooking();
 
@@ -290,10 +324,14 @@ bg-slate-800
 rounded-xl
 text-left
 "
+                        onClick={() => {
+
+                            setActivePage("dashboard");
+                            setSidebarOpen(false);
+
+                        }}
                     >
-
                         🏠 Dashboard
-
                     </button>
 
                     <button
@@ -304,6 +342,12 @@ bg-slate-800
 rounded-xl
 text-left
 "
+                        onClick={() => {
+
+                            setActivePage("menu");
+                            setSidebarOpen(false);
+
+                        }}
                     >
 
                         🍛 Menu
@@ -318,6 +362,9 @@ bg-slate-800
 rounded-xl
 text-left
 "
+                        onClick={() =>
+                            setSidebarOpen(false)
+                        }
                     >
 
                         📋 Meal Booking
@@ -421,14 +468,17 @@ font-bold
                     </div>
 
                 </div>
+                {
+                    activePage === "dashboard" &&
 
-                <div className="
+                    <div className="
 grid
 grid-cols-1
 md:grid-cols-2
 xl:grid-cols-3
 gap-6
 ">
+
 
                     <div className="
 bg-purple-500
@@ -524,6 +574,9 @@ font-bold
                     </div>
 
                     <div className="
+
+                        <div className="
+
 bg-blue-500
 text-white
 p-6
@@ -531,86 +584,86 @@ rounded-3xl
 space-y-3
 ">
 
-                        <h2 className="text-2xl font-bold">
+                            <h2 className="text-2xl font-bold">
 
-                            🍛 Today's Menu
+                                🍛 Today's Menu
 
-                        </h2>
+                            </h2>
 
-                        <div className="border-b border-white/30 pb-3">
+                            <div className="border-b border-white/30 pb-3">
 
-                            <p className="text-lg font-semibold">
+                                <p className="text-lg font-semibold">
 
-                                📅 {
-                                    new Date().toLocaleDateString(
-                                        "en-US",
-                                        {
-                                            weekday: "long"
-                                        }
-                                    )
+                                    📅 {
+                                        new Date().toLocaleDateString(
+                                            "en-US",
+                                            {
+                                                weekday: "long"
+                                            }
+                                        )
+                                    }
+
+                                </p>
+
+                                <p className="text-sm opacity-80">
+
+                                    🗓 {
+                                        new Date().toLocaleDateString(
+                                            "en-US",
+                                            {
+                                                day: "numeric",
+                                                month: "long",
+                                                year: "numeric"
+                                            }
+                                        )
+                                    }
+
+                                </p>
+
+                            </div>
+
+                            <p>
+
+                                🍳 Breakfast:
+
+                                {
+                                    todayMenu?.breakfast
+                                        ?.join(", ")
+                                    ||
+                                    "No menu"
                                 }
 
                             </p>
 
-                            <p className="text-sm opacity-80">
+                            <p>
 
-                                🗓 {
-                                    new Date().toLocaleDateString(
-                                        "en-US",
-                                        {
-                                            day: "numeric",
-                                            month: "long",
-                                            year: "numeric"
-                                        }
-                                    )
+                                🍛 Lunch:
+
+                                {
+                                    todayMenu?.lunch
+                                        ?.join(", ")
+                                    ||
+                                    "No menu"
+                                }
+
+                            </p>
+
+                            <p>
+
+                                🌙 Dinner:
+
+                                {
+                                    todayMenu?.dinner
+                                        ?.join(", ")
+                                    ||
+                                    "No menu"
                                 }
 
                             </p>
 
                         </div>
 
-                        <p>
-
-                            🍳 Breakfast:
-
-                            {
-                                todayMenu?.breakfast
-                                    ?.join(", ")
-                                ||
-                                "No menu"
-                            }
-
-                        </p>
-
-                        <p>
-
-                            🍛 Lunch:
-
-                            {
-                                todayMenu?.lunch
-                                    ?.join(", ")
-                                ||
-                                "No menu"
-                            }
-
-                        </p>
-
-                        <p>
-
-                            🌙 Dinner:
-
-                            {
-                                todayMenu?.dinner
-                                    ?.join(", ")
-                                ||
-                                "No menu"
-                            }
-
-                        </p>
-
-                    </div>
-
-                    <div className="
+                        <div className="
 bg-green-500
 text-white
 p-6
@@ -622,6 +675,7 @@ space-y-6
 text-2xl
 font-bold
 ">
+
 
                             📋 Tomorrow Meal Booking
 
@@ -975,9 +1029,81 @@ font-bold
 
                         }
 
-                    </div>
+                            📋 Book Meal
 
-                </div>
+                        </div>
+
+
+                    </div>
+                }
+                {
+                    activePage === "menu" &&
+
+                    <div className="
+grid
+grid-cols-1
+md:grid-cols-2
+xl:grid-cols-3
+gap-6
+">
+
+                        {
+                            weeklyMenus.map((menu) => (
+
+                                <div
+                                    key={menu._id}
+                                    className="
+bg-blue-500
+text-white
+p-6
+rounded-3xl
+space-y-3
+"
+                                >
+
+                                    <h2 className="text-2xl font-bold">
+
+                                        🍛 {menu.day}
+
+                                    </h2>
+
+                                    <p>
+
+                                        🍳 Breakfast:
+
+                                        {
+                                            menu.breakfast?.join(", ")
+                                        }
+
+                                    </p>
+
+                                    <p>
+
+                                        🍛 Lunch:
+
+                                        {
+                                            menu.lunch?.join(", ")
+                                        }
+
+                                    </p>
+
+                                    <p>
+
+                                        🌙 Dinner:
+
+                                        {
+                                            menu.dinner?.join(", ")
+                                        }
+
+                                    </p>
+
+                                </div>
+
+                            ))
+                        }
+
+                    </div>
+                }
 
             </div>
 
@@ -986,5 +1112,6 @@ font-bold
     )
 
 }
+
 
 export default StudentDashboard;
