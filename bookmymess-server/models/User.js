@@ -32,7 +32,10 @@ const userSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Mess",
             default: null
-        },
+        },studentId:{
+    type:String,
+    default:null
+},
         studentStartDate: {
             type: Date,
             default: null
