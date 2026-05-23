@@ -122,9 +122,7 @@ function StudentDashboard() {
 
                 const res =
                     await API.get(
-
-                        `/booking/tomorrow/${user._id}`
-
+                        `/booking/tomorrow/${user.studentId}`
                     );
 
                 if (res.data) {
@@ -217,7 +215,7 @@ function StudentDashboard() {
                     {
 
                         studentId:
-                            user._id,
+                            user.studentId,
 
                         messId:
                             user.messId,
