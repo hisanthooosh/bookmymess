@@ -44,7 +44,36 @@ function OwnerDashboard() {
         useState("");
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
+    const [bookingStats, setBookingStats] =
+        useState({
 
+            tomorrowTotal: 0,
+
+            todayBreakfastComing: 0,
+            todayBreakfastNotComing: 0,
+            todayBreakfastNoResponse: 0,
+
+            todayLunchComing: 0,
+            todayLunchNotComing: 0,
+            todayLunchNoResponse: 0,
+
+            todayDinnerComing: 0,
+            todayDinnerNotComing: 0,
+            todayDinnerNoResponse: 0,
+
+            breakfastComing: 0,
+            breakfastNotComing: 0,
+            breakfastNoResponse: 0,
+
+            lunchComing: 0,
+            lunchNotComing: 0,
+            lunchNoResponse: 0,
+
+            dinnerComing: 0,
+            dinnerNotComing: 0,
+            dinnerNoResponse: 0
+
+        });
     const [breakfast, setBreakfast] =
         useState([""]);
 
@@ -117,7 +146,33 @@ function OwnerDashboard() {
         }
 
     }
+    const fetchBookingStats =
+        async () => {
 
+            try {
+
+                const res =
+                    await API.get(
+
+                        `/booking/stats/${user.messId}`
+
+                    );
+
+                setBookingStats(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed to load stats"
+                );
+
+            }
+
+        }
     useEffect(() => {
 
         const menu =
@@ -265,6 +320,8 @@ function OwnerDashboard() {
         fetchMenus();
 
         fetchStudents();
+
+        fetchBookingStats();
 
     }, []);
 
@@ -571,6 +628,44 @@ function OwnerDashboard() {
             }
 
         }
+
+    const days = [
+
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+
+    ];
+
+    const todayDay =
+        days[
+        new Date().getDay()
+        ];
+
+    const tomorrowDay =
+        days[
+        (
+            new Date().getDay() + 1
+        ) % 7
+        ];
+
+    const todayMenu =
+
+        savedMenus.find(
+            menu =>
+                menu.day === todayDay
+        );
+
+    const tomorrowMenu =
+
+        savedMenus.find(
+            menu =>
+                menu.day === tomorrowDay
+        );
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -833,13 +928,509 @@ text-lg
 
                     &&
 
-                    <h1 className="text-4xl font-bold">
+                    <div className="
+grid
+grid-cols-1
+xl:grid-cols-2
+gap-5
+mb-6
+">
 
-                        Welcome {user?.name}
+                        {/* TODAY */}
 
-                    </h1>
+                        <div className="
+bg-white
+rounded-[30px]
+shadow-md
+overflow-hidden
+">
+
+                            <div className="
+bg-red-500
+text-white
+p-4
+flex
+justify-between
+items-center
+">
+
+                                <div>
+
+                                    <h1 className="
+text-xl
+font-bold
+">
+
+                                        📅 Today
+
+                                    </h1>
+
+                                    <p className="text-sm">
+
+                                        {new Date().toLocaleDateString()}
+
+                                    </p>
+
+                                    <p className="
+text-xs
+text-white/80
+mt-1
+">
+
+                                        {todayDay}
+
+                                    </p>
+
+                                </div>
+
+                                <div className="
+bg-white/20
+px-3
+py-1
+rounded-full
+text-sm
+font-bold
+">
+
+                                    🔒 Fixed
+
+                                </div>
+
+                            </div>
+
+
+                            <div className="
+p-5
+grid
+grid-cols-1
+md:grid-cols-3
+gap-4
+">
+
+                                {
+                                    [
+                                        {
+                                            title: "🍳 Breakfast",
+
+                                            menu:
+                                                todayMenu?.breakfast?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.todayBreakfastComing,
+
+                                            notComing: bookingStats.todayBreakfastNotComing,
+
+                                            noResponse: bookingStats.todayBreakfastNoResponse
+                                        },
+
+                                        {
+                                            title: "🍛 Lunch",
+
+                                            menu:
+                                                todayMenu?.lunch?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.todayLunchComing,
+
+                                            notComing: bookingStats.todayLunchNotComing,
+
+                                            noResponse: bookingStats.todayLunchNoResponse
+                                        },
+
+                                        {
+                                            title: "🌙 Dinner",
+
+                                            menu:
+                                                todayMenu?.dinner?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.todayDinnerComing,
+
+                                            notComing: bookingStats.todayDinnerNotComing,
+
+                                            noResponse: bookingStats.todayDinnerNoResponse
+                                        }
+                                    ].map((meal, index) => (
+
+                                        <div
+                                            key={index}
+                                            className="
+bg-slate-50
+rounded-2xl
+p-4
+border
+hover:shadow-md
+duration-300
+"
+                                        >
+
+                                            <h2 className="
+font-bold
+text-sm
+text-gray-600
+mb-4
+">
+
+                                                {meal.title}
+
+
+                                            </h2>
+                                            <p className="
+text-xs
+text-gray-500
+mb-4
+leading-5
+">
+
+                                                🍽 {meal.menu}
+
+                                            </p>
+
+                                            <div className="space-y-3">
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-green-600
+font-medium
+">
+
+                                                        Coming
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.coming}
+
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-red-500
+font-medium
+">
+
+                                                        Not Coming
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.notComing}
+
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-gray-500
+font-medium
+">
+
+                                                        No Reply
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.noResponse}
+
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    ))
+                                }
+
+                            </div>
+
+                        </div>
+
+
+
+                        {/* TOMORROW */}
+
+                        <div className="
+bg-white
+rounded-[30px]
+shadow-md
+overflow-hidden
+">
+
+                            <div className="
+bg-green-500
+text-white
+p-4
+flex
+justify-between
+items-center
+">
+
+                                <div>
+
+                                    <h1 className="
+text-xl
+font-bold
+">
+
+                                        📅 Tomorrow
+
+                                    </h1>
+
+                                    <p className="text-sm">
+
+                                        {
+                                            new Date(
+                                                Date.now() + 86400000
+                                            ).toLocaleDateString()
+                                        }
+
+                                    </p>
+
+                                    <p className="
+text-xs
+text-white/80
+mt-1
+">
+
+                                        {tomorrowDay}
+
+                                    </p>
+
+                                </div>
+
+                                <div className="
+bg-white/20
+px-3
+py-1
+rounded-full
+text-sm
+font-bold
+">
+
+                                    ✏ Editable
+
+                                </div>
+
+                            </div>
+
+
+                            <div className="
+p-5
+grid
+grid-cols-1
+md:grid-cols-3
+gap-4
+">
+
+                                {
+                                    [
+                                        {
+                                            title: "🍳 Breakfast",
+
+                                            menu:
+                                                tomorrowMenu?.breakfast?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.breakfastComing,
+
+                                            notComing: bookingStats.breakfastNotComing,
+
+                                            noResponse: bookingStats.breakfastNoResponse
+                                        },
+
+                                        {
+                                            title: "🍛 Lunch",
+
+                                            menu:
+                                                tomorrowMenu?.lunch?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.lunchComing,
+
+                                            notComing: bookingStats.lunchNotComing,
+
+                                            noResponse: bookingStats.lunchNoResponse
+                                        },
+
+                                        {
+                                            title: "🌙 Dinner",
+
+                                            menu:
+                                                tomorrowMenu?.dinner?.join(", ")
+                                                || "No Menu",
+
+                                            coming: bookingStats.dinnerComing,
+
+                                            notComing: bookingStats.dinnerNotComing,
+
+                                            noResponse: bookingStats.dinnerNoResponse
+                                        }
+                                    ].map((meal, index) => (
+
+                                        <div
+                                            key={index}
+                                            className="
+bg-slate-50
+rounded-2xl
+p-4
+border
+hover:shadow-md
+duration-300
+"
+                                        >
+
+                                            <h2 className="
+font-bold
+text-sm
+text-gray-600
+mb-4
+">
+
+                                                {meal.title}
+
+                                            </h2>
+                                            <p className="
+text-xs
+text-gray-500
+mb-4
+leading-5
+">
+
+                                                🍽 {meal.menu}
+
+                                            </p>
+                                            <div className="
+space-y-3
+">
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-green-600
+font-medium
+">
+
+                                                        Coming
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.coming}
+
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-red-500
+font-medium
+">
+
+                                                        Not Coming
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.notComing}
+
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div className="
+flex
+justify-between
+items-center
+">
+
+                                                    <span className="
+text-gray-500
+font-medium
+">
+
+                                                        No Reply
+
+                                                    </span>
+
+                                                    <span className="
+text-3xl
+font-bold
+">
+
+                                                        {meal.noResponse}
+
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    ))
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
                 }
-
                 {
                     activePage === "students" &&
 
