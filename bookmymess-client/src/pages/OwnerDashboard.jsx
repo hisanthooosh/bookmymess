@@ -48,6 +48,13 @@ function OwnerDashboard() {
         useState(
             "payment"
         );
+    const [selectedOrder,
+        setSelectedOrder] =
+        useState(null);
+
+    const [orderModal,
+        setOrderModal] =
+        useState(false);
     const [extraItems,
         setExtraItems] =
         useState([]);
@@ -71,7 +78,9 @@ function OwnerDashboard() {
         useState(
             user?.upiId || ""
         );
-
+    const [orders,
+        setOrders] =
+        useState([]);
     const [upiName, setUpiName] =
         useState(
             user?.upiName || ""
@@ -249,6 +258,52 @@ function OwnerDashboard() {
 
                 toast.error(
                     "Failed to load expiry stats"
+                );
+
+            }
+
+        }
+    const openOrder =
+        (order) => {
+
+            setSelectedOrder(
+                order
+            );
+
+            setOrderModal(
+                true
+            );
+
+        }
+    const fetchOrders =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/booking/extra-orders/${user.messId}`
+
+                    );
+
+                console.log(
+                    "Orders Data:",
+                    res.data
+                );
+
+                setOrders(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Order Error:",
+                    error
                 );
 
             }
@@ -527,7 +582,51 @@ function OwnerDashboard() {
             }
 
         }
+    const confirmOrder =
+        async (id) => {
 
+            try {
+
+                await API.put(
+
+                    `/booking/confirm-order/${id}`
+
+                );
+
+                toast.success(
+
+                    "Order confirmed 🎉"
+
+                );
+
+                await fetchOrders();
+
+                if (selectedOrder) {
+
+                    setSelectedOrder({
+
+                        ...selectedOrder,
+
+                        orderStatus:
+                            "confirmed"
+
+                    });
+
+                }
+
+            }
+
+            catch (error) {
+
+                toast.error(
+
+                    "Failed"
+
+                );
+
+            }
+
+        }
     const fetchAttendanceList =
         async () => {
 
@@ -716,6 +815,7 @@ function OwnerDashboard() {
         fetchExpiryStats();
         fetchAttendanceList();
         fetchExtraItems();
+        fetchOrders();
 
     }, []);
 
@@ -975,8 +1075,12 @@ function OwnerDashboard() {
 
             student.studentId
                 ?.toLowerCase()
+
                 .includes(
-                    searchTerm.toLowerCase()
+
+                    bookingSearch
+                        .toLowerCase()
+
                 )
 
         );
@@ -2995,7 +3099,19 @@ rounded-xl
 
                                 >
 
-                                    Save Payment Info
+                                    {
+
+                                        user?.upiId
+
+                                            ?
+
+                                            "Update Payment Info"
+
+                                            :
+
+                                            "Save Payment Info"
+
+                                    }
 
                                 </button>
 
@@ -3351,7 +3467,227 @@ rounded-lg
                             </div>
 
                         }
+                        {
+                            extraTab === "orders"
 
+                            &&
+
+                            <div
+                                className="
+space-y-4
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    📋 Extra Orders
+
+                                </h1>
+
+                                {
+
+                                    orders.length === 0
+
+                                        ?
+
+                                        <p>
+
+                                            No Orders
+
+                                        </p>
+
+                                        :
+
+                                        orders.map(
+
+                                            order => (
+
+                                                <div
+
+                                                    key={order._id}
+
+                                                    className="
+bg-slate-100
+rounded-xl
+p-5
+space-y-3
+"
+
+                                                >
+
+                                                    <p>
+
+                                                        🆔
+
+                                                        {order.studentId}
+
+                                                    </p>
+
+                                                    <p>
+
+                                                        💰 ₹
+
+                                                        {order.extraTotal}
+
+                                                    </p>
+                                                    <p>
+
+                                                        💳 Transaction:
+
+                                                        <b>
+
+                                                            {
+
+                                                                order.transactionId
+
+                                                                ||
+
+                                                                "Not Provided"
+
+                                                            }
+
+                                                        </b>
+
+                                                    </p>
+                                                    <div>
+
+                                                        🍗 Items:
+
+                                                        {
+                                                            order.extraItems?.length > 0
+
+                                                                ?
+
+                                                                order.extraItems.map(
+
+                                                                    item => (
+
+                                                                        <div
+                                                                            key={item.itemId}
+                                                                            className="
+bg-white
+p-3
+rounded-lg
+mb-2
+"
+                                                                        >
+
+                                                                            {item.itemName}
+
+                                                                            x
+
+                                                                            {item.quantity}
+
+                                                                            —
+
+                                                                            ₹{item.price * item.quantity}
+
+                                                                        </div>
+
+                                                                    )
+
+                                                                )
+
+                                                                :
+
+                                                                <p>
+
+                                                                    No extra items
+
+                                                                </p>
+
+                                                        }
+
+                                                    </div>
+
+                                                    <div
+                                                        className={`
+
+text-white
+px-4
+py-2
+rounded-xl
+inline-block
+
+${order.orderStatus === "confirmed"
+
+                                                                ?
+
+                                                                "bg-green-500"
+
+                                                                :
+
+                                                                "bg-yellow-500"
+
+                                                            }
+
+`}
+
+                                                    >
+
+                                                        {
+
+                                                            order.orderStatus === "confirmed"
+
+                                                                ?
+
+                                                                "✅ Confirmed"
+
+                                                                :
+
+                                                                "⏳ Waiting"
+
+                                                        }
+
+                                                    </div>
+
+                                                    {
+
+                                                        order.orderStatus !== "confirmed"
+
+                                                        &&
+
+                                                        <button
+
+                                                            onClick={() =>
+
+                                                                openOrder(
+                                                                    order
+                                                                )
+
+                                                            }
+
+                                                            className="
+bg-blue-600
+text-white
+px-5
+py-3
+rounded-xl
+"
+
+                                                        >
+
+                                                            👁 View
+
+                                                        </button>
+
+                                                    }
+
+                                                </div>
+
+                                            )
+
+                                        )
+
+                                }
+
+                            </div>
+                        }
                     </div>
 
                 }
@@ -3795,6 +4131,283 @@ rounded-xl"
                     </div>
 
                 </div>
+            }
+            {
+                orderModal
+
+                &&
+
+                <div
+                    className="
+fixed
+inset-0
+bg-black/50
+flex
+justify-center
+items-center
+z-50
+"
+                >
+
+                    <div
+                        className="
+bg-white
+w-[500px]
+max-h-[80vh]
+overflow-y-auto
+rounded-3xl
+p-6
+space-y-5
+"
+                    >
+
+                        <div
+                            className="
+flex
+justify-between
+items-center
+"
+                        >
+
+                            <h1
+                                className="
+text-2xl
+font-bold
+"
+                            >
+
+                                📋 Order Details
+
+                            </h1>
+
+                            <button
+
+                                onClick={() =>
+
+                                    setOrderModal(
+                                        false
+                                    )
+
+                                }
+
+                                className="
+text-2xl
+font-bold
+"
+
+                            >
+
+                                ✕
+
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            className="
+bg-slate-100
+rounded-xl
+p-4
+space-y-2
+"
+                        >
+
+                            <p>
+
+                                👤 Name:
+
+                                <b>
+
+                                    {selectedOrder?.student?.name}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                📞 Phone:
+
+                                <b>
+
+                                    {selectedOrder?.student?.phone}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                🆔 Student ID:
+
+                                <b>
+
+                                    {selectedOrder?.studentId}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                📅 Order Date:
+
+                                <b>
+
+                                    {
+
+                                        new Date(
+
+                                            selectedOrder?.createdAt
+
+                                        ).toLocaleString()
+
+                                    }
+
+                                </b>
+
+                            </p>
+
+                        </div>
+
+
+                        <p>
+
+                            💰 Amount:
+
+                            <b>
+
+                                ₹{selectedOrder?.extraTotal}
+
+                            </b>
+
+                        </p>
+
+
+                        <p>
+
+                            💳 Transaction:
+
+                            <b>
+
+                                {
+
+                                    selectedOrder?.transactionId
+
+                                    ||
+
+                                    "Not Provided"
+
+                                }
+
+                            </b>
+
+                        </p>
+
+
+                        <div>
+
+                            <h2
+                                className="
+font-bold
+mb-3
+"
+                            >
+
+                                🍗 Items
+
+                            </h2>
+
+                            {
+
+                                selectedOrder?.extraItems?.map(
+
+                                    item => (
+
+                                        <div
+
+                                            key={item.itemId}
+
+                                            className="
+bg-slate-100
+rounded-xl
+p-3
+mb-2
+"
+                                        >
+
+                                            {item.itemName}
+
+                                            x
+
+                                            {item.quantity}
+
+                                            —
+
+                                            ₹
+
+                                            {
+
+                                                item.price *
+
+                                                item.quantity
+
+                                            }
+
+                                        </div>
+
+                                    )
+
+                                )
+
+                            }
+
+                        </div>
+
+
+                        {
+
+                            selectedOrder?.orderStatus
+
+                            !==
+
+                            "confirmed"
+
+                            &&
+
+                            <button
+
+                                onClick={() =>
+
+                                    confirmOrder(
+
+                                        selectedOrder._id
+
+                                    )
+
+                                }
+
+                                className="
+w-full
+bg-green-600
+text-white
+p-4
+rounded-xl
+"
+
+                            >
+
+                                ✅ Confirm Order
+
+                            </button>
+
+                        }
+
+                    </div>
+
+                </div>
+
             }
         </div >
 

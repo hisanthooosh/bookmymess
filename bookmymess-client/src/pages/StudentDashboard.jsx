@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import API from "../services/api";
+import { toast }
+    from "react-toastify";
 
 function StudentDashboard() {
 
@@ -21,13 +23,29 @@ function StudentDashboard() {
         useState(false);
     const [todayMenu, setTodayMenu] =
         useState(null);
+    const [paymentInfo,
+        setPaymentInfo] =
+        useState(null);
+    const [transactionId,
+        setTransactionId] =
+        useState("");
+
+    const [paid,
+        setPaid] =
+        useState(false);
 
     const [bookingSaved, setBookingSaved] =
         useState(false);
     const [isEditing, setIsEditing] =
         useState(true);
     const now = new Date();
+    const [extraItems,
+        setExtraItems] =
+        useState([]);
 
+    const [selectedExtras,
+        setSelectedExtras] =
+        useState([]);
     const closeTime = new Date();
 
     closeTime.setHours(
@@ -114,7 +132,83 @@ function StudentDashboard() {
         navigate("/");
 
     }
+    const fetchExtraItems =
+        async () => {
 
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/extra-item/${user.messId}`
+
+                    );
+
+                setExtraItems(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+
+    const fetchPaymentInfo =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/owner/payment/${user.messId}`
+
+                    );
+
+                setPaymentInfo(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+    const tomorrowDay =
+        new Date(
+            Date.now() + 86400000
+        )
+            .toLocaleDateString(
+                "en-US",
+                {
+                    weekday: "long"
+                }
+            );
+
+    const filteredExtraItems =
+
+        extraItems.filter(
+
+            item =>
+
+                item.day === tomorrowDay
+
+        );
     const fetchTomorrowBooking =
         async () => {
 
@@ -161,9 +255,14 @@ function StudentDashboard() {
     useEffect(() => {
 
         fetchTodayMenu();
+
         fetchWeeklyMenus();
 
         fetchTomorrowBooking();
+
+        fetchExtraItems();
+
+        fetchPaymentInfo();
 
     }, []);
     useEffect(() => {
@@ -197,6 +296,7 @@ function StudentDashboard() {
         async () => {
 
             try {
+
                 if (
 
                     breakfast === null ||
@@ -210,8 +310,27 @@ function StudentDashboard() {
                     );
 
                 }
+
+                if (
+
+                    totalAmount > 0
+
+                    &&
+
+                    !paid
+
+                ) {
+
+                    return alert(
+                        "Please complete payment"
+                    );
+
+                }
+
                 await API.post(
+
                     "/booking/save",
+
                     {
 
                         studentId:
@@ -222,20 +341,40 @@ function StudentDashboard() {
 
                         breakfast,
                         lunch,
-                        dinner
+                        dinner,
+
+                        extraItems:
+                            selectedExtras,
+
+                        extraTotal:
+                            totalAmount,
+
+                        transactionId
 
                     }
+
                 );
 
-                setBookingSaved(true);
+                setBookingSaved(
+                    true
+                );
 
-                setIsEditing(false);
+                setIsEditing(
+                    false
+                );
+
                 alert(
+
                     bookingSaved
+
                         ?
+
                         "Booking Updated ✅"
+
                         :
+
                         "Booking Saved ✅"
+
                 );
 
             }
@@ -246,7 +385,9 @@ function StudentDashboard() {
 
                     error?.response
                         ?.data?.message
+
                     ||
+
                     "Error"
 
                 );
@@ -254,7 +395,87 @@ function StudentDashboard() {
             }
 
         };
+    const handleExtraSelect =
+        (item, change) => {
 
+            const exists =
+
+                selectedExtras.find(
+
+                    x => x._id === item._id
+
+                );
+
+            if (exists) {
+
+                const updated =
+
+                    selectedExtras
+                        .map(x => {
+
+                            if (x._id === item._id) {
+
+                                return {
+
+                                    ...x,
+
+                                    quantity:
+                                        x.quantity + change
+
+                                };
+
+                            }
+
+                            return x;
+
+                        })
+
+                        .filter(
+
+                            x => x.quantity > 0
+
+                        );
+
+                setSelectedExtras(
+                    updated
+                );
+
+            }
+
+            else if (change > 0) {
+
+                setSelectedExtras([
+
+                    ...selectedExtras,
+
+                    {
+
+                        ...item,
+
+                        quantity: 1
+
+                    }
+
+                ]);
+
+            }
+
+        }
+    const totalAmount =
+
+        selectedExtras.reduce(
+
+            (total, item) =>
+
+                total +
+
+                (item.price *
+
+                    item.quantity),
+
+            0
+
+        );
     const endDate =
         new Date(
             user?.studentEndDate
@@ -278,6 +499,8 @@ function StudentDashboard() {
 
     const isExpired =
         remainingDays <= 0;
+
+
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -1124,7 +1347,354 @@ ${dinner === false
                                 </div>
 
                             </div>
+                            <div
+                                className="
+bg-white/20
+rounded-2xl
+p-4
+space-y-4
+"
+                            >
 
+                                <h3
+                                    className="
+text-xl
+font-bold
+"
+                                >
+
+                                    🍗 Extra Items
+
+                                </h3>
+
+                                {
+
+                                    extraItems.length === 0
+
+                                        ?
+
+                                        <p>
+
+                                            No extra items
+
+                                        </p>
+
+                                        :
+
+                                        filteredExtraItems.map(
+
+                                            item => (
+
+                                                <div
+
+                                                    key={item._id}
+
+                                                    className="
+bg-white
+text-black
+p-4
+rounded-xl
+flex
+justify-between
+items-center
+"
+
+                                                >
+
+                                                    <div>
+
+                                                        <p
+                                                            className="
+font-bold
+"
+                                                        >
+
+                                                            {item.itemName}
+
+                                                        </p>
+
+                                                        <p>
+
+                                                            ₹{item.price}
+
+                                                        </p>
+
+                                                        <div
+                                                            className="
+text-sm
+text-gray-500
+space-y-1
+"
+                                                        >
+
+                                                            <p>
+
+                                                                📅 {item.day}
+
+                                                            </p>
+
+                                                            <p>
+
+                                                                🍽 {item.mealType}
+
+                                                            </p>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div
+                                                        className="
+flex
+gap-2
+items-center
+"
+                                                    >
+
+                                                        <button
+
+                                                            onClick={() =>
+
+                                                                handleExtraSelect(
+                                                                    item,
+                                                                    -1
+                                                                )
+
+                                                            }
+
+                                                            className="
+bg-red-500
+text-white
+px-3
+py-2
+rounded
+"
+
+                                                        >
+
+                                                            -
+
+                                                        </button>
+
+                                                        <span>
+
+                                                            {
+
+                                                                selectedExtras.find(
+
+                                                                    x => x._id === item._id
+
+                                                                )?.quantity
+
+                                                                ||
+
+                                                                0
+
+                                                            }
+
+                                                        </span>
+
+                                                        <button
+
+                                                            onClick={() =>
+
+                                                                handleExtraSelect(
+                                                                    item,
+                                                                    1
+                                                                )
+
+                                                            }
+
+                                                            className="
+bg-green-500
+text-white
+px-3
+py-2
+rounded
+"
+
+                                                        >
+
+                                                            +
+
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+
+                                            )
+
+                                        )
+
+                                }
+
+                                <div
+                                    className="
+text-xl
+font-bold
+text-white
+"
+                                >
+
+                                    Total Extra:
+
+                                    ₹{totalAmount}
+
+                                </div>
+
+                            </div>
+                            {
+                                totalAmount > 0
+
+                                &&
+
+                                <div
+                                    className="
+bg-white/20
+rounded-2xl
+p-4
+space-y-4
+"
+                                >
+
+                                    <h3
+                                        className="
+text-xl
+font-bold
+"
+                                    >
+
+                                        💳 Payment
+
+                                    </h3>
+
+                                    <p>
+
+                                        UPI Name:
+
+                                        <b>
+
+                                            {paymentInfo?.upiName}
+
+                                        </b>
+
+                                    </p>
+
+                                    <p>
+
+                                        UPI ID:
+
+                                        <b>
+
+                                            {paymentInfo?.upiId}
+
+                                        </b>
+
+                                    </p>
+
+                                    <p>
+
+                                        Amount:
+
+                                        <b>
+
+                                            ₹{totalAmount}
+
+                                        </b>
+
+                                    </p>
+
+                                    <input
+
+                                        type="text"
+
+                                        placeholder="Enter Transaction ID"
+
+                                        value={transactionId}
+
+                                        onChange={(e) =>
+
+                                            setTransactionId(
+                                                e.target.value
+                                            )
+
+                                        }
+
+                                        className="
+w-full
+p-4
+border
+rounded-xl
+text-black
+"
+
+                                    />
+
+                                    <button
+
+                                        onClick={() => {
+
+                                            if (
+                                                !transactionId.trim()
+                                            ) {
+
+                                                return toast.error(
+                                                    "Enter transaction ID"
+                                                );
+
+                                            }
+
+                                            setPaid(true);
+
+                                            toast.success(
+                                                "Payment marked ✅"
+                                            );
+
+                                        }}
+
+                                        className={`
+
+w-full
+p-3
+rounded-xl
+font-bold
+text-white
+
+${paid
+
+                                                ?
+
+                                                "bg-blue-600"
+
+                                                :
+
+                                                "bg-green-600"
+
+                                            }
+
+`}
+
+                                    >
+
+                                        {
+
+                                            paid
+
+                                                ?
+
+                                                "✅ Payment Completed"
+
+                                                :
+
+                                                "💳 I Paid"
+
+                                        }
+
+                                    </button>
+
+                                </div>
+
+                            }
                             {
                                 bookingClosed ?
 

@@ -30,8 +30,55 @@ const bookingSchema = new mongoose.Schema(
         dinner: {
             type: Boolean,
             default: false
-        }
+        },
+        extraItems: [
 
+            {
+
+                itemId: String,
+
+                itemName: String,
+
+                quantity: Number,
+
+                price: Number,
+
+                mealType: String
+
+            }
+
+        ],
+
+        extraTotal: {
+
+            type: Number,
+
+            default: 0
+
+        },
+
+        orderStatus: {
+
+            type: String,
+
+            enum: [
+
+                "pending",
+                "confirmed"
+
+            ],
+
+            default: "pending"
+
+        },
+
+        transactionId: {
+
+            type: String,
+
+            default: ""
+
+        },
     },
     {
         timestamps: true

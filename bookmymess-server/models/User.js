@@ -44,6 +44,20 @@ const userSchema = new mongoose.Schema(
         studentEndDate: {
             type: Date,
             default: null
+        }, upiId: {
+
+            type: String,
+
+            default: ""
+
+        },
+
+        upiName: {
+
+            type: String,
+
+            default: ""
+
         },
         upiId: {
             type: String,

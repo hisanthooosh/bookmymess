@@ -5,7 +5,9 @@ const {
 
     addOwner,
 
-    updatePaymentInfo
+    updatePaymentInfo,
+
+    getPaymentInfo
 
 } = require("../controllers/ownerController");
 
@@ -16,5 +18,12 @@ router.post(
 router.put(
     "/payment/:id",
     updatePaymentInfo
+);
+router.get(
+
+    "/payment/:messId",
+
+    getPaymentInfo
+
 );
 module.exports = router;

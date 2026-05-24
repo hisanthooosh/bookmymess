@@ -122,10 +122,53 @@ const updatePaymentInfo =
         }
 
     };
+const getPaymentInfo =
+    async (req, res) => {
+
+        try {
+
+            const owner =
+
+                await User.findOne({
+
+                    messId:
+                        req.params.messId,
+
+                    role: "owner"
+
+                })
+
+                    .select(
+
+                        "upiId upiName"
+
+                    );
+
+            res.json(
+                owner
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    }
 module.exports = {
 
     addOwner,
 
-    updatePaymentInfo
+    updatePaymentInfo,
 
-};
+    getPaymentInfo
+
+}

@@ -9,15 +9,29 @@ const {
     getStudentBookings,
     getTomorrowBooking,
     getOwnerStats,
-    getStudentAttendance
+    getStudentAttendance,
+    getExtraOrders,
+    confirmOrder
 
 }
 
     = require(
         "../controllers/bookingController"
     );
+router.put(
 
+    "/confirm-order/:id",
 
+    confirmOrder
+
+);
+router.get(
+
+    "/extra-orders/:messId",
+
+    getExtraOrders
+
+);
 router.post(
     "/save",
     saveBooking
