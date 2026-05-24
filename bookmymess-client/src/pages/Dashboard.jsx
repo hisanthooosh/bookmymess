@@ -452,28 +452,14 @@ ${activePage === "viewmess"
 
                                     <h1 className="text-4xl font-bold mt-4">
 
-                                        10
+                                        100
 
                                     </h1>
 
                                 </div>
 
 
-                                <div className="bg-white p-6 rounded-3xl shadow">
-
-                                    <p className="text-gray-500">
-
-                                        Owners
-
-                                    </p>
-
-                                    <h1 className="text-4xl font-bold mt-4">
-
-                                        5
-
-                                    </h1>
-
-                                </div>
+                               
 
 
                                 <div className="bg-white p-6 rounded-3xl shadow">
@@ -493,21 +479,7 @@ ${activePage === "viewmess"
                                 </div>
 
 
-                                <div className="bg-white p-6 rounded-3xl shadow">
-
-                                    <p className="text-gray-500">
-
-                                        Status
-
-                                    </p>
-
-                                    <h1 className="text-green-500 font-bold text-2xl mt-4">
-
-                                        Active
-
-                                    </h1>
-
-                                </div>
+                               
 
                             </div>
 

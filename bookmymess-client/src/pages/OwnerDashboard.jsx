@@ -74,6 +74,16 @@ function OwnerDashboard() {
             dinnerNoResponse: 0
 
         });
+    const [expiryStats, setExpiryStats] =
+        useState({
+
+            endingToday: 0,
+
+            endingTomorrow: 0,
+
+            ending7Days: 0
+
+        });
     const [breakfast, setBreakfast] =
         useState([""]);
 
@@ -94,7 +104,15 @@ function OwnerDashboard() {
 
     const [searchTerm, setSearchTerm] =
         useState("");
+    const [bookingSearch, setBookingSearch] =
+        useState("");
 
+    const [selectedBookingStudent,
+        setSelectedBookingStudent] =
+        useState(null);
+    const [attendanceList,
+        setAttendanceList] =
+        useState([]);
     const [studentName, setStudentName] =
         useState("");
 
@@ -168,6 +186,110 @@ function OwnerDashboard() {
 
                 toast.error(
                     "Failed to load stats"
+                );
+
+            }
+
+        }
+
+    const fetchExpiryStats =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/student/expiry-stats/${user.messId}`
+
+                    );
+
+                setExpiryStats(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed to load expiry stats"
+                );
+
+            }
+
+        }
+
+    const fetchAttendance =
+        async () => {
+
+            try {
+
+                if (
+                    !bookingSearch.trim()
+                )
+                    return;
+
+
+                const res =
+
+                    await API.get(
+
+                        `/booking/attendance/${bookingSearch}`
+
+                    );
+
+                setSelectedBookingStudent(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Student Not Found"
+                );
+
+                setSelectedBookingStudent(
+                    null
+                );
+
+            }
+
+        }
+
+    const fetchAttendanceList =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/student/attendance-list/${user.messId}`
+
+                    );
+
+                console.log(
+                    "Attendance Data:",
+                    res.data
+                );
+
+                setAttendanceList(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(error);
+
+                toast.error(
+                    "Failed to load attendance"
                 );
 
             }
@@ -322,6 +444,9 @@ function OwnerDashboard() {
         fetchStudents();
 
         fetchBookingStats();
+
+        fetchExpiryStats();
+        fetchAttendanceList();
 
     }, []);
 
@@ -666,6 +791,16 @@ function OwnerDashboard() {
             menu =>
                 menu.day === tomorrowDay
         );
+
+
+
+
+
+
+
+
+
+
     return (
 
         <div className="min-h-screen flex bg-slate-100 relative">
@@ -784,7 +919,7 @@ lg:translate-x-0
                             className="w-full p-4 bg-slate-800 rounded-xl text-left"
                         >
 
-                            📋 Meal Bookings
+                            📋 Meal Attendance
 
                         </button>
 
@@ -935,7 +1070,212 @@ xl:grid-cols-2
 gap-5
 mb-6
 ">
+                        <div className="
+bg-white
+rounded-[30px]
+shadow-md
+p-6
+mb-6
+col-span-full
+">
 
+                            <div className="
+flex
+justify-between
+items-center
+mb-6
+">
+
+                                <div>
+
+                                    <h1 className="
+text-2xl
+font-bold
+">
+
+                                        📊 Subscription Status
+
+                                    </h1>
+
+                                    <p className="
+text-sm
+text-gray-500
+">
+
+                                        Student subscription overview
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div className="
+grid
+grid-cols-1
+md:grid-cols-3
+gap-5
+">
+
+                                {/* Today */}
+
+                                <div className="
+bg-red-50
+rounded-2xl
+p-5
+border
+border-red-200
+">
+
+                                    <div className="
+text-4xl
+mb-2
+">
+
+                                        ⏰
+
+                                    </div>
+
+                                    <h2 className="
+font-semibold
+text-gray-600
+">
+
+                                        Ending Today
+
+                                    </h2>
+
+                                    <p className="
+text-5xl
+font-bold
+text-red-500
+mt-3
+">
+
+                                        {expiryStats.endingToday}
+
+                                    </p>
+
+                                    <p className="
+text-sm
+text-gray-500
+mt-2
+">
+
+                                        Students
+
+                                    </p>
+
+                                </div>
+
+
+                                {/* Tomorrow */}
+
+                                <div className="
+bg-blue-50
+rounded-2xl
+p-5
+border
+border-blue-200
+">
+
+                                    <div className="
+text-4xl
+mb-2
+">
+
+                                        📅
+
+                                    </div>
+
+                                    <h2 className="
+font-semibold
+text-gray-600
+">
+
+                                        Ending Tomorrow
+
+                                    </h2>
+
+                                    <p className="
+text-5xl
+font-bold
+text-blue-500
+mt-3
+">
+
+                                        {expiryStats.endingTomorrow}
+
+                                    </p>
+
+                                    <p className="
+text-sm
+text-gray-500
+mt-2
+">
+
+                                        Students
+
+                                    </p>
+
+                                </div>
+
+
+                                {/* 7 days */}
+
+                                <div className="
+bg-yellow-50
+rounded-2xl
+p-5
+border
+border-yellow-200
+">
+
+                                    <div className="
+text-4xl
+mb-2
+">
+
+                                        ⚠
+
+                                    </div>
+
+                                    <h2 className="
+font-semibold
+text-gray-600
+">
+
+                                        Ending In 7 Days
+
+                                    </h2>
+
+                                    <p className="
+text-5xl
+font-bold
+text-yellow-500
+mt-3
+">
+
+                                        {expiryStats.ending7Days}
+
+                                    </p>
+
+                                    <p className="
+text-sm
+text-gray-500
+mt-2
+">
+
+                                        Students
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
                         {/* TODAY */}
 
                         <div className="
@@ -2163,9 +2503,339 @@ shadow
 
                     &&
 
-                    <div className="bg-white p-6 rounded-3xl">
+                    <div className="
+bg-white
+p-6
+rounded-3xl
+space-y-6
+">
 
-                        Meal Bookings
+                        <h1 className="
+text-3xl
+font-bold
+">
+
+                            📋 Meal Attendance
+
+                        </h1>
+
+
+                        {/* Search */}
+
+                        <div className="
+flex
+gap-3
+flex-col
+md:flex-row
+">
+
+                            <input
+                                type="text"
+                                placeholder="
+Search Student ID / Name
+"
+
+                                value={bookingSearch}
+
+                                onChange={(e) => {
+
+                                    setBookingSearch(
+                                        e.target.value
+                                    );
+
+                                }}
+
+                                className="
+flex-1
+p-4
+border
+rounded-xl
+"
+                            />
+
+                        </div>
+
+
+                        {/* Attendance Table */}
+
+                        <div className="
+overflow-x-auto
+rounded-3xl
+border
+">
+
+                            <table className="
+w-full
+">
+
+                                <thead>
+
+                                    <tr className="
+bg-slate-900
+text-white
+">
+
+                                        <th className="
+p-4
+text-left
+">
+
+                                            ID
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-left
+">
+
+                                            Name
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-left
+">
+
+                                            Phone
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
+                                            🍳
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
+                                            🍛
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
+                                            🌙
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
+                                            Days Left
+
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {
+
+                                        attendanceList
+
+                                            .filter(student =>
+
+                                                student.studentId
+                                                    .toLowerCase()
+
+                                                    .includes(
+
+                                                        bookingSearch
+                                                            .toLowerCase()
+
+                                                    )
+
+                                                ||
+
+                                                student.name
+                                                    .toLowerCase()
+
+                                                    .includes(
+
+                                                        bookingSearch
+                                                            .toLowerCase()
+
+                                                    )
+
+                                            )
+
+                                            .map(student => (
+
+                                                <tr
+                                                    key={student._id}
+
+                                                    className="
+border-b
+hover:bg-slate-100
+duration-300
+"
+                                                >
+
+                                                    <td className="
+p-4
+font-semibold
+">
+
+                                                        {student.studentId}
+
+                                                    </td>
+
+                                                    <td className="
+p-4
+">
+
+                                                        {student.name}
+
+                                                    </td>
+
+                                                    <td className="
+p-4
+">
+
+                                                        {student.phone}
+
+                                                    </td>
+
+
+                                                    {/* Breakfast */}
+
+                                                    <td className="
+p-4
+text-center
+text-2xl
+">
+
+                                                        {
+
+                                                            student.breakfast === true
+
+                                                                ?
+
+                                                                "✅"
+
+                                                                :
+
+                                                                student.breakfast === false
+
+                                                                    ?
+
+                                                                    "❌"
+
+                                                                    :
+
+                                                                    "⏳"
+
+                                                        }
+
+                                                    </td>
+
+
+                                                    {/* Lunch */}
+
+                                                    <td className="
+p-4
+text-center
+text-2xl
+">
+
+                                                        {
+
+                                                            student.lunch === true
+
+                                                                ?
+
+                                                                "✅"
+
+                                                                :
+
+                                                                student.lunch === false
+
+                                                                    ?
+
+                                                                    "❌"
+
+                                                                    :
+
+                                                                    "⏳"
+
+                                                        }
+
+                                                    </td>
+
+
+                                                    {/* Dinner */}
+
+                                                    <td className="
+p-4
+text-center
+text-2xl
+">
+
+                                                        {
+
+                                                            student.dinner === true
+
+                                                                ?
+
+                                                                "✅"
+
+                                                                :
+
+                                                                student.dinner === false
+
+                                                                    ?
+
+                                                                    "❌"
+
+                                                                    :
+
+                                                                    "⏳"
+
+                                                        }
+
+                                                    </td>
+
+
+                                                    <td className="
+p-4
+text-center
+font-bold
+">
+
+                                                        {
+
+                                                            student.remainingDays
+
+                                                        }
+
+                                                    </td>
+
+                                                </tr>
+
+                                            ))
+
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
 
                     </div>
                 }
@@ -2269,7 +2939,7 @@ rounded-xl"
 
                 </div>
             }
-        </div>
+        </div >
 
     )
 

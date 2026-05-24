@@ -8,7 +8,8 @@ const {
     saveBooking,
     getStudentBookings,
     getTomorrowBooking,
-    getOwnerStats
+    getOwnerStats,
+    getStudentAttendance
 
 }
 
@@ -33,6 +34,12 @@ router.get(
     "/stats/:messId",
     getOwnerStats
 );
+router.get(
 
+    "/attendance/:studentId",
+
+    getStudentAttendance
+
+);
 module.exports =
     router;

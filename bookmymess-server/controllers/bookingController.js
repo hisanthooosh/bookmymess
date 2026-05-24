@@ -229,7 +229,102 @@ const getTomorrowBooking = async (req, res) => {
 };
 const User =
     require("../models/User");
+const getStudentAttendance =
+    async (req, res) => {
 
+        try {
+
+            const student =
+
+                await User.findOne({
+
+                    studentId:
+                        req.params.studentId
+
+                });
+
+            if (!student) {
+
+                return res.status(404)
+                    .json({
+
+                        message:
+                            "Student Not Found"
+
+                    });
+
+            }
+
+
+            /* tomorrow booking */
+
+            const tomorrow =
+                new Date();
+
+            tomorrow.setDate(
+                tomorrow.getDate() + 1
+            );
+
+            tomorrow.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+            const booking =
+
+                await Booking.findOne({
+
+                    studentId:
+                        req.params.studentId,
+
+                    bookingDate:
+                        tomorrow
+
+                });
+
+            res.json({
+
+                name:
+                    student.name,
+
+                studentId:
+                    student.studentId,
+
+                phone:
+                    student.phone,
+
+                remainingDays,
+
+                breakfast:
+                    booking?.breakfast,
+
+                lunch:
+                    booking?.lunch,
+
+                dinner:
+                    booking?.dinner
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+            res.status(500)
+                .json({
+
+                    message:
+                        "Server Error"
+
+                });
+
+        }
+
+    }
 const getOwnerStats =
     async (req, res) => {
 
@@ -279,22 +374,66 @@ const getOwnerStats =
 
             /* bookings */
 
+            /* tomorrow range */
+
+            const tomorrowEnd =
+                new Date(
+                    tomorrow
+                );
+
+            tomorrowEnd.setHours(
+                23,
+                59,
+                59,
+                999
+            );
+
+
+            /* today range */
+
+            const todayEnd =
+                new Date(
+                    today
+                );
+
+            todayEnd.setHours(
+                23,
+                59,
+                59,
+                999
+            );
+
+
+            /* bookings */
+
             const bookings =
+
                 await Booking.find({
 
                     messId,
-                    bookingDate:
-                        tomorrow
+
+                    bookingDate: {
+
+                        $gte: tomorrow,
+                        $lte: tomorrowEnd
+
+                    }
 
                 });
 
 
             const todayBookings =
+
                 await Booking.find({
 
                     messId,
-                    bookingDate:
-                        today
+
+                    bookingDate: {
+
+                        $gte: today,
+                        $lte: todayEnd
+
+                    }
 
                 });
 
@@ -494,6 +633,7 @@ module.exports = {
     saveBooking,
     getStudentBookings,
     getTomorrowBooking,
-    getOwnerStats
+    getOwnerStats,
+    getStudentAttendance
 
 };
