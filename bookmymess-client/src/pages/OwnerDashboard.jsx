@@ -44,6 +44,38 @@ function OwnerDashboard() {
         useState("");
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
+    const [extraTab, setExtraTab] =
+        useState(
+            "payment"
+        );
+    const [extraItems,
+        setExtraItems] =
+        useState([]);
+
+    const [extraName,
+        setExtraName] =
+        useState("");
+
+    const [extraPrice,
+        setExtraPrice] =
+        useState("");
+
+    const [extraMealType,
+        setExtraMealType] =
+        useState("breakfast");
+
+    const [extraDay,
+        setExtraDay] =
+        useState("Sunday");
+    const [upiId, setUpiId] =
+        useState(
+            user?.upiId || ""
+        );
+
+    const [upiName, setUpiName] =
+        useState(
+            user?.upiName || ""
+        );
     const [bookingStats, setBookingStats] =
         useState({
 
@@ -101,7 +133,9 @@ function OwnerDashboard() {
 
     const [students, setStudents] =
         useState([]);
-
+    const [editingExtraId,
+        setEditingExtraId] =
+        useState(null);
     const [searchTerm, setSearchTerm] =
         useState("");
     const [bookingSearch, setBookingSearch] =
@@ -220,7 +254,241 @@ function OwnerDashboard() {
             }
 
         }
+    const savePaymentInfo =
+        async () => {
 
+            try {
+
+                await API.put(
+
+                    `/owner/payment/${user._id}`,
+
+                    {
+
+                        upiId,
+                        upiName
+
+                    }
+
+                );
+
+                const updatedUser = {
+
+                    ...user,
+
+                    upiId,
+                    upiName
+
+                };
+
+                localStorage.setItem(
+
+                    "user",
+
+                    JSON.stringify(
+                        updatedUser
+                    )
+
+                );
+
+                toast.success(
+                    "Payment info saved 🎉"
+                );
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed to save"
+                );
+
+            }
+
+        }
+    const saveExtraItem =
+        async () => {
+
+            try {
+
+                await API.post(
+
+                    "/extra-item/save",
+
+                    {
+
+                        messId:
+                            user.messId,
+
+                        day:
+                            extraDay,
+
+                        mealType:
+                            extraMealType,
+
+                        itemName:
+                            extraName,
+
+                        price:
+                            extraPrice
+
+                    }
+
+                );
+
+                toast.success(
+
+                    "Extra item added 🎉"
+
+                );
+
+                fetchExtraItems();
+
+                setExtraName("");
+
+                setExtraPrice("");
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
+    const fetchExtraItems =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/extra-item/${user.messId}`
+
+                    );
+
+                setExtraItems(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+    const editExtraItem =
+        (item) => {
+
+            setEditingExtraId(
+                item._id
+            );
+
+            setExtraDay(
+                item.day
+            );
+
+            setExtraMealType(
+                item.mealType
+            );
+
+            setExtraName(
+                item.itemName
+            );
+
+            setExtraPrice(
+                item.price
+            );
+
+        }
+    const updateExtraItem =
+        async () => {
+
+            try {
+
+                await API.put(
+
+                    `/extra-item/update/${editingExtraId}`,
+
+                    {
+
+                        day:
+                            extraDay,
+
+                        mealType:
+                            extraMealType,
+
+                        itemName:
+                            extraName,
+
+                        price:
+                            extraPrice
+
+                    }
+
+                );
+
+                toast.success(
+                    "Updated 🎉"
+                );
+
+                setEditingExtraId(
+                    null
+                );
+
+                setExtraName("");
+                setExtraPrice("");
+
+                fetchExtraItems();
+
+            }
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
+
+    const deleteExtraItem =
+        async (id) => {
+
+            try {
+
+                await API.delete(
+
+                    `/extra-item/delete/${id}`
+
+                );
+
+                toast.success(
+                    "Deleted"
+                );
+
+                fetchExtraItems();
+
+            }
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
     const fetchAttendance =
         async () => {
 
@@ -447,6 +715,7 @@ function OwnerDashboard() {
 
         fetchExpiryStats();
         fetchAttendanceList();
+        fetchExtraItems();
 
     }, []);
 
@@ -922,7 +1191,23 @@ lg:translate-x-0
                             📋 Meal Attendance
 
                         </button>
+                        <button
+                            onClick={() => {
+                                setActivePage("extra")
+                                setSidebarOpen(false);
+                            }}
+                            className="
+w-full
+p-4
+bg-slate-800
+rounded-xl
+text-left
+"
+                        >
 
+                            🍽 Extra Orders & Payments
+
+                        </button>
                     </div>
 
                 </div>
@@ -2497,7 +2782,579 @@ shadow
 
                     </div>
                 }
+                {
+                    activePage === "extra"
 
+                    &&
+
+                    <div
+                        className="
+bg-white
+p-6
+rounded-3xl
+space-y-6
+"
+                    >
+
+                        <div
+                            className="
+flex
+gap-3
+border-b
+pb-4
+"
+                        >
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "payment"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "payment"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                💳 Payment Setup
+
+                            </button>
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "items"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "items"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                🍗 Extra Items
+
+                            </button>
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "orders"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "orders"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                📋 Orders
+
+                            </button>
+
+                        </div>
+
+                        {
+                            extraTab === "payment"
+
+                            &&
+
+                            <div
+                                className="
+space-y-4
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    💳 Payment Setup
+
+                                </h1>
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="UPI Name"
+
+                                    value={upiName}
+
+                                    onChange={(e) =>
+
+                                        setUpiName(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="UPI ID"
+
+                                    value={upiId}
+
+                                    onChange={(e) =>
+
+                                        setUpiId(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <button
+
+                                    onClick={
+                                        savePaymentInfo
+                                    }
+
+                                    className="
+bg-green-600
+text-white
+px-8
+py-4
+rounded-xl
+"
+
+                                >
+
+                                    Save Payment Info
+
+                                </button>
+
+                            </div>
+
+                        }
+                        {
+                            extraTab === "items"
+
+                            &&
+
+                            <div
+                                className="
+space-y-5
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    🍗 Extra Meal Items
+
+                                </h1>
+
+                                <select
+
+                                    value={extraDay}
+
+                                    onChange={(e) =>
+
+                                        setExtraDay(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+
+                                >
+
+                                    {days.map(day => (
+
+                                        <option
+                                            key={day}
+                                        >
+
+                                            {day}
+
+                                        </option>
+
+                                    ))}
+
+                                </select>
+
+                                <select
+
+                                    value={
+                                        extraMealType
+                                    }
+
+                                    onChange={(e) =>
+
+                                        setExtraMealType(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+
+                                >
+
+                                    <option value="breakfast">
+
+                                        Breakfast
+
+                                    </option>
+
+                                    <option value="lunch">
+
+                                        Lunch
+
+                                    </option>
+
+                                    <option value="dinner">
+
+                                        Dinner
+
+                                    </option>
+
+                                </select>
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="Item Name"
+
+                                    value={extraName}
+
+                                    onChange={(e) =>
+
+                                        setExtraName(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <input
+
+                                    type="number"
+
+                                    placeholder="Price"
+
+                                    value={extraPrice}
+
+                                    onChange={(e) =>
+
+                                        setExtraPrice(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+                                <button
+
+                                    onClick={
+
+                                        editingExtraId
+
+                                            ?
+
+                                            updateExtraItem
+
+                                            :
+
+                                            saveExtraItem
+
+                                    }
+
+                                    className="
+bg-green-600
+text-white
+px-8
+py-4
+rounded-xl
+"
+
+                                >
+
+                                    {
+
+                                        editingExtraId
+
+                                            ?
+
+                                            "Update Item"
+
+                                            :
+
+                                            "Save Item"
+
+                                    }
+
+                                </button>
+
+                                <div
+                                    className="
+overflow-x-auto
+rounded-xl
+border
+"
+                                >
+
+                                    <table
+                                        className="
+w-full
+"
+                                    >
+
+                                        <thead>
+
+                                            <tr
+                                                className="
+bg-slate-900
+text-white
+"
+                                            >
+
+                                                <th className="p-4">
+                                                    Day
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Meal
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Item
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Price
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            {
+
+                                                extraItems.map(
+
+                                                    item => (
+
+                                                        <tr
+                                                            key={item._id}
+                                                            className="
+border-b
+hover:bg-slate-100
+"
+                                                        >
+
+                                                            <td className="p-4">
+
+                                                                {item.day}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                {item.mealType}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                {item.itemName}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                ₹{item.price}
+
+                                                            </td>
+
+                                                            <td
+                                                                className="
+p-4
+flex
+gap-2
+"
+                                                            >
+
+                                                                <button
+
+                                                                    onClick={() =>
+                                                                        editExtraItem(
+                                                                            item
+                                                                        )
+                                                                    }
+
+                                                                    className="
+bg-blue-500
+text-white
+px-3
+py-2
+rounded-lg
+"
+
+                                                                >
+
+                                                                    ✏️
+
+                                                                </button>
+
+                                                                <button
+
+                                                                    onClick={() =>
+
+                                                                        deleteExtraItem(
+                                                                            item._id
+                                                                        )
+
+                                                                    }
+
+                                                                    className="
+bg-red-500
+text-white
+px-3
+py-2
+rounded-lg
+"
+
+                                                                >
+
+                                                                    🗑
+
+                                                                </button>
+
+                                                            </td>
+
+                                                        </tr>
+
+                                                    )
+
+                                                )
+
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                }
                 {
                     activePage === "bookings"
 
