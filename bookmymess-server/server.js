@@ -47,6 +47,15 @@ app.use(
     "/api/booking",
     bookingRoutes
 );
+app.use(
+
+    "/api/extra-item",
+
+    require(
+        "./routes/extraItemRoutes"
+    )
+
+);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

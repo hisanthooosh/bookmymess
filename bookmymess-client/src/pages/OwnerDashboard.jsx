@@ -44,6 +44,57 @@ function OwnerDashboard() {
         useState("");
     const [selectedDay, setSelectedDay] =
         useState("Sunday");
+    const [extraTab, setExtraTab] =
+        useState(
+            "payment"
+        );
+    const [selectedOrder,
+        setSelectedOrder] =
+        useState(null);
+
+    const [orderModal,
+        setOrderModal] =
+        useState(false);
+    const [extraItems,
+        setExtraItems] =
+        useState([]);
+
+    const [extraName,
+        setExtraName] =
+        useState("");
+
+    const [extraPrice,
+        setExtraPrice] =
+        useState("");
+    const [extraSummary,
+        setExtraSummary] =
+        useState({
+
+            breakfast: {},
+
+            lunch: {},
+
+            dinner: {}
+
+        });
+    const [extraMealType,
+        setExtraMealType] =
+        useState("breakfast");
+
+    const [extraDay,
+        setExtraDay] =
+        useState("Sunday");
+    const [upiId, setUpiId] =
+        useState(
+            user?.upiId || ""
+        );
+    const [orders,
+        setOrders] =
+        useState([]);
+    const [upiName, setUpiName] =
+        useState(
+            user?.upiName || ""
+        );
     const [bookingStats, setBookingStats] =
         useState({
 
@@ -101,7 +152,9 @@ function OwnerDashboard() {
 
     const [students, setStudents] =
         useState([]);
-
+    const [editingExtraId,
+        setEditingExtraId] =
+        useState(null);
     const [searchTerm, setSearchTerm] =
         useState("");
     const [bookingSearch, setBookingSearch] =
@@ -191,7 +244,34 @@ function OwnerDashboard() {
             }
 
         }
+    const fetchExtraSummary =
+        async () => {
 
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/booking/extra-summary/${user.messId}`
+
+                    );
+
+                setExtraSummary(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
     const fetchExpiryStats =
         async () => {
 
@@ -220,7 +300,287 @@ function OwnerDashboard() {
             }
 
         }
+    const openOrder =
+        (order) => {
 
+            setSelectedOrder(
+                order
+            );
+
+            setOrderModal(
+                true
+            );
+
+        }
+    const fetchOrders =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/booking/extra-orders/${user.messId}`
+
+                    );
+
+                console.log(
+                    "Orders Data:",
+                    res.data
+                );
+
+                setOrders(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Order Error:",
+                    error
+                );
+
+            }
+
+        }
+    const savePaymentInfo =
+        async () => {
+
+            try {
+
+                await API.put(
+
+                    `/owner/payment/${user._id}`,
+
+                    {
+
+                        upiId,
+                        upiName
+
+                    }
+
+                );
+
+                const updatedUser = {
+
+                    ...user,
+
+                    upiId,
+                    upiName
+
+                };
+
+                localStorage.setItem(
+
+                    "user",
+
+                    JSON.stringify(
+                        updatedUser
+                    )
+
+                );
+
+                toast.success(
+                    "Payment info saved 🎉"
+                );
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed to save"
+                );
+
+            }
+
+        }
+    const saveExtraItem =
+        async () => {
+
+            try {
+
+                await API.post(
+
+                    "/extra-item/save",
+
+                    {
+
+                        messId:
+                            user.messId,
+
+                        day:
+                            extraDay,
+
+                        mealType:
+                            extraMealType,
+
+                        itemName:
+                            extraName,
+
+                        price:
+                            extraPrice
+
+                    }
+
+                );
+
+                toast.success(
+
+                    "Extra item added 🎉"
+
+                );
+
+                fetchExtraItems();
+
+                setExtraName("");
+
+                setExtraPrice("");
+
+            }
+
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
+    const fetchExtraItems =
+        async () => {
+
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/extra-item/${user.messId}`
+
+                    );
+
+                setExtraItems(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+    const editExtraItem =
+        (item) => {
+
+            setEditingExtraId(
+                item._id
+            );
+
+            setExtraDay(
+                item.day
+            );
+
+            setExtraMealType(
+                item.mealType
+            );
+
+            setExtraName(
+                item.itemName
+            );
+
+            setExtraPrice(
+                item.price
+            );
+
+        }
+    const updateExtraItem =
+        async () => {
+
+            try {
+
+                await API.put(
+
+                    `/extra-item/update/${editingExtraId}`,
+
+                    {
+
+                        day:
+                            extraDay,
+
+                        mealType:
+                            extraMealType,
+
+                        itemName:
+                            extraName,
+
+                        price:
+                            extraPrice
+
+                    }
+
+                );
+
+                toast.success(
+                    "Updated 🎉"
+                );
+
+                setEditingExtraId(
+                    null
+                );
+
+                setExtraName("");
+                setExtraPrice("");
+
+                fetchExtraItems();
+
+            }
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
+
+    const deleteExtraItem =
+        async (id) => {
+
+            try {
+
+                await API.delete(
+
+                    `/extra-item/delete/${id}`
+
+                );
+
+                toast.success(
+                    "Deleted"
+                );
+
+                fetchExtraItems();
+
+            }
+            catch (error) {
+
+                toast.error(
+                    "Failed"
+                );
+
+            }
+
+        }
     const fetchAttendance =
         async () => {
 
@@ -259,7 +619,51 @@ function OwnerDashboard() {
             }
 
         }
+    const confirmOrder =
+        async (id) => {
 
+            try {
+
+                await API.put(
+
+                    `/booking/confirm-order/${id}`
+
+                );
+
+                toast.success(
+
+                    "Order confirmed 🎉"
+
+                );
+
+                await fetchOrders();
+
+                if (selectedOrder) {
+
+                    setSelectedOrder({
+
+                        ...selectedOrder,
+
+                        orderStatus:
+                            "confirmed"
+
+                    });
+
+                }
+
+            }
+
+            catch (error) {
+
+                toast.error(
+
+                    "Failed"
+
+                );
+
+            }
+
+        }
     const fetchAttendanceList =
         async () => {
 
@@ -446,7 +850,14 @@ function OwnerDashboard() {
         fetchBookingStats();
 
         fetchExpiryStats();
+
         fetchAttendanceList();
+
+        fetchExtraItems();
+
+        fetchOrders();
+
+        fetchExtraSummary();
 
     }, []);
 
@@ -706,8 +1117,12 @@ function OwnerDashboard() {
 
             student.studentId
                 ?.toLowerCase()
+
                 .includes(
-                    searchTerm.toLowerCase()
+
+                    bookingSearch
+                        .toLowerCase()
+
                 )
 
         );
@@ -922,7 +1337,23 @@ lg:translate-x-0
                             📋 Meal Attendance
 
                         </button>
+                        <button
+                            onClick={() => {
+                                setActivePage("extra")
+                                setSidebarOpen(false);
+                            }}
+                            className="
+w-full
+p-4
+bg-slate-800
+rounded-xl
+text-left
+"
+                        >
 
+                            🍽 Extra Orders & Payments
+
+                        </button>
                     </div>
 
                 </div>
@@ -1425,7 +1856,126 @@ leading-5
                                                 🍽 {meal.menu}
 
                                             </p>
+                                            <div
+                                                className="
+bg-blue-50
+rounded-xl
+p-3
+mb-4
+"
+                                            >
 
+                                                <p
+                                                    className="
+font-bold
+text-sm
+mb-2
+"
+                                                >
+
+                                                    🍗 Extra Orders
+
+                                                </p>
+
+                                                {
+
+                                                    Object.entries(
+
+                                                        index === 0
+
+                                                            ?
+
+                                                            extraSummary.breakfast
+
+                                                            :
+
+                                                            index === 1
+
+                                                                ?
+
+                                                                extraSummary.lunch
+
+                                                                :
+
+                                                                extraSummary.dinner
+
+                                                    ).length === 0
+
+                                                        ?
+
+                                                        <p
+                                                            className="
+text-xs
+text-gray-500
+"
+                                                        >
+
+                                                            No Extra Orders
+
+                                                        </p>
+
+                                                        :
+
+                                                        Object.entries(
+
+                                                            index === 0
+
+                                                                ?
+
+                                                                extraSummary.breakfast
+
+                                                                :
+
+                                                                index === 1
+
+                                                                    ?
+
+                                                                    extraSummary.lunch
+
+                                                                    :
+
+                                                                    extraSummary.dinner
+
+                                                        )
+
+                                                            .map(
+
+                                                                ([item, qty]) => (
+
+                                                                    <div
+
+                                                                        key={item}
+
+                                                                        className="
+flex
+justify-between
+text-sm
+mb-1
+"
+
+                                                                    >
+
+                                                                        <span>
+
+                                                                            {item}
+
+                                                                        </span>
+
+                                                                        <span>
+
+                                                                            x{qty}
+
+                                                                        </span>
+
+                                                                    </div>
+
+                                                                )
+
+                                                            )
+
+                                                }
+
+                                            </div>
                                             <div className="space-y-3">
 
                                                 <div className="
@@ -2497,7 +3047,871 @@ shadow
 
                     </div>
                 }
+                {
+                    activePage === "extra"
 
+                    &&
+
+                    <div
+                        className="
+bg-white
+p-6
+rounded-3xl
+space-y-6
+"
+                    >
+
+                        <div
+                            className="
+flex
+gap-3
+border-b
+pb-4
+"
+                        >
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "payment"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "payment"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                💳 Payment Setup
+
+                            </button>
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "items"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "items"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                🍗 Extra Items
+
+                            </button>
+
+                            <button
+
+                                onClick={() =>
+                                    setExtraTab(
+                                        "orders"
+                                    )
+                                }
+
+                                className={`
+
+px-5
+py-3
+rounded-xl
+
+${extraTab === "orders"
+
+                                        ?
+
+                                        "bg-blue-600 text-white"
+
+                                        :
+
+                                        "bg-slate-100"
+
+                                    }
+
+`}
+
+                            >
+
+                                📋 Orders
+
+                            </button>
+
+                        </div>
+
+                        {
+                            extraTab === "payment"
+
+                            &&
+
+                            <div
+                                className="
+space-y-4
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    💳 Payment Setup
+
+                                </h1>
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="UPI Name"
+
+                                    value={upiName}
+
+                                    onChange={(e) =>
+
+                                        setUpiName(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="UPI ID"
+
+                                    value={upiId}
+
+                                    onChange={(e) =>
+
+                                        setUpiId(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <button
+
+                                    onClick={
+                                        savePaymentInfo
+                                    }
+
+                                    className="
+bg-green-600
+text-white
+px-8
+py-4
+rounded-xl
+"
+
+                                >
+
+                                    {
+
+                                        user?.upiId
+
+                                            ?
+
+                                            "Update Payment Info"
+
+                                            :
+
+                                            "Save Payment Info"
+
+                                    }
+
+                                </button>
+
+                            </div>
+
+                        }
+                        {
+                            extraTab === "items"
+
+                            &&
+
+                            <div
+                                className="
+space-y-5
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    🍗 Extra Meal Items
+
+                                </h1>
+
+                                <select
+
+                                    value={extraDay}
+
+                                    onChange={(e) =>
+
+                                        setExtraDay(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+
+                                >
+
+                                    {days.map(day => (
+
+                                        <option
+                                            key={day}
+                                        >
+
+                                            {day}
+
+                                        </option>
+
+                                    ))}
+
+                                </select>
+
+                                <select
+
+                                    value={
+                                        extraMealType
+                                    }
+
+                                    onChange={(e) =>
+
+                                        setExtraMealType(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+
+                                >
+
+                                    <option value="breakfast">
+
+                                        Breakfast
+
+                                    </option>
+
+                                    <option value="lunch">
+
+                                        Lunch
+
+                                    </option>
+
+                                    <option value="dinner">
+
+                                        Dinner
+
+                                    </option>
+
+                                </select>
+
+                                <input
+
+                                    type="text"
+
+                                    placeholder="Item Name"
+
+                                    value={extraName}
+
+                                    onChange={(e) =>
+
+                                        setExtraName(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+
+                                <input
+
+                                    type="number"
+
+                                    placeholder="Price"
+
+                                    value={extraPrice}
+
+                                    onChange={(e) =>
+
+                                        setExtraPrice(
+                                            e.target.value
+                                        )
+
+                                    }
+
+                                    className="
+w-full
+p-4
+border
+rounded-xl
+"
+                                />
+                                <button
+
+                                    onClick={
+
+                                        editingExtraId
+
+                                            ?
+
+                                            updateExtraItem
+
+                                            :
+
+                                            saveExtraItem
+
+                                    }
+
+                                    className="
+bg-green-600
+text-white
+px-8
+py-4
+rounded-xl
+"
+
+                                >
+
+                                    {
+
+                                        editingExtraId
+
+                                            ?
+
+                                            "Update Item"
+
+                                            :
+
+                                            "Save Item"
+
+                                    }
+
+                                </button>
+
+                                <div
+                                    className="
+overflow-x-auto
+rounded-xl
+border
+"
+                                >
+
+                                    <table
+                                        className="
+w-full
+"
+                                    >
+
+                                        <thead>
+
+                                            <tr
+                                                className="
+bg-slate-900
+text-white
+"
+                                            >
+
+                                                <th className="p-4">
+                                                    Day
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Meal
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Item
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Price
+                                                </th>
+
+                                                <th className="p-4">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            {
+
+                                                extraItems.map(
+
+                                                    item => (
+
+                                                        <tr
+                                                            key={item._id}
+                                                            className="
+border-b
+hover:bg-slate-100
+"
+                                                        >
+
+                                                            <td className="p-4">
+
+                                                                {item.day}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                {item.mealType}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                {item.itemName}
+
+                                                            </td>
+
+                                                            <td className="p-4">
+
+                                                                ₹{item.price}
+
+                                                            </td>
+
+                                                            <td
+                                                                className="
+p-4
+flex
+gap-2
+"
+                                                            >
+
+                                                                <button
+
+                                                                    onClick={() =>
+                                                                        editExtraItem(
+                                                                            item
+                                                                        )
+                                                                    }
+
+                                                                    className="
+bg-blue-500
+text-white
+px-3
+py-2
+rounded-lg
+"
+
+                                                                >
+
+                                                                    ✏️
+
+                                                                </button>
+
+                                                                <button
+
+                                                                    onClick={() =>
+
+                                                                        deleteExtraItem(
+                                                                            item._id
+                                                                        )
+
+                                                                    }
+
+                                                                    className="
+bg-red-500
+text-white
+px-3
+py-2
+rounded-lg
+"
+
+                                                                >
+
+                                                                    🗑
+
+                                                                </button>
+
+                                                            </td>
+
+                                                        </tr>
+
+                                                    )
+
+                                                )
+
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        }
+                        {
+                            extraTab === "orders"
+
+                            &&
+
+                            <div
+                                className="
+space-y-4
+"
+                            >
+
+                                <h1
+                                    className="
+text-2xl
+font-bold
+"
+                                >
+
+                                    📋 Extra Orders
+
+                                </h1>
+
+                                {
+
+                                    orders.length === 0
+
+                                        ?
+
+                                        <p>
+
+                                            No Orders
+
+                                        </p>
+
+                                        :
+
+                                        orders.map(
+
+                                            order => (
+
+                                                <div
+
+                                                    key={order._id}
+
+                                                    className="
+bg-slate-100
+rounded-xl
+p-5
+space-y-3
+"
+
+                                                >
+
+                                                    <p>
+
+                                                        🆔
+
+                                                        {order.studentId}
+
+                                                    </p>
+
+                                                    <p>
+
+                                                        💰 ₹
+
+                                                        {order.extraTotal}
+
+                                                    </p>
+                                                    <p>
+
+                                                        💳 Transaction:
+
+                                                        <b>
+
+                                                            {
+
+                                                                order.transactionId
+
+                                                                ||
+
+                                                                "Not Provided"
+
+                                                            }
+
+                                                        </b>
+
+                                                    </p>
+                                                    <div>
+
+                                                        🍗 Items:
+
+                                                        {
+                                                            order.extraItems?.length > 0
+
+                                                                ?
+
+                                                                order.extraItems.map(
+
+                                                                    item => (
+
+                                                                        <div
+                                                                            key={item.itemId}
+                                                                            className="
+bg-white
+p-3
+rounded-lg
+mb-2
+"
+                                                                        >
+
+                                                                            <div>
+
+                                                                                🍗 {item.itemName}
+
+                                                                                x
+
+                                                                                {item.quantity}
+
+                                                                            </div>
+
+                                                                            <div
+                                                                                className="
+text-sm
+text-gray-500
+"
+                                                                            >
+
+                                                                                🍽
+
+                                                                                {
+
+                                                                                    item.mealType
+                                                                                        ?.charAt(0)
+                                                                                        .toUpperCase()
+
+                                                                                    +
+
+                                                                                    item.mealType
+                                                                                        ?.slice(1)
+
+                                                                                }
+
+                                                                            </div>
+
+                                                                            <div
+                                                                                className="
+text-sm
+text-gray-500
+"
+                                                                            >
+
+                                                                                📅
+
+                                                                                {
+
+                                                                                    new Date(
+                                                                                        order.bookingDate
+                                                                                    )
+
+                                                                                        .toLocaleDateString(
+
+                                                                                            "en-US",
+
+                                                                                            {
+                                                                                                weekday: "long"
+                                                                                            }
+
+                                                                                        )
+
+                                                                                }
+
+                                                                            </div>
+
+                                                                            <div>
+
+                                                                                ₹
+
+                                                                                {item.price * item.quantity}
+
+                                                                            </div>
+
+                                                                        </div>
+
+                                                                    )
+
+                                                                )
+                                                                :
+
+                                                                <p>
+
+                                                                    No extra items
+
+                                                                </p>
+
+                                                        }
+
+                                                    </div>
+
+                                                    <div
+                                                        className={`
+
+text-white
+px-4
+py-2
+rounded-xl
+inline-block
+
+${order.orderStatus === "confirmed"
+
+                                                                ?
+
+                                                                "bg-green-500"
+
+                                                                :
+
+                                                                "bg-yellow-500"
+
+                                                            }
+
+`}
+
+                                                    >
+
+                                                        {
+
+                                                            order.orderStatus === "confirmed"
+
+                                                                ?
+
+                                                                "✅ Confirmed"
+
+                                                                :
+
+                                                                "⏳ Waiting"
+
+                                                        }
+
+                                                    </div>
+
+                                                    {
+
+                                                        order.orderStatus !== "confirmed"
+
+                                                        &&
+
+                                                        <button
+
+                                                            onClick={() =>
+
+                                                                openOrder(
+                                                                    order
+                                                                )
+
+                                                            }
+
+                                                            className="
+bg-blue-600
+text-white
+px-5
+py-3
+rounded-xl
+"
+
+                                                        >
+
+                                                            👁 View
+
+                                                        </button>
+
+                                                    }
+
+                                                </div>
+
+                                            )
+
+                                        )
+
+                                }
+
+                            </div>
+                        }
+                    </div>
+
+                }
                 {
                     activePage === "bookings"
 
@@ -2634,6 +4048,15 @@ p-4
 text-center
 ">
 
+                                            🍗 Extras
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
                                             Days Left
 
                                         </th>
@@ -2648,186 +4071,243 @@ text-center
 
                                         attendanceList
 
-                                            .filter(student =>
+                                            .filter(
 
-                                                student.studentId
-                                                    .toLowerCase()
+                                                student =>
 
-                                                    .includes(
+                                                    student.studentId
+                                                        ?.toLowerCase()
 
-                                                        bookingSearch
-                                                            .toLowerCase()
+                                                        .includes(
 
-                                                    )
+                                                            bookingSearch
+                                                                .toLowerCase()
 
-                                                ||
+                                                        )
 
-                                                student.name
-                                                    .toLowerCase()
+                                                    ||
 
-                                                    .includes(
+                                                    student.name
+                                                        ?.toLowerCase()
 
-                                                        bookingSearch
-                                                            .toLowerCase()
+                                                        .includes(
 
-                                                    )
+                                                            bookingSearch
+                                                                .toLowerCase()
+
+                                                        )
 
                                             )
 
-                                            .map(student => (
+                                            .map(
 
-                                                <tr
-                                                    key={student._id}
+                                                student => (
 
-                                                    className="
+                                                    <tr
+
+                                                        key={student._id}
+
+                                                        className="
 border-b
 hover:bg-slate-100
 duration-300
 "
-                                                >
 
-                                                    <td className="
+                                                    >
+
+                                                        <td className="
 p-4
 font-semibold
 ">
 
-                                                        {student.studentId}
+                                                            {student.studentId}
 
-                                                    </td>
+                                                        </td>
 
-                                                    <td className="
+                                                        <td className="
 p-4
 ">
 
-                                                        {student.name}
+                                                            {student.name}
 
-                                                    </td>
+                                                        </td>
 
-                                                    <td className="
+                                                        <td className="
 p-4
 ">
 
-                                                        {student.phone}
+                                                            {student.phone}
 
-                                                    </td>
+                                                        </td>
 
 
-                                                    {/* Breakfast */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.breakfast === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.breakfast === false
+                                                                student.breakfast === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.breakfast === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    {/* Lunch */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.lunch === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.lunch === false
+                                                                student.lunch === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.lunch === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    {/* Dinner */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.dinner === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.dinner === false
+                                                                student.dinner === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.dinner === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    <td className="
+                                                        <td className="
+p-4
+">
+
+                                                            {
+
+                                                                student.extraItems?.length > 0
+
+                                                                    ?
+
+                                                                    student.extraItems.map(
+
+                                                                        (item, index) => (
+
+                                                                            <div
+
+                                                                                key={index}
+
+                                                                                className="
+bg-blue-50
+rounded-lg
+px-2
+py-1
+mb-1
+text-sm
+"
+
+                                                                            >
+
+                                                                                🍗
+
+                                                                                {item.itemName}
+
+
+                                                                                --x
+
+                                                                                {item.quantity}
+
+                                                                            </div>
+
+                                                                        )
+
+                                                                    )
+
+                                                                    :
+
+                                                                    <span className="
+text-gray-400
+">
+
+                                                                        -
+
+                                                                    </span>
+
+                                                            }
+
+                                                        </td>
+
+
+                                                        <td className="
 p-4
 text-center
 font-bold
 ">
 
-                                                        {
+                                                            {student.remainingDays}
 
-                                                            student.remainingDays
+                                                        </td>
 
-                                                        }
+                                                    </tr>
 
-                                                    </td>
+                                                )
 
-                                                </tr>
-
-                                            ))
+                                            )
 
                                     }
 
@@ -2836,7 +4316,6 @@ font-bold
                             </table>
 
                         </div>
-
                     </div>
                 }
 
@@ -2938,6 +4417,283 @@ rounded-xl"
                     </div>
 
                 </div>
+            }
+            {
+                orderModal
+
+                &&
+
+                <div
+                    className="
+fixed
+inset-0
+bg-black/50
+flex
+justify-center
+items-center
+z-50
+"
+                >
+
+                    <div
+                        className="
+bg-white
+w-[500px]
+max-h-[80vh]
+overflow-y-auto
+rounded-3xl
+p-6
+space-y-5
+"
+                    >
+
+                        <div
+                            className="
+flex
+justify-between
+items-center
+"
+                        >
+
+                            <h1
+                                className="
+text-2xl
+font-bold
+"
+                            >
+
+                                📋 Order Details
+
+                            </h1>
+
+                            <button
+
+                                onClick={() =>
+
+                                    setOrderModal(
+                                        false
+                                    )
+
+                                }
+
+                                className="
+text-2xl
+font-bold
+"
+
+                            >
+
+                                ✕
+
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            className="
+bg-slate-100
+rounded-xl
+p-4
+space-y-2
+"
+                        >
+
+                            <p>
+
+                                👤 Name:
+
+                                <b>
+
+                                    {selectedOrder?.student?.name}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                📞 Phone:
+
+                                <b>
+
+                                    {selectedOrder?.student?.phone}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                🆔 Student ID:
+
+                                <b>
+
+                                    {selectedOrder?.studentId}
+
+                                </b>
+
+                            </p>
+
+                            <p>
+
+                                📅 Order Date:
+
+                                <b>
+
+                                    {
+
+                                        new Date(
+
+                                            selectedOrder?.createdAt
+
+                                        ).toLocaleString()
+
+                                    }
+
+                                </b>
+
+                            </p>
+
+                        </div>
+
+
+                        <p>
+
+                            💰 Amount:
+
+                            <b>
+
+                                ₹{selectedOrder?.extraTotal}
+
+                            </b>
+
+                        </p>
+
+
+                        <p>
+
+                            💳 Transaction:
+
+                            <b>
+
+                                {
+
+                                    selectedOrder?.transactionId
+
+                                    ||
+
+                                    "Not Provided"
+
+                                }
+
+                            </b>
+
+                        </p>
+
+
+                        <div>
+
+                            <h2
+                                className="
+font-bold
+mb-3
+"
+                            >
+
+                                🍗 Items
+
+                            </h2>
+
+                            {
+
+                                selectedOrder?.extraItems?.map(
+
+                                    item => (
+
+                                        <div
+
+                                            key={item.itemId}
+
+                                            className="
+bg-slate-100
+rounded-xl
+p-3
+mb-2
+"
+                                        >
+
+                                            {item.itemName}
+
+                                            x
+
+                                            {item.quantity}
+
+                                            —
+
+                                            ₹
+
+                                            {
+
+                                                item.price *
+
+                                                item.quantity
+
+                                            }
+
+                                        </div>
+
+                                    )
+
+                                )
+
+                            }
+
+                        </div>
+
+
+                        {
+
+                            selectedOrder?.orderStatus
+
+                            !==
+
+                            "confirmed"
+
+                            &&
+
+                            <button
+
+                                onClick={() =>
+
+                                    confirmOrder(
+
+                                        selectedOrder._id
+
+                                    )
+
+                                }
+
+                                className="
+w-full
+bg-green-600
+text-white
+p-4
+rounded-xl
+"
+
+                            >
+
+                                ✅ Confirm Order
+
+                            </button>
+
+                        }
+
+                    </div>
+
+                </div>
+
             }
         </div >
 

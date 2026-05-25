@@ -66,7 +66,109 @@ const addOwner = async (req, res) => {
     }
 
 };
+const updatePaymentInfo =
+    async (req, res) => {
 
+        try {
+
+            const {
+
+                upiId,
+                upiName
+
+            } = req.body;
+
+            const owner =
+                await User.findByIdAndUpdate(
+
+                    req.params.id,
+
+                    {
+
+                        upiId,
+                        upiName
+
+                    },
+
+                    {
+                        new: true
+                    }
+
+                );
+
+            res.status(200).json({
+
+                success: true,
+
+                message:
+                    "Payment info updated",
+
+                owner
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500).json({
+
+                success: false,
+
+                message: error.message
+
+            });
+
+        }
+
+    };
+const getPaymentInfo =
+    async (req, res) => {
+
+        try {
+
+            const owner =
+
+                await User.findOne({
+
+                    messId:
+                        req.params.messId,
+
+                    role: "owner"
+
+                })
+
+                    .select(
+
+                        "upiId upiName"
+
+                    );
+
+            res.json(
+                owner
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    }
 module.exports = {
-    addOwner
-};
+
+    addOwner,
+
+    updatePaymentInfo,
+
+    getPaymentInfo
+
+}

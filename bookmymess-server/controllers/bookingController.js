@@ -10,10 +10,15 @@ const saveBooking = async (req, res) => {
             messId,
             breakfast,
             lunch,
-            dinner
+            dinner,
+
+            extraItems = [],
+
+            extraTotal = 0,
+
+            transactionId = ""
 
         } = req.body;
-
 
         /* close time */
 
@@ -84,6 +89,14 @@ const saveBooking = async (req, res) => {
             existingBooking.dinner =
                 dinner;
 
+            existingBooking.extraItems =
+                extraItems || [];
+
+            existingBooking.extraTotal =
+                Number(extraTotal) || 0;
+
+            existingBooking.transactionId =
+                transactionId || "";
             await existingBooking.save();
 
             return res.status(200).json({
@@ -112,10 +125,18 @@ const saveBooking = async (req, res) => {
 
                 breakfast,
                 lunch,
-                dinner
+                dinner,
+
+                extraItems:
+                    extraItems || [],
+
+                extraTotal:
+                    Number(extraTotal) || 0,
+
+                transactionId:
+                    transactionId || ""
 
             });
-
 
         res.status(201).json({
 
@@ -283,7 +304,27 @@ const getStudentAttendance =
                         tomorrow
 
                 });
+            const remainingDays =
 
+                Math.ceil(
+
+                    (
+
+                        new Date(
+                            student.studentEndDate
+                        )
+
+                        -
+
+                        new Date()
+
+                    )
+
+                    /
+
+                    (1000 * 60 * 60 * 24)
+
+                );
             res.json({
 
                 name:
@@ -304,7 +345,10 @@ const getStudentAttendance =
                     booking?.lunch,
 
                 dinner:
-                    booking?.dinner
+                    booking?.dinner,
+
+                extraItems:
+                    booking?.extraItems || []
 
             });
 
@@ -628,12 +672,246 @@ const getOwnerStats =
         }
 
     };
+const getExtraOrders =
+    async (req, res) => {
+
+        try {
+
+            const orders =
+
+                await Booking.aggregate([
+
+                    {
+
+                        $match: {
+
+                            messId:
+                                req.params.messId,
+
+                            extraTotal: {
+                                $gt: 0
+                            }
+
+                        }
+
+                    },
+
+                    {
+
+                        $lookup: {
+
+                            from: "users",
+
+                            localField:
+                                "studentId",
+
+                            foreignField:
+                                "studentId",
+
+                            as: "student"
+
+                        }
+
+                    },
+
+                    {
+
+                        $unwind:
+                            "$student"
+
+                    },
+
+                    {
+
+                        $sort: {
+
+                            createdAt: -1
+
+                        }
+
+                    }
+
+                ]);
+
+            res.json(
+                orders
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    }
+const confirmOrder =
+    async (req, res) => {
+
+        try {
+
+            const booking =
+
+                await Booking.findByIdAndUpdate(
+
+                    req.params.id,
+
+                    {
+
+                        orderStatus:
+                            "confirmed"
+
+                    },
+
+                    {
+
+                        new: true
+
+                    }
+
+                );
+
+            res.json({
+
+                success: true,
+
+                booking
+
+            });
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    }
+const getTodayExtraSummary =
+    async (req, res) => {
+
+        try {
+
+            const today =
+                new Date();
+
+            today.setHours(
+                0, 0, 0, 0
+            );
+
+            const todayEnd =
+                new Date(today);
+
+            todayEnd.setHours(
+                23, 59, 59, 999
+            );
+
+            const bookings =
+
+                await Booking.find({
+
+                    messId: req.params.messId,
+
+                    bookingDate: {
+
+                        $gte: today,
+                        $lte: todayEnd
+
+                    }
+
+                });
+
+            const summary = {
+
+                breakfast: {},
+                lunch: {},
+                dinner: {}
+
+            };
+
+            bookings.forEach(
+
+                booking => {
+
+                    booking.extraItems.forEach(
+
+                        item => {
+
+                            if (
+
+                                !summary[
+                                item.mealType
+                                ][
+                                item.itemName
+                                ]
+
+                            ) {
+
+                                summary[
+                                    item.mealType
+                                ][
+                                    item.itemName
+                                ] = 0;
+
+                            }
+
+                            summary[
+                                item.mealType
+                            ][
+                                item.itemName
+                            ] +=
+                                item.quantity;
+
+                        }
+
+                    );
+
+                }
+
+            );
+
+            res.json(
+                summary
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    };
 module.exports = {
 
     saveBooking,
     getStudentBookings,
     getTomorrowBooking,
     getOwnerStats,
-    getStudentAttendance
+    getStudentAttendance,
+    getExtraOrders,
+    confirmOrder,
+    getTodayExtraSummary
 
-};
+}

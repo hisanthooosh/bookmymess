@@ -32,10 +32,10 @@ const userSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Mess",
             default: null
-        },studentId:{
-    type:String,
-    default:null
-},
+        }, studentId: {
+            type: String,
+            default: null
+        },
         studentStartDate: {
             type: Date,
             default: null
@@ -44,8 +44,30 @@ const userSchema = new mongoose.Schema(
         studentEndDate: {
             type: Date,
             default: null
+        }, upiId: {
+
+            type: String,
+
+            default: ""
+
         },
 
+        upiName: {
+
+            type: String,
+
+            default: ""
+
+        },
+        upiId: {
+            type: String,
+            default: ""
+        },
+
+        upiName: {
+            type: String,
+            default: ""
+        },
     },
     {
         timestamps: true
