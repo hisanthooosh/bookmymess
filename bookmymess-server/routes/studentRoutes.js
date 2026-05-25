@@ -527,7 +527,7 @@ router.get(
 
                                 });
 
-                            
+
 
 
                             const remainingDays =
@@ -576,7 +576,10 @@ router.get(
                                     booking?.lunch,
 
                                 dinner:
-                                    booking?.dinner
+                                    booking?.dinner,
+
+                                extraItems:
+                                    booking?.extraItems || []
 
                             };
 

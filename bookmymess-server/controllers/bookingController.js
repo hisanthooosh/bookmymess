@@ -345,7 +345,10 @@ const getStudentAttendance =
                     booking?.lunch,
 
                 dinner:
-                    booking?.dinner
+                    booking?.dinner,
+
+                extraItems:
+                    booking?.extraItems || []
 
             });
 
@@ -798,20 +801,117 @@ const confirmOrder =
         }
 
     }
+const getTodayExtraSummary =
+    async (req, res) => {
+
+        try {
+
+            const today =
+                new Date();
+
+            today.setHours(
+                0, 0, 0, 0
+            );
+
+            const todayEnd =
+                new Date(today);
+
+            todayEnd.setHours(
+                23, 59, 59, 999
+            );
+
+            const bookings =
+
+                await Booking.find({
+
+                    messId: req.params.messId,
+
+                    bookingDate: {
+
+                        $gte: today,
+                        $lte: todayEnd
+
+                    }
+
+                });
+
+            const summary = {
+
+                breakfast: {},
+                lunch: {},
+                dinner: {}
+
+            };
+
+            bookings.forEach(
+
+                booking => {
+
+                    booking.extraItems.forEach(
+
+                        item => {
+
+                            if (
+
+                                !summary[
+                                item.mealType
+                                ][
+                                item.itemName
+                                ]
+
+                            ) {
+
+                                summary[
+                                    item.mealType
+                                ][
+                                    item.itemName
+                                ] = 0;
+
+                            }
+
+                            summary[
+                                item.mealType
+                            ][
+                                item.itemName
+                            ] +=
+                                item.quantity;
+
+                        }
+
+                    );
+
+                }
+
+            );
+
+            res.json(
+                summary
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    };
 module.exports = {
 
     saveBooking,
-
     getStudentBookings,
-
     getTomorrowBooking,
-
     getOwnerStats,
-
     getStudentAttendance,
-
     getExtraOrders,
-
-    confirmOrder
+    confirmOrder,
+    getTodayExtraSummary
 
 }

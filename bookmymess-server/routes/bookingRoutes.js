@@ -11,13 +11,28 @@ const {
     getOwnerStats,
     getStudentAttendance,
     getExtraOrders,
-    confirmOrder
+    confirmOrder,
+    getTodayExtraSummary
 
 }
 
     = require(
         "../controllers/bookingController"
     );
+router.get(
+
+    "/extra-orders/:messId",
+
+    getExtraOrders
+
+);
+router.get(
+
+    "/extra-summary/:messId",
+
+    getTodayExtraSummary
+
+);
 router.put(
 
     "/confirm-order/:id",

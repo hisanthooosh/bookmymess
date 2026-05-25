@@ -66,7 +66,17 @@ function OwnerDashboard() {
     const [extraPrice,
         setExtraPrice] =
         useState("");
+    const [extraSummary,
+        setExtraSummary] =
+        useState({
 
+            breakfast: {},
+
+            lunch: {},
+
+            dinner: {}
+
+        });
     const [extraMealType,
         setExtraMealType] =
         useState("breakfast");
@@ -234,7 +244,34 @@ function OwnerDashboard() {
             }
 
         }
+    const fetchExtraSummary =
+        async () => {
 
+            try {
+
+                const res =
+
+                    await API.get(
+
+                        `/booking/extra-summary/${user.messId}`
+
+                    );
+
+                setExtraSummary(
+                    res.data
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
     const fetchExpiryStats =
         async () => {
 
@@ -813,9 +850,14 @@ function OwnerDashboard() {
         fetchBookingStats();
 
         fetchExpiryStats();
+
         fetchAttendanceList();
+
         fetchExtraItems();
+
         fetchOrders();
+
+        fetchExtraSummary();
 
     }, []);
 
@@ -1814,7 +1856,126 @@ leading-5
                                                 🍽 {meal.menu}
 
                                             </p>
+                                            <div
+                                                className="
+bg-blue-50
+rounded-xl
+p-3
+mb-4
+"
+                                            >
 
+                                                <p
+                                                    className="
+font-bold
+text-sm
+mb-2
+"
+                                                >
+
+                                                    🍗 Extra Orders
+
+                                                </p>
+
+                                                {
+
+                                                    Object.entries(
+
+                                                        index === 0
+
+                                                            ?
+
+                                                            extraSummary.breakfast
+
+                                                            :
+
+                                                            index === 1
+
+                                                                ?
+
+                                                                extraSummary.lunch
+
+                                                                :
+
+                                                                extraSummary.dinner
+
+                                                    ).length === 0
+
+                                                        ?
+
+                                                        <p
+                                                            className="
+text-xs
+text-gray-500
+"
+                                                        >
+
+                                                            No Extra Orders
+
+                                                        </p>
+
+                                                        :
+
+                                                        Object.entries(
+
+                                                            index === 0
+
+                                                                ?
+
+                                                                extraSummary.breakfast
+
+                                                                :
+
+                                                                index === 1
+
+                                                                    ?
+
+                                                                    extraSummary.lunch
+
+                                                                    :
+
+                                                                    extraSummary.dinner
+
+                                                        )
+
+                                                            .map(
+
+                                                                ([item, qty]) => (
+
+                                                                    <div
+
+                                                                        key={item}
+
+                                                                        className="
+flex
+justify-between
+text-sm
+mb-1
+"
+
+                                                                    >
+
+                                                                        <span>
+
+                                                                            {item}
+
+                                                                        </span>
+
+                                                                        <span>
+
+                                                                            x{qty}
+
+                                                                        </span>
+
+                                                                    </div>
+
+                                                                )
+
+                                                            )
+
+                                                }
+
+                                            </div>
                                             <div className="space-y-3">
 
                                                 <div className="
@@ -3577,22 +3738,82 @@ mb-2
 "
                                                                         >
 
-                                                                            {item.itemName}
+                                                                            <div>
 
-                                                                            x
+                                                                                🍗 {item.itemName}
 
-                                                                            {item.quantity}
+                                                                                x
 
-                                                                            —
+                                                                                {item.quantity}
 
-                                                                            ₹{item.price * item.quantity}
+                                                                            </div>
+
+                                                                            <div
+                                                                                className="
+text-sm
+text-gray-500
+"
+                                                                            >
+
+                                                                                🍽
+
+                                                                                {
+
+                                                                                    item.mealType
+                                                                                        ?.charAt(0)
+                                                                                        .toUpperCase()
+
+                                                                                    +
+
+                                                                                    item.mealType
+                                                                                        ?.slice(1)
+
+                                                                                }
+
+                                                                            </div>
+
+                                                                            <div
+                                                                                className="
+text-sm
+text-gray-500
+"
+                                                                            >
+
+                                                                                📅
+
+                                                                                {
+
+                                                                                    new Date(
+                                                                                        order.bookingDate
+                                                                                    )
+
+                                                                                        .toLocaleDateString(
+
+                                                                                            "en-US",
+
+                                                                                            {
+                                                                                                weekday: "long"
+                                                                                            }
+
+                                                                                        )
+
+                                                                                }
+
+                                                                            </div>
+
+                                                                            <div>
+
+                                                                                ₹
+
+                                                                                {item.price * item.quantity}
+
+                                                                            </div>
 
                                                                         </div>
 
                                                                     )
 
                                                                 )
-
                                                                 :
 
                                                                 <p>
@@ -3827,6 +4048,15 @@ p-4
 text-center
 ">
 
+                                            🍗 Extras
+
+                                        </th>
+
+                                        <th className="
+p-4
+text-center
+">
+
                                             Days Left
 
                                         </th>
@@ -3841,186 +4071,243 @@ text-center
 
                                         attendanceList
 
-                                            .filter(student =>
+                                            .filter(
 
-                                                student.studentId
-                                                    .toLowerCase()
+                                                student =>
 
-                                                    .includes(
+                                                    student.studentId
+                                                        ?.toLowerCase()
 
-                                                        bookingSearch
-                                                            .toLowerCase()
+                                                        .includes(
 
-                                                    )
+                                                            bookingSearch
+                                                                .toLowerCase()
 
-                                                ||
+                                                        )
 
-                                                student.name
-                                                    .toLowerCase()
+                                                    ||
 
-                                                    .includes(
+                                                    student.name
+                                                        ?.toLowerCase()
 
-                                                        bookingSearch
-                                                            .toLowerCase()
+                                                        .includes(
 
-                                                    )
+                                                            bookingSearch
+                                                                .toLowerCase()
+
+                                                        )
 
                                             )
 
-                                            .map(student => (
+                                            .map(
 
-                                                <tr
-                                                    key={student._id}
+                                                student => (
 
-                                                    className="
+                                                    <tr
+
+                                                        key={student._id}
+
+                                                        className="
 border-b
 hover:bg-slate-100
 duration-300
 "
-                                                >
 
-                                                    <td className="
+                                                    >
+
+                                                        <td className="
 p-4
 font-semibold
 ">
 
-                                                        {student.studentId}
+                                                            {student.studentId}
 
-                                                    </td>
+                                                        </td>
 
-                                                    <td className="
+                                                        <td className="
 p-4
 ">
 
-                                                        {student.name}
+                                                            {student.name}
 
-                                                    </td>
+                                                        </td>
 
-                                                    <td className="
+                                                        <td className="
 p-4
 ">
 
-                                                        {student.phone}
+                                                            {student.phone}
 
-                                                    </td>
+                                                        </td>
 
 
-                                                    {/* Breakfast */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.breakfast === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.breakfast === false
+                                                                student.breakfast === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.breakfast === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    {/* Lunch */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.lunch === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.lunch === false
+                                                                student.lunch === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.lunch === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    {/* Dinner */}
-
-                                                    <td className="
+                                                        <td className="
 p-4
 text-center
 text-2xl
 ">
 
-                                                        {
+                                                            {
 
-                                                            student.dinner === true
-
-                                                                ?
-
-                                                                "✅"
-
-                                                                :
-
-                                                                student.dinner === false
+                                                                student.dinner === true
 
                                                                     ?
 
-                                                                    "❌"
+                                                                    "✅"
 
                                                                     :
 
-                                                                    "⏳"
+                                                                    student.dinner === false
 
-                                                        }
+                                                                        ?
 
-                                                    </td>
+                                                                        "❌"
+
+                                                                        :
+
+                                                                        "⏳"
+
+                                                            }
+
+                                                        </td>
 
 
-                                                    <td className="
+                                                        <td className="
+p-4
+">
+
+                                                            {
+
+                                                                student.extraItems?.length > 0
+
+                                                                    ?
+
+                                                                    student.extraItems.map(
+
+                                                                        (item, index) => (
+
+                                                                            <div
+
+                                                                                key={index}
+
+                                                                                className="
+bg-blue-50
+rounded-lg
+px-2
+py-1
+mb-1
+text-sm
+"
+
+                                                                            >
+
+                                                                                🍗
+
+                                                                                {item.itemName}
+
+
+                                                                                --x
+
+                                                                                {item.quantity}
+
+                                                                            </div>
+
+                                                                        )
+
+                                                                    )
+
+                                                                    :
+
+                                                                    <span className="
+text-gray-400
+">
+
+                                                                        -
+
+                                                                    </span>
+
+                                                            }
+
+                                                        </td>
+
+
+                                                        <td className="
 p-4
 text-center
 font-bold
 ">
 
-                                                        {
+                                                            {student.remainingDays}
 
-                                                            student.remainingDays
+                                                        </td>
 
-                                                        }
+                                                    </tr>
 
-                                                    </td>
+                                                )
 
-                                                </tr>
-
-                                            ))
+                                            )
 
                                     }
 
@@ -4029,7 +4316,6 @@ font-bold
                             </table>
 
                         </div>
-
                     </div>
                 }
 
