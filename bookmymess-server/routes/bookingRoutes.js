@@ -12,7 +12,10 @@ const {
     getStudentAttendance,
     getExtraOrders,
     confirmOrder,
-    getTodayExtraSummary
+    confirmPayment,
+    getOrderHistory,
+    getTodayExtraSummary,
+    getLatestOrderStatus
 
 }
 
@@ -39,6 +42,10 @@ router.put(
 
     confirmOrder
 
+);
+router.put(
+    "/confirm-payment/:bookingId/:paymentIndex",
+    confirmPayment
 );
 router.get(
 
@@ -69,6 +76,14 @@ router.get(
 
     getStudentAttendance
 
+);
+router.get(
+    "/status/:studentId",
+    getLatestOrderStatus
+);
+router.get(
+    "/history/:studentId",
+    getOrderHistory
 );
 module.exports =
     router;

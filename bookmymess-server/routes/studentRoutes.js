@@ -490,25 +490,15 @@ router.get(
                     students.map(
                         async (student) => {
 
-                            const today =
-                                new Date();
+                           const selectedDate = req.query.date
+    ? new Date(req.query.date)
+    : new Date();
 
-                            today.setHours(
-                                0,
-                                0,
-                                0,
-                                0
-                            );
+selectedDate.setHours(0, 0, 0, 0);
 
-                            const todayEnd =
-                                new Date(today);
+const selectedDateEnd = new Date(selectedDate);
 
-                            todayEnd.setHours(
-                                23,
-                                59,
-                                59,
-                                999
-                            );
+selectedDateEnd.setHours(23, 59, 59, 999);
 
                             const booking =
                                 await Booking.findOne({
@@ -519,12 +509,12 @@ router.get(
                                     messId:
                                         req.params.messId,
 
-                                    bookingDate: {
+                                  orderStatus: "confirmed",
 
-                                        $gte: today,
-                                        $lte: todayEnd
-                                    }
-
+bookingDate: {
+  $gte: selectedDate,
+  $lte: selectedDateEnd
+}
                                 });
 
 

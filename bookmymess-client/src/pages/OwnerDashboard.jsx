@@ -5,1242 +5,637 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 
 function OwnerDashboard() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    const user = JSON.parse(
-        localStorage.getItem("user")
-    );
+  const [activePage, setActivePage] = useState("dashboard");
 
-    const [activePage, setActivePage] =
-        useState("dashboard");
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-    const logout = () => {
+    toast.info("Logged out successfully");
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+    setTimeout(() => {
+      navigate("/");
+    }, 500);
+  };
+  const [reactivateModal, setReactivateModal] = useState(false);
 
-        toast.info(
-            "Logged out successfully"
-        );
+  const [selectedStudentId, setSelectedStudentId] = useState("");
 
-        setTimeout(() => {
+  const [newStartDate, setNewStartDate] = useState("");
 
-            navigate("/");
+  const [newEndDate, setNewEndDate] = useState("");
+  const [selectedDay, setSelectedDay] = useState("Sunday");
+  const [extraTab, setExtraTab] = useState("payment");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-        }, 500);
+  const [orderModal, setOrderModal] = useState(false);
+  const [extraItems, setExtraItems] = useState([]);
 
+  const [extraName, setExtraName] = useState("");
+
+  const [extraPrice, setExtraPrice] = useState("");
+  const [extraSummary, setExtraSummary] = useState({
+    breakfast: {},
+
+    lunch: {},
+
+    dinner: {},
+  });
+  const [extraMealType, setExtraMealType] = useState("breakfast");
+
+  const [extraDay, setExtraDay] = useState("Sunday");
+  const [upiId, setUpiId] = useState(user?.upiId || "");
+  const [orders, setOrders] = useState([]);
+  const [upiName, setUpiName] = useState(user?.upiName || "");
+  const [bookingStats, setBookingStats] = useState({
+    tomorrowTotal: 0,
+
+    todayBreakfastComing: 0,
+    todayBreakfastNotComing: 0,
+    todayBreakfastNoResponse: 0,
+
+    todayLunchComing: 0,
+    todayLunchNotComing: 0,
+    todayLunchNoResponse: 0,
+
+    todayDinnerComing: 0,
+    todayDinnerNotComing: 0,
+    todayDinnerNoResponse: 0,
+
+    breakfastComing: 0,
+    breakfastNotComing: 0,
+    breakfastNoResponse: 0,
+
+    lunchComing: 0,
+    lunchNotComing: 0,
+    lunchNoResponse: 0,
+
+    dinnerComing: 0,
+    dinnerNotComing: 0,
+    dinnerNoResponse: 0,
+  });
+  const [expiryStats, setExpiryStats] = useState({
+    endingToday: 0,
+
+    endingTomorrow: 0,
+
+    ending7Days: 0,
+  });
+  const [breakfast, setBreakfast] = useState([""]);
+
+  const [lunch, setLunch] = useState([""]);
+
+  const [dinner, setDinner] = useState([""]);
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [savedMenus, setSavedMenus] = useState([]);
+
+  const [students, setStudents] = useState([]);
+  const [editingExtraId, setEditingExtraId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [bookingSearch, setBookingSearch] = useState("");
+
+  const [selectedBookingStudent, setSelectedBookingStudent] = useState(null);
+  const [attendanceList, setAttendanceList] = useState([]);
+  const [attendanceDate, setAttendanceDate] = useState(new Date());
+  const [studentName, setStudentName] = useState("");
+
+  const [studentPhone, setStudentPhone] = useState("");
+
+  const [studentPassword, setStudentPassword] = useState("");
+
+  const [startDate, setStartDate] = useState("");
+
+  const [editingStudentId, setEditingStudentId] = useState(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [endDate, setEndDate] = useState("");
+
+  const addItem = (type) => {
+    if (type === "breakfast") {
+      setBreakfast([...breakfast, ""]);
     }
-    const [reactivateModal, setReactivateModal] =
-        useState(false);
 
-    const [selectedStudentId, setSelectedStudentId] =
-        useState("");
+    if (type === "lunch") {
+      setLunch([...lunch, ""]);
+    }
 
-    const [newStartDate, setNewStartDate] =
-        useState("");
+    if (type === "dinner") {
+      setDinner([...dinner, ""]);
+    }
+  };
+  const fetchBookingStats = async () => {
+    try {
+      const res = await API.get(`/booking/stats/${user.messId}`);
 
-    const [newEndDate, setNewEndDate] =
-        useState("");
-    const [selectedDay, setSelectedDay] =
-        useState("Sunday");
-    const [extraTab, setExtraTab] =
-        useState(
-            "payment"
-        );
-    const [selectedOrder,
-        setSelectedOrder] =
-        useState(null);
+      setBookingStats(res.data);
+    } catch (error) {
+      toast.error("Failed to load stats");
+    }
+  };
+  const fetchExtraSummary = async () => {
+    try {
+      const res = await API.get(`/booking/extra-summary/${user.messId}`);
 
-    const [orderModal,
-        setOrderModal] =
-        useState(false);
-    const [extraItems,
-        setExtraItems] =
-        useState([]);
+      setExtraSummary(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchExpiryStats = async () => {
+    try {
+      const res = await API.get(`/student/expiry-stats/${user.messId}`);
 
-    const [extraName,
-        setExtraName] =
-        useState("");
+      setExpiryStats(res.data);
+    } catch (error) {
+      toast.error("Failed to load expiry stats");
+    }
+  };
+  const openOrder = (order) => {
+    setSelectedOrder(order);
 
-    const [extraPrice,
-        setExtraPrice] =
-        useState("");
-    const [extraSummary,
-        setExtraSummary] =
-        useState({
+    setOrderModal(true);
+  };
+  const fetchOrders = async () => {
+    try {
+      const res = await API.get(`/booking/extra-orders/${user.messId}`);
 
-            breakfast: {},
+      console.log("Orders Data:", res.data);
 
-            lunch: {},
+      setOrders(res.data);
+    } catch (error) {
+      console.log("Order Error:", error);
+    }
+  };
+  const savePaymentInfo = async () => {
+    try {
+      await API.put(
+        `/owner/payment/${user._id}`,
 
-            dinner: {}
+        {
+          upiId,
+          upiName,
+        },
+      );
 
+      const updatedUser = {
+        ...user,
+
+        upiId,
+        upiName,
+      };
+
+      localStorage.setItem(
+        "user",
+
+        JSON.stringify(updatedUser),
+      );
+
+      toast.success("Payment info saved 🎉");
+    } catch (error) {
+      toast.error("Failed to save");
+    }
+  };
+  const saveExtraItem = async () => {
+    try {
+      await API.post(
+        "/extra-item/save",
+
+        {
+          messId: user.messId,
+
+          day: extraDay,
+
+          mealType: extraMealType,
+
+          itemName: extraName,
+
+          price: extraPrice,
+        },
+      );
+
+      toast.success("Extra item added 🎉");
+
+      fetchExtraItems();
+
+      setExtraName("");
+
+      setExtraPrice("");
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+  const fetchExtraItems = async () => {
+    try {
+      const res = await API.get(`/extra-item/${user.messId}`);
+
+      setExtraItems(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const editExtraItem = (item) => {
+    setEditingExtraId(item._id);
+
+    setExtraDay(item.day);
+
+    setExtraMealType(item.mealType);
+
+    setExtraName(item.itemName);
+
+    setExtraPrice(item.price);
+  };
+  const updateExtraItem = async () => {
+    try {
+      await API.put(
+        `/extra-item/update/${editingExtraId}`,
+
+        {
+          day: extraDay,
+
+          mealType: extraMealType,
+
+          itemName: extraName,
+
+          price: extraPrice,
+        },
+      );
+
+      toast.success("Updated 🎉");
+
+      setEditingExtraId(null);
+
+      setExtraName("");
+      setExtraPrice("");
+
+      fetchExtraItems();
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+
+  const deleteExtraItem = async (id) => {
+    try {
+      await API.delete(`/extra-item/delete/${id}`);
+
+      toast.success("Deleted");
+
+      fetchExtraItems();
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+  const fetchAttendance = async () => {
+    try {
+      if (!bookingSearch.trim()) return;
+
+      const res = await API.get(`/booking/attendance/${bookingSearch}`);
+
+      setSelectedBookingStudent(res.data);
+    } catch (error) {
+      toast.error("Student Not Found");
+
+      setSelectedBookingStudent(null);
+    }
+  };
+  const confirmOrder = async (id) => {
+    try {
+      await API.put(`/booking/confirm-order/${id}`);
+
+      toast.success("Order confirmed 🎉");
+
+      await fetchOrders();
+
+      if (selectedOrder) {
+        setSelectedOrder({
+          ...selectedOrder,
+
+          orderStatus: "confirmed",
         });
-    const [extraMealType,
-        setExtraMealType] =
-        useState("breakfast");
+      }
+    } catch (error) {
+      toast.error("Failed");
+    }
+  };
+  const fetchAttendanceList = async (date = attendanceDate) => {
+    try {
+      const formattedDate = date.toISOString().split("T")[0];
 
-    const [extraDay,
-        setExtraDay] =
-        useState("Sunday");
-    const [upiId, setUpiId] =
-        useState(
-            user?.upiId || ""
+      const res = await API.get(
+        `/student/attendance-list/${user.messId}?date=${formattedDate}`,
+      );
+
+      console.log("Attendance Data:", res.data);
+
+      setAttendanceList(res.data);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to load attendance");
+    }
+  };
+  useEffect(() => {
+    const menu = savedMenus.find((item) => item.day === selectedDay);
+
+    if (menu) {
+      setBreakfast(menu.breakfast);
+
+      setLunch(menu.lunch);
+
+      setDinner(menu.dinner);
+    } else {
+      setBreakfast([""]);
+      setLunch([""]);
+      setDinner([""]);
+    }
+  }, [selectedDay, savedMenus]);
+
+  const saveMenu = async () => {
+    try {
+      await API.post(
+        "/menu/save",
+
+        {
+          messId: user.messId,
+
+          day: selectedDay,
+
+          breakfast: breakfast.filter((item) => item.trim()),
+
+          lunch: lunch.filter((item) => item.trim()),
+
+          dinner: dinner.filter((item) => item.trim()),
+        },
+      );
+
+      await fetchMenus();
+
+      toast.success("Menu Saved Successfully 🎉");
+    } catch (error) {
+      toast.error("Failed to save menu ❌");
+    }
+  };
+
+  const fetchMenus = async () => {
+    try {
+      const res = await API.get(`/menu/${user.messId}`);
+
+      setSavedMenus(res.data.menus);
+    } catch (error) {
+      toast.error("Failed to save menu ❌");
+    }
+  };
+  const fetchStudents = async () => {
+    try {
+      const res = await API.get(`/student/${user.messId}`);
+
+      setStudents(res.data.students);
+    } catch (error) {
+      toast.error("Failed to load students");
+    }
+  };
+  useEffect(() => {
+    fetchMenus();
+
+    fetchStudents();
+
+    fetchBookingStats();
+
+    fetchExpiryStats();
+
+    fetchAttendanceList();
+
+    fetchExtraItems();
+
+    fetchOrders();
+
+    fetchExtraSummary();
+  }, []);
+  useEffect(() => {
+    fetchAttendanceList(attendanceDate);
+  }, [attendanceDate]);
+  const updateItem = (type, index, value) => {
+    if (type === "breakfast") {
+      const data = [...breakfast];
+
+      data[index] = value;
+
+      setBreakfast(data);
+    }
+
+    if (type === "lunch") {
+      const data = [...lunch];
+
+      data[index] = value;
+
+      setLunch(data);
+    }
+
+    if (type === "dinner") {
+      const data = [...dinner];
+
+      data[index] = value;
+
+      setDinner(data);
+    }
+  };
+  const addStudent = async () => {
+    if (isEditing) {
+      try {
+        await API.put(
+          `/student/update/${editingStudentId}`,
+
+          {
+            name: studentName,
+            phone: studentPhone,
+            studentStartDate: startDate,
+            studentEndDate: endDate,
+          },
         );
-    const [orders,
-        setOrders] =
-        useState([]);
-    const [upiName, setUpiName] =
-        useState(
-            user?.upiName || ""
-        );
-    const [bookingStats, setBookingStats] =
-        useState({
 
-            tomorrowTotal: 0,
+        toast.success("Student Updated 🎉");
 
-            todayBreakfastComing: 0,
-            todayBreakfastNotComing: 0,
-            todayBreakfastNoResponse: 0,
+        setIsEditing(false);
 
-            todayLunchComing: 0,
-            todayLunchNotComing: 0,
-            todayLunchNoResponse: 0,
+        setEditingStudentId(null);
 
-            todayDinnerComing: 0,
-            todayDinnerNotComing: 0,
-            todayDinnerNoResponse: 0,
-
-            breakfastComing: 0,
-            breakfastNotComing: 0,
-            breakfastNoResponse: 0,
-
-            lunchComing: 0,
-            lunchNotComing: 0,
-            lunchNoResponse: 0,
-
-            dinnerComing: 0,
-            dinnerNotComing: 0,
-            dinnerNoResponse: 0
-
-        });
-    const [expiryStats, setExpiryStats] =
-        useState({
-
-            endingToday: 0,
-
-            endingTomorrow: 0,
-
-            ending7Days: 0
-
-        });
-    const [breakfast, setBreakfast] =
-        useState([""]);
-
-    const [lunch, setLunch] =
-        useState([""]);
-
-    const [dinner, setDinner] =
-        useState([""]);
-
-    const [sidebarOpen, setSidebarOpen] =
-        useState(false);
-
-    const [savedMenus, setSavedMenus] =
-        useState([]);
-
-    const [students, setStudents] =
-        useState([]);
-    const [editingExtraId,
-        setEditingExtraId] =
-        useState(null);
-    const [searchTerm, setSearchTerm] =
-        useState("");
-    const [bookingSearch, setBookingSearch] =
-        useState("");
-
-    const [selectedBookingStudent,
-        setSelectedBookingStudent] =
-        useState(null);
-    const [attendanceList,
-        setAttendanceList] =
-        useState([]);
-    const [studentName, setStudentName] =
-        useState("");
-
-    const [studentPhone, setStudentPhone] =
-        useState("");
-
-    const [studentPassword, setStudentPassword] =
-        useState("");
-
-    const [startDate, setStartDate] =
-        useState("");
-
-    const [editingStudentId, setEditingStudentId] =
-        useState(null);
-
-    const [isEditing, setIsEditing] =
-        useState(false);
-
-    const [endDate, setEndDate] =
-        useState("");
-
-    const addItem = (type) => {
-
-        if (type === "breakfast") {
-
-            setBreakfast([
-                ...breakfast,
-                ""
-            ]);
-
-        }
-
-        if (type === "lunch") {
-
-            setLunch([
-                ...lunch,
-                ""
-            ]);
-
-        }
-
-        if (type === "dinner") {
-
-            setDinner([
-                ...dinner,
-                ""
-            ]);
-
-        }
-
-    }
-    const fetchBookingStats =
-        async () => {
-
-            try {
-
-                const res =
-                    await API.get(
-
-                        `/booking/stats/${user.messId}`
-
-                    );
-
-                setBookingStats(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Failed to load stats"
-                );
-
-            }
-
-        }
-    const fetchExtraSummary =
-        async () => {
-
-            try {
-
-                const res =
-
-                    await API.get(
-
-                        `/booking/extra-summary/${user.messId}`
-
-                    );
-
-                setExtraSummary(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                console.log(
-                    error
-                );
-
-            }
-
-        }
-    const fetchExpiryStats =
-        async () => {
-
-            try {
-
-                const res =
-
-                    await API.get(
-
-                        `/student/expiry-stats/${user.messId}`
-
-                    );
-
-                setExpiryStats(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Failed to load expiry stats"
-                );
-
-            }
-
-        }
-    const openOrder =
-        (order) => {
-
-            setSelectedOrder(
-                order
-            );
-
-            setOrderModal(
-                true
-            );
-
-        }
-    const fetchOrders =
-        async () => {
-
-            try {
-
-                const res =
-
-                    await API.get(
-
-                        `/booking/extra-orders/${user.messId}`
-
-                    );
-
-                console.log(
-                    "Orders Data:",
-                    res.data
-                );
-
-                setOrders(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                console.log(
-                    "Order Error:",
-                    error
-                );
-
-            }
-
-        }
-    const savePaymentInfo =
-        async () => {
-
-            try {
-
-                await API.put(
-
-                    `/owner/payment/${user._id}`,
-
-                    {
-
-                        upiId,
-                        upiName
-
-                    }
-
-                );
-
-                const updatedUser = {
-
-                    ...user,
-
-                    upiId,
-                    upiName
-
-                };
-
-                localStorage.setItem(
-
-                    "user",
-
-                    JSON.stringify(
-                        updatedUser
-                    )
-
-                );
-
-                toast.success(
-                    "Payment info saved 🎉"
-                );
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Failed to save"
-                );
-
-            }
-
-        }
-    const saveExtraItem =
-        async () => {
-
-            try {
-
-                await API.post(
-
-                    "/extra-item/save",
-
-                    {
-
-                        messId:
-                            user.messId,
-
-                        day:
-                            extraDay,
-
-                        mealType:
-                            extraMealType,
-
-                        itemName:
-                            extraName,
-
-                        price:
-                            extraPrice
-
-                    }
-
-                );
-
-                toast.success(
-
-                    "Extra item added 🎉"
-
-                );
-
-                fetchExtraItems();
-
-                setExtraName("");
-
-                setExtraPrice("");
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Failed"
-                );
-
-            }
-
-        }
-    const fetchExtraItems =
-        async () => {
-
-            try {
-
-                const res =
-
-                    await API.get(
-
-                        `/extra-item/${user.messId}`
-
-                    );
-
-                setExtraItems(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                console.log(
-                    error
-                );
-
-            }
-
-        }
-    const editExtraItem =
-        (item) => {
-
-            setEditingExtraId(
-                item._id
-            );
-
-            setExtraDay(
-                item.day
-            );
-
-            setExtraMealType(
-                item.mealType
-            );
-
-            setExtraName(
-                item.itemName
-            );
-
-            setExtraPrice(
-                item.price
-            );
-
-        }
-    const updateExtraItem =
-        async () => {
-
-            try {
-
-                await API.put(
-
-                    `/extra-item/update/${editingExtraId}`,
-
-                    {
-
-                        day:
-                            extraDay,
-
-                        mealType:
-                            extraMealType,
-
-                        itemName:
-                            extraName,
-
-                        price:
-                            extraPrice
-
-                    }
-
-                );
-
-                toast.success(
-                    "Updated 🎉"
-                );
-
-                setEditingExtraId(
-                    null
-                );
-
-                setExtraName("");
-                setExtraPrice("");
-
-                fetchExtraItems();
-
-            }
-            catch (error) {
-
-                toast.error(
-                    "Failed"
-                );
-
-            }
-
-        }
-
-    const deleteExtraItem =
-        async (id) => {
-
-            try {
-
-                await API.delete(
-
-                    `/extra-item/delete/${id}`
-
-                );
-
-                toast.success(
-                    "Deleted"
-                );
-
-                fetchExtraItems();
-
-            }
-            catch (error) {
-
-                toast.error(
-                    "Failed"
-                );
-
-            }
-
-        }
-    const fetchAttendance =
-        async () => {
-
-            try {
-
-                if (
-                    !bookingSearch.trim()
-                )
-                    return;
-
-
-                const res =
-
-                    await API.get(
-
-                        `/booking/attendance/${bookingSearch}`
-
-                    );
-
-                setSelectedBookingStudent(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Student Not Found"
-                );
-
-                setSelectedBookingStudent(
-                    null
-                );
-
-            }
-
-        }
-    const confirmOrder =
-        async (id) => {
-
-            try {
-
-                await API.put(
-
-                    `/booking/confirm-order/${id}`
-
-                );
-
-                toast.success(
-
-                    "Order confirmed 🎉"
-
-                );
-
-                await fetchOrders();
-
-                if (selectedOrder) {
-
-                    setSelectedOrder({
-
-                        ...selectedOrder,
-
-                        orderStatus:
-                            "confirmed"
-
-                    });
-
-                }
-
-            }
-
-            catch (error) {
-
-                toast.error(
-
-                    "Failed"
-
-                );
-
-            }
-
-        }
-    const fetchAttendanceList =
-        async () => {
-
-            try {
-
-                const res =
-
-                    await API.get(
-
-                        `/student/attendance-list/${user.messId}`
-
-                    );
-
-                console.log(
-                    "Attendance Data:",
-                    res.data
-                );
-
-                setAttendanceList(
-                    res.data
-                );
-
-            }
-
-            catch (error) {
-
-                console.log(error);
-
-                toast.error(
-                    "Failed to load attendance"
-                );
-
-            }
-
-        }
-    useEffect(() => {
-
-        const menu =
-
-            savedMenus.find(
-
-                (item) =>
-
-                    item.day === selectedDay
-
-            );
-
-        if (menu) {
-
-            setBreakfast(
-                menu.breakfast
-            );
-
-            setLunch(
-                menu.lunch
-            );
-
-            setDinner(
-                menu.dinner
-            );
-
-        }
-
-        else {
-
-            setBreakfast([""]);
-            setLunch([""]);
-            setDinner([""]);
-
-        }
-
-    }, [
-        selectedDay,
-        savedMenus
-    ]);
-
-    const saveMenu = async () => {
-
-        try {
-
-            await API.post(
-
-                "/menu/save",
-
-                {
-
-                    messId: user.messId,
-
-                    day: selectedDay,
-
-                    breakfast:
-                        breakfast.filter(
-                            item => item.trim()
-                        ),
-
-                    lunch:
-                        lunch.filter(
-                            item => item.trim()
-                        ),
-
-                    dinner:
-                        dinner.filter(
-                            item => item.trim()
-                        )
-
-                }
-
-            );
-
-            await fetchMenus();
-
-            toast.success(
-                "Menu Saved Successfully 🎉"
-            );
-
-        }
-
-        catch (error) {
-
-            toast.error(
-                "Failed to save menu ❌"
-            );
-
-        }
-
-    }
-
-    const fetchMenus = async () => {
-
-        try {
-
-            const res =
-
-                await API.get(
-                    `/menu/${user.messId}`
-                );
-
-            setSavedMenus(
-                res.data.menus
-            );
-
-        }
-
-        catch (error) {
-
-            toast.error(
-                "Failed to save menu ❌"
-            );
-
-        }
-
-    }
-    const fetchStudents = async () => {
-
-        try {
-
-            const res =
-
-                await API.get(
-                    `/student/${user.messId}`
-                );
-
-            setStudents(
-                res.data.students
-            );
-
-        }
-
-        catch (error) {
-
-            toast.error(
-                "Failed to load students"
-            );
-
-        }
-
-    }
-    useEffect(() => {
-
-        fetchMenus();
+        setStudentName("");
+        setStudentPhone("");
+        setStudentPassword("");
+        setStartDate("");
+        setEndDate("");
 
         fetchStudents();
 
-        fetchBookingStats();
-
-        fetchExpiryStats();
-
-        fetchAttendanceList();
-
-        fetchExtraItems();
-
-        fetchOrders();
-
-        fetchExtraSummary();
-
-    }, []);
-
-    const updateItem = (
-
-        type,
-        index,
-        value
-
-    ) => {
-
-        if (type === "breakfast") {
-
-            const data = [...breakfast];
-
-            data[index] = value;
-
-            setBreakfast(data);
-
-        }
-
-        if (type === "lunch") {
-
-            const data = [...lunch];
-
-            data[index] = value;
-
-            setLunch(data);
-
-        }
-
-        if (type === "dinner") {
-
-            const data = [...dinner];
-
-            data[index] = value;
-
-            setDinner(data);
-
-        }
-
-    }
-    const addStudent = async () => {
-
-        if (isEditing) {
-
-            try {
-
-                await API.put(
-
-                    `/student/update/${editingStudentId}`,
-
-                    {
-
-                        name: studentName,
-                        phone: studentPhone,
-                        studentStartDate: startDate,
-                        studentEndDate: endDate
-
-                    }
-
-                );
-
-                toast.success(
-                    "Student Updated 🎉"
-                );
-
-                setIsEditing(false);
-
-                setEditingStudentId(null);
-
-                setStudentName("");
-                setStudentPhone("");
-                setStudentPassword("");
-                setStartDate("");
-                setEndDate("");
-
-                fetchStudents();
-
-                return;
-
-            }
-
-            catch (error) {
-
-                toast.error(
-                    "Update failed"
-                );
-
-                return;
-
-            }
-
-        }
-
-        try {
-
-            const res =
-                await API.post(
-
-                    "/student/add",
-
-                    {
-                        name: studentName,
-                        phone: studentPhone,
-                        password: studentPassword,
-                        startDate,
-                        endDate,
-                        messId: user.messId
-                    }
-
-                );
-
-            toast.success(
-                "Student Added Successfully 🎉"
-            );
-            await fetchStudents();
-            setStudentName("");
-            setStudentPhone("");
-            setStudentPassword("");
-
-        }
-
-        catch (error) {
-
-            toast.error(
-
-                error.response?.data?.message ||
-
-                "Failed to add student"
-
-            );
-
-        }
-
-    }
-    const removeItem = (
-
-        type,
-        index
-
-    ) => {
-
-        if (type === "breakfast") {
-
-            setBreakfast(
-
-                breakfast.filter(
-                    (_, i) => i !== index
-                )
-
-            );
-
-        }
-
-        if (type === "lunch") {
-
-            setLunch(
-
-                lunch.filter(
-                    (_, i) => i !== index
-                )
-
-            );
-
-        }
-
-        if (type === "dinner") {
-
-            setDinner(
-
-                dinner.filter(
-                    (_, i) => i !== index
-                )
-
-            );
-
-        }
-
-    }
-    const deleteStudent = async (id) => {
-
-        try {
-
-            await API.delete(
-                `/student/delete/${id}`
-            );
-
-            toast.success(
-                "Student Deleted"
-            );
-
-            fetchStudents();
-
-        }
-
-        catch (error) {
-
-            toast.error(
-                "Delete failed"
-            );
-
-        }
-
+        return;
+      } catch (error) {
+        toast.error("Update failed");
+
+        return;
+      }
     }
 
-    const reactivateStudent = (id) => {
+    try {
+      const res = await API.post(
+        "/student/add",
 
-        setSelectedStudentId(id);
+        {
+          name: studentName,
+          phone: studentPhone,
+          password: studentPassword,
+          startDate,
+          endDate,
+          messId: user.messId,
+        },
+      );
 
-        setReactivateModal(true);
-
+      toast.success("Student Added Successfully 🎉");
+      await fetchStudents();
+      setStudentName("");
+      setStudentPhone("");
+      setStudentPassword("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add student");
     }
-    const editStudent = (student) => {
-
-        setIsEditing(true);
-
-        setEditingStudentId(
-            student._id
-        );
-
-        setStudentName(
-            student.name
-        );
-
-        setStudentPhone(
-            student.phone
-        );
-
-        setStartDate(
-            student.studentStartDate
-                ?.split("T")[0]
-        );
-
-        setEndDate(
-            student.studentEndDate
-                ?.split("T")[0]
-        );
-
+  };
+  const removeItem = (type, index) => {
+    if (type === "breakfast") {
+      setBreakfast(breakfast.filter((_, i) => i !== index));
     }
-    const filteredStudents =
-        students.filter((student) =>
 
-            student.name
-                .toLowerCase()
-                .includes(
-                    searchTerm.toLowerCase()
-                )
+    if (type === "lunch") {
+      setLunch(lunch.filter((_, i) => i !== index));
+    }
 
-            ||
+    if (type === "dinner") {
+      setDinner(dinner.filter((_, i) => i !== index));
+    }
+  };
+  const deleteStudent = async (id) => {
+    try {
+      await API.delete(`/student/delete/${id}`);
 
-            student.phone.includes(
-                searchTerm
-            )
+      toast.success("Student Deleted");
 
-            ||
+      fetchStudents();
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
 
-            student.studentId
-                ?.toLowerCase()
+  const reactivateStudent = (id) => {
+    setSelectedStudentId(id);
 
-                .includes(
+    setReactivateModal(true);
+  };
+  const editStudent = (student) => {
+    setIsEditing(true);
 
-                    bookingSearch
-                        .toLowerCase()
+    setEditingStudentId(student._id);
 
-                )
+    setStudentName(student.name);
 
-        );
-    const submitReactivate =
-        async () => {
+    setStudentPhone(student.phone);
 
-            try {
+    setStartDate(student.studentStartDate?.split("T")[0]);
 
-                await API.put(
+    setEndDate(student.studentEndDate?.split("T")[0]);
+  };
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.phone.includes(searchTerm) ||
+      student.studentId
+        ?.toLowerCase()
 
-                    `/student/reactivate/${selectedStudentId}`,
+        .includes(bookingSearch.toLowerCase()),
+  );
+  const submitReactivate = async () => {
+    try {
+      await API.put(
+        `/student/reactivate/${selectedStudentId}`,
 
-                    {
-                        studentStartDate:
-                            newStartDate,
+        {
+          studentStartDate: newStartDate,
 
-                        studentEndDate:
-                            newEndDate
-                    }
+          studentEndDate: newEndDate,
+        },
+      );
 
-                );
+      toast.success("Student Reactivated");
 
-                toast.success(
-                    "Student Reactivated"
-                );
+      setReactivateModal(false);
 
-                setReactivateModal(false);
+      setNewStartDate("");
 
-                setNewStartDate("");
+      setNewEndDate("");
 
-                setNewEndDate("");
+      fetchStudents();
+    } catch (error) {
+      toast.error("Reactivate Failed");
+    }
+  };
 
-                fetchStudents();
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
 
-            }
+  const todayDay = days[new Date().getDay()];
 
-            catch (error) {
+  const tomorrowDay = days[(new Date().getDay() + 1) % 7];
 
-                toast.error(
-                    "Reactivate Failed"
-                );
+  const todayMenu = savedMenus.find((menu) => menu.day === todayDay);
 
-            }
+  const tomorrowMenu = savedMenus.find((menu) => menu.day === tomorrowDay);
+  const groupItems = (items = []) => {
+    const grouped = {};
 
-        }
+    items.forEach((item) => {
+      const key = `${item.itemName}-${item.mealType}`;
 
-    const days = [
+      if (!grouped[key]) {
+        grouped[key] = {
+          ...item,
+          quantity: Number(item.quantity || 0),
+        };
+      } else {
+        grouped[key].quantity += Number(item.quantity || 0);
+      }
+    });
 
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
+    return Object.values(grouped);
+  };
 
-    ];
-
-    const todayDay =
-        days[
-        new Date().getDay()
-        ];
-
-    const tomorrowDay =
-        days[
-        (
-            new Date().getDay() + 1
-        ) % 7
-        ];
-
-    const todayMenu =
-
-        savedMenus.find(
-            menu =>
-                menu.day === todayDay
-        );
-
-    const tomorrowMenu =
-
-        savedMenus.find(
-            menu =>
-                menu.day === tomorrowDay
-        );
-
-
-
-
-
-
-
-
-
-
-    return (
-
-        <div className="min-h-screen flex bg-slate-100 relative">
-
-            {
-                sidebarOpen &&
-
-                <div
-                    className="
+  return (
+    <div className="min-h-screen flex bg-slate-100 relative">
+      {sidebarOpen && (
+        <div
+          className="
 fixed
 inset-0
 bg-black/50
 z-40
 lg:hidden
 "
-                    onClick={() =>
-                        setSidebarOpen(false)
-                    }
-                />
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-            }
+      {/* Sidebar */}
 
-            {/* Sidebar */}
-
-            <div className={`
+      <div
+        className={`
 fixed
 lg:fixed
 top-0
@@ -1257,114 +652,83 @@ flex
 flex-col
 justify-between
 
-${sidebarOpen
-                    ?
-                    "translate-x-0"
-                    :
-                    "-translate-x-full"
-                }
+${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
 
 lg:translate-x-0
 
-`}>
+`}
+      >
+        {/* Top Section */}
 
-                {/* Top Section */}
+        <div>
+          <h1 className="text-3xl font-bold">🍽 Owner Panel</h1>
 
-                <div>
+          <p className="text-gray-400 mt-2">{user?.name}</p>
 
-                    <h1 className="text-3xl font-bold">
+          <div className="space-y-3 mt-10">
+            <button
+              onClick={() => {
+                setActivePage("dashboard");
+                setSidebarOpen(false);
+              }}
+              className="w-full p-4 bg-slate-800 rounded-xl text-left"
+            >
+              🏠 Dashboard
+            </button>
 
-                        🍽 Owner Panel
+            <button
+              onClick={() => {
+                setActivePage("students");
+                setSidebarOpen(false);
+              }}
+              className="w-full p-4 bg-slate-800 rounded-xl text-left"
+            >
+              👨‍🎓 Students
+            </button>
 
-                    </h1>
+            <button
+              onClick={() => {
+                setActivePage("menu");
+                setSidebarOpen(false);
+              }}
+              className="w-full p-4 bg-slate-800 rounded-xl text-left"
+            >
+              🍛 Menu
+            </button>
 
-                    <p className="text-gray-400 mt-2">
-
-                        {user?.name}
-
-                    </p>
-
-                    <div className="space-y-3 mt-10">
-
-                        <button
-                            onClick={() => {
-                                setActivePage("dashboard");
-                                setSidebarOpen(false);
-                            }
-                            }
-                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                        >
-
-                            🏠 Dashboard
-
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                setActivePage("students");
-                                setSidebarOpen(false);
-                            }
-                            }
-                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                        >
-
-                            👨‍🎓 Students
-
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                setActivePage("menu")
-                                setSidebarOpen(false);
-                            }
-                            }
-                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                        >
-
-                            🍛 Menu
-
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                setActivePage("bookings")
-                                setSidebarOpen(false);
-                            }
-                            }
-                            className="w-full p-4 bg-slate-800 rounded-xl text-left"
-                        >
-
-                            📋 Meal Attendance
-
-                        </button>
-                        <button
-                            onClick={() => {
-                                setActivePage("extra")
-                                setSidebarOpen(false);
-                            }}
-                            className="
+            <button
+              onClick={() => {
+                setActivePage("bookings");
+                setSidebarOpen(false);
+              }}
+              className="w-full p-4 bg-slate-800 rounded-xl text-left"
+            >
+              📋 Meal Attendance
+            </button>
+            <button
+              onClick={() => {
+                setActivePage("extra");
+                setSidebarOpen(false);
+              }}
+              className="
 w-full
 p-4
 bg-slate-800
 rounded-xl
 text-left
 "
-                        >
+            >
+              🍽 Extra Orders & Payments
+            </button>
+          </div>
+        </div>
 
-                            🍽 Extra Orders & Payments
+        {/* Bottom Logout Button */}
 
-                        </button>
-                    </div>
-
-                </div>
-
-                {/* Bottom Logout Button */}
-
-                <div className="pt-6">
-
-                    <button
-                        onClick={logout}
-                        className="
+        <div className="pt-6">
+          <button
+            onClick={logout}
+            className="
 w-full
 p-4
 bg-red-500
@@ -1373,29 +737,27 @@ rounded-xl
 font-semibold
 duration-300
 "
-                    >
+          >
+            🚪 Logout
+          </button>
+        </div>
+      </div>
 
-                        🚪 Logout
+      {/* Main Content */}
 
-                    </button>
-
-                </div>
-
-            </div>
-
-            {/* Main Content */}
-
-            <div className="
+      <div
+        className="
 flex-1
 lg:ml-[280px]
 p-4
 md:p-8
 overflow-x-hidden
-">
+"
+      >
+        {/* Top Navbar */}
 
-                {/* Top Navbar */}
-
-                <div className="
+        <div
+          className="
 sticky
 top-0
 bg-white
@@ -1407,65 +769,38 @@ flex
 justify-between
 items-center
 z-30
-">
+"
+        >
+          <div className="flex items-center gap-4">
+            <button
+              className="lg:hidden text-3xl"
+              onClick={() => setSidebarOpen(true)}
+            >
+              ☰
+            </button>
 
-                    <div className="flex items-center gap-4">
+            <div>
+              <h2 className="font-bold text-xl">Owner Dashboard</h2>
 
-                        <button
-                            className="lg:hidden text-3xl"
-                            onClick={() =>
-                                setSidebarOpen(true)
-                            }
-                        >
+              <p className="text-sm text-gray-500">Welcome {user?.name}</p>
+            </div>
+          </div>
 
-                            ☰
+          {/* Right Profile Section */}
 
-                        </button>
+          <div className="flex items-center gap-3">
+            {/* Desktop Mess Name */}
 
-                        <div>
+            <div className="hidden md:block text-right">
+              <h2 className="font-bold text-lg text-slate-800">{user?.name}</h2>
 
-                            <h2 className="font-bold text-xl">
+              <p className="text-sm text-gray-500">Mess Owner</p>
+            </div>
 
-                                Owner Dashboard
+            {/* Mobile + Desktop Circle */}
 
-                            </h2>
-
-                            <p className="text-sm text-gray-500">
-
-                                Welcome {user?.name}
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    {/* Right Profile Section */}
-
-                    <div className="flex items-center gap-3">
-
-                        {/* Desktop Mess Name */}
-
-                        <div className="hidden md:block text-right">
-
-                            <h2 className="font-bold text-lg text-slate-800">
-
-                                {user?.name}
-
-                            </h2>
-
-                            <p className="text-sm text-gray-500">
-
-                                Mess Owner
-
-                            </p>
-
-                        </div>
-
-                        {/* Mobile + Desktop Circle */}
-
-                        <div
-                            className="
+            <div
+              className="
 w-12
 h-12
 rounded-full
@@ -1479,353 +814,329 @@ items-center
 font-bold
 text-lg
 "
-                        >
+            >
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </div>
 
-                            {user?.name?.charAt(0).toUpperCase()}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                {
-                    activePage === "dashboard"
-
-                    &&
-
-                    <div className="
+        {activePage === "dashboard" && (
+          <div
+            className="
 grid
 grid-cols-1
 xl:grid-cols-2
 gap-5
 mb-6
-">
-                        <div className="
+"
+          >
+            <div
+              className="
 bg-white
 rounded-[30px]
 shadow-md
 p-6
 mb-6
 col-span-full
-">
-
-                            <div className="
+"
+            >
+              <div
+                className="
 flex
 justify-between
 items-center
 mb-6
-">
-
-                                <div>
-
-                                    <h1 className="
+"
+              >
+                <div>
+                  <h1
+                    className="
 text-2xl
 font-bold
-">
+"
+                  >
+                    📊 Subscription Status
+                  </h1>
 
-                                        📊 Subscription Status
-
-                                    </h1>
-
-                                    <p className="
+                  <p
+                    className="
 text-sm
 text-gray-500
-">
+"
+                  >
+                    Student subscription overview
+                  </p>
+                </div>
+              </div>
 
-                                        Student subscription overview
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="
+              <div
+                className="
 grid
 grid-cols-1
 md:grid-cols-3
 gap-5
-">
+"
+              >
+                {/* Today */}
 
-                                {/* Today */}
-
-                                <div className="
+                <div
+                  className="
 bg-red-50
 rounded-2xl
 p-5
 border
 border-red-200
-">
-
-                                    <div className="
+"
+                >
+                  <div
+                    className="
 text-4xl
 mb-2
-">
+"
+                  >
+                    ⏰
+                  </div>
 
-                                        ⏰
-
-                                    </div>
-
-                                    <h2 className="
+                  <h2
+                    className="
 font-semibold
 text-gray-600
-">
+"
+                  >
+                    Ending Today
+                  </h2>
 
-                                        Ending Today
-
-                                    </h2>
-
-                                    <p className="
+                  <p
+                    className="
 text-5xl
 font-bold
 text-red-500
 mt-3
-">
+"
+                  >
+                    {expiryStats.endingToday}
+                  </p>
 
-                                        {expiryStats.endingToday}
-
-                                    </p>
-
-                                    <p className="
+                  <p
+                    className="
 text-sm
 text-gray-500
 mt-2
-">
+"
+                  >
+                    Students
+                  </p>
+                </div>
 
-                                        Students
+                {/* Tomorrow */}
 
-                                    </p>
-
-                                </div>
-
-
-                                {/* Tomorrow */}
-
-                                <div className="
+                <div
+                  className="
 bg-blue-50
 rounded-2xl
 p-5
 border
 border-blue-200
-">
-
-                                    <div className="
+"
+                >
+                  <div
+                    className="
 text-4xl
 mb-2
-">
+"
+                  >
+                    📅
+                  </div>
 
-                                        📅
-
-                                    </div>
-
-                                    <h2 className="
+                  <h2
+                    className="
 font-semibold
 text-gray-600
-">
+"
+                  >
+                    Ending Tomorrow
+                  </h2>
 
-                                        Ending Tomorrow
-
-                                    </h2>
-
-                                    <p className="
+                  <p
+                    className="
 text-5xl
 font-bold
 text-blue-500
 mt-3
-">
+"
+                  >
+                    {expiryStats.endingTomorrow}
+                  </p>
 
-                                        {expiryStats.endingTomorrow}
-
-                                    </p>
-
-                                    <p className="
+                  <p
+                    className="
 text-sm
 text-gray-500
 mt-2
-">
+"
+                  >
+                    Students
+                  </p>
+                </div>
 
-                                        Students
+                {/* 7 days */}
 
-                                    </p>
-
-                                </div>
-
-
-                                {/* 7 days */}
-
-                                <div className="
+                <div
+                  className="
 bg-yellow-50
 rounded-2xl
 p-5
 border
 border-yellow-200
-">
-
-                                    <div className="
+"
+                >
+                  <div
+                    className="
 text-4xl
 mb-2
-">
+"
+                  >
+                    ⚠
+                  </div>
 
-                                        ⚠
-
-                                    </div>
-
-                                    <h2 className="
+                  <h2
+                    className="
 font-semibold
 text-gray-600
-">
+"
+                  >
+                    Ending In 7 Days
+                  </h2>
 
-                                        Ending In 7 Days
-
-                                    </h2>
-
-                                    <p className="
+                  <p
+                    className="
 text-5xl
 font-bold
 text-yellow-500
 mt-3
-">
+"
+                  >
+                    {expiryStats.ending7Days}
+                  </p>
 
-                                        {expiryStats.ending7Days}
-
-                                    </p>
-
-                                    <p className="
+                  <p
+                    className="
 text-sm
 text-gray-500
 mt-2
-">
+"
+                  >
+                    Students
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* TODAY */}
 
-                                        Students
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                        {/* TODAY */}
-
-                        <div className="
+            <div
+              className="
 bg-white
 rounded-[30px]
 shadow-md
 overflow-hidden
-">
-
-                            <div className="
+"
+            >
+              <div
+                className="
 bg-red-500
 text-white
 p-4
 flex
 justify-between
 items-center
-">
-
-                                <div>
-
-                                    <h1 className="
+"
+              >
+                <div>
+                  <h1
+                    className="
 text-xl
 font-bold
-">
+"
+                  >
+                    📅 Today
+                  </h1>
 
-                                        📅 Today
+                  <p className="text-sm">{new Date().toLocaleDateString()}</p>
 
-                                    </h1>
-
-                                    <p className="text-sm">
-
-                                        {new Date().toLocaleDateString()}
-
-                                    </p>
-
-                                    <p className="
+                  <p
+                    className="
 text-xs
 text-white/80
 mt-1
-">
+"
+                  >
+                    {todayDay}
+                  </p>
+                </div>
 
-                                        {todayDay}
-
-                                    </p>
-
-                                </div>
-
-                                <div className="
+                <div
+                  className="
 bg-white/20
 px-3
 py-1
 rounded-full
 text-sm
 font-bold
-">
+"
+                >
+                  🔒 Fixed
+                </div>
+              </div>
 
-                                    🔒 Fixed
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="
+              <div
+                className="
 p-5
 grid
 grid-cols-1
 md:grid-cols-3
 gap-4
-">
+"
+              >
+                {[
+                  {
+                    title: "🍳 Breakfast",
 
-                                {
-                                    [
-                                        {
-                                            title: "🍳 Breakfast",
+                    menu: todayMenu?.breakfast?.join(", ") || "No Menu",
 
-                                            menu:
-                                                todayMenu?.breakfast?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.todayBreakfastComing,
 
-                                            coming: bookingStats.todayBreakfastComing,
+                    notComing: bookingStats.todayBreakfastNotComing,
 
-                                            notComing: bookingStats.todayBreakfastNotComing,
+                    noResponse: bookingStats.todayBreakfastNoResponse,
+                  },
 
-                                            noResponse: bookingStats.todayBreakfastNoResponse
-                                        },
+                  {
+                    title: "🍛 Lunch",
 
-                                        {
-                                            title: "🍛 Lunch",
+                    menu: todayMenu?.lunch?.join(", ") || "No Menu",
 
-                                            menu:
-                                                todayMenu?.lunch?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.todayLunchComing,
 
-                                            coming: bookingStats.todayLunchComing,
+                    notComing: bookingStats.todayLunchNotComing,
 
-                                            notComing: bookingStats.todayLunchNotComing,
+                    noResponse: bookingStats.todayLunchNoResponse,
+                  },
 
-                                            noResponse: bookingStats.todayLunchNoResponse
-                                        },
+                  {
+                    title: "🌙 Dinner",
 
-                                        {
-                                            title: "🌙 Dinner",
+                    menu: todayMenu?.dinner?.join(", ") || "No Menu",
 
-                                            menu:
-                                                todayMenu?.dinner?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.todayDinnerComing,
 
-                                            coming: bookingStats.todayDinnerComing,
+                    notComing: bookingStats.todayDinnerNotComing,
 
-                                            notComing: bookingStats.todayDinnerNotComing,
-
-                                            noResponse: bookingStats.todayDinnerNoResponse
-                                        }
-                                    ].map((meal, index) => (
-
-                                        <div
-                                            key={index}
-                                            className="
+                    noResponse: bookingStats.todayDinnerNoResponse,
+                  },
+                ].map((meal, index) => (
+                  <div
+                    key={index}
+                    className="
 bg-slate-50
 rounded-2xl
 p-4
@@ -1833,367 +1144,278 @@ border
 hover:shadow-md
 duration-300
 "
-                                        >
-
-                                            <h2 className="
+                  >
+                    <h2
+                      className="
 font-bold
 text-sm
 text-gray-600
 mb-4
-">
-
-                                                {meal.title}
-
-
-                                            </h2>
-                                            <p className="
+"
+                    >
+                      {meal.title}
+                    </h2>
+                    <p
+                      className="
 text-xs
 text-gray-500
 mb-4
 leading-5
-">
-
-                                                🍽 {meal.menu}
-
-                                            </p>
-                                            <div
-                                                className="
+"
+                    >
+                      🍽 {meal.menu}
+                    </p>
+                    <div
+                      className="
 bg-blue-50
 rounded-xl
 p-3
 mb-4
 "
-                                            >
-
-                                                <p
-                                                    className="
+                    >
+                      <p
+                        className="
 font-bold
 text-sm
 mb-2
 "
-                                                >
+                      >
+                        🍗 Extra Orders
+                      </p>
 
-                                                    🍗 Extra Orders
-
-                                                </p>
-
-                                                {
-
-                                                    Object.entries(
-
-                                                        index === 0
-
-                                                            ?
-
-                                                            extraSummary.breakfast
-
-                                                            :
-
-                                                            index === 1
-
-                                                                ?
-
-                                                                extraSummary.lunch
-
-                                                                :
-
-                                                                extraSummary.dinner
-
-                                                    ).length === 0
-
-                                                        ?
-
-                                                        <p
-                                                            className="
+                      {Object.entries(
+                        index === 0
+                          ? extraSummary.breakfast
+                          : index === 1
+                            ? extraSummary.lunch
+                            : extraSummary.dinner,
+                      ).length === 0 ? (
+                        <p
+                          className="
 text-xs
 text-gray-500
 "
-                                                        >
+                        >
+                          No Extra Orders
+                        </p>
+                      ) : (
+                        Object.entries(
+                          index === 0
+                            ? extraSummary.breakfast
+                            : index === 1
+                              ? extraSummary.lunch
+                              : extraSummary.dinner,
+                        )
 
-                                                            No Extra Orders
-
-                                                        </p>
-
-                                                        :
-
-                                                        Object.entries(
-
-                                                            index === 0
-
-                                                                ?
-
-                                                                extraSummary.breakfast
-
-                                                                :
-
-                                                                index === 1
-
-                                                                    ?
-
-                                                                    extraSummary.lunch
-
-                                                                    :
-
-                                                                    extraSummary.dinner
-
-                                                        )
-
-                                                            .map(
-
-                                                                ([item, qty]) => (
-
-                                                                    <div
-
-                                                                        key={item}
-
-                                                                        className="
+                          .map(([item, qty]) => (
+                            <div
+                              key={item}
+                              className="
 flex
 justify-between
 text-sm
 mb-1
 "
+                            >
+                              <span>{item}</span>
 
-                                                                    >
-
-                                                                        <span>
-
-                                                                            {item}
-
-                                                                        </span>
-
-                                                                        <span>
-
-                                                                            x{qty}
-
-                                                                        </span>
-
-                                                                    </div>
-
-                                                                )
-
-                                                            )
-
-                                                }
-
-                                            </div>
-                                            <div className="space-y-3">
-
-                                                <div className="
+                              <span>x{qty}</span>
+                            </div>
+                          ))
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-green-600
 font-medium
-">
+"
+                        >
+                          Coming
+                        </span>
 
-                                                        Coming
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
+"
+                        >
+                          {meal.coming}
+                        </span>
+                      </div>
 
-                                                        {meal.coming}
-
-                                                    </span>
-
-                                                </div>
-
-
-                                                <div className="
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-red-500
 font-medium
-">
+"
+                        >
+                          Not Coming
+                        </span>
 
-                                                        Not Coming
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
+"
+                        >
+                          {meal.notComing}
+                        </span>
+                      </div>
 
-                                                        {meal.notComing}
-
-                                                    </span>
-
-                                                </div>
-
-
-                                                <div className="
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-gray-500
 font-medium
-">
+"
+                        >
+                          No Reply
+                        </span>
 
-                                                        No Reply
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
+"
+                        >
+                          {meal.noResponse}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                                                        {meal.noResponse}
+            {/* TOMORROW */}
 
-                                                    </span>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    ))
-                                }
-
-                            </div>
-
-                        </div>
-
-
-
-                        {/* TOMORROW */}
-
-                        <div className="
+            <div
+              className="
 bg-white
 rounded-[30px]
 shadow-md
 overflow-hidden
-">
-
-                            <div className="
+"
+            >
+              <div
+                className="
 bg-green-500
 text-white
 p-4
 flex
 justify-between
 items-center
-">
-
-                                <div>
-
-                                    <h1 className="
+"
+              >
+                <div>
+                  <h1
+                    className="
 text-xl
 font-bold
-">
+"
+                  >
+                    📅 Tomorrow
+                  </h1>
 
-                                        📅 Tomorrow
+                  <p className="text-sm">
+                    {new Date(Date.now() + 86400000).toLocaleDateString()}
+                  </p>
 
-                                    </h1>
-
-                                    <p className="text-sm">
-
-                                        {
-                                            new Date(
-                                                Date.now() + 86400000
-                                            ).toLocaleDateString()
-                                        }
-
-                                    </p>
-
-                                    <p className="
+                  <p
+                    className="
 text-xs
 text-white/80
 mt-1
-">
+"
+                  >
+                    {tomorrowDay}
+                  </p>
+                </div>
 
-                                        {tomorrowDay}
-
-                                    </p>
-
-                                </div>
-
-                                <div className="
+                <div
+                  className="
 bg-white/20
 px-3
 py-1
 rounded-full
 text-sm
 font-bold
-">
+"
+                >
+                  ✏ Editable
+                </div>
+              </div>
 
-                                    ✏ Editable
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="
+              <div
+                className="
 p-5
 grid
 grid-cols-1
 md:grid-cols-3
 gap-4
-">
+"
+              >
+                {[
+                  {
+                    title: "🍳 Breakfast",
 
-                                {
-                                    [
-                                        {
-                                            title: "🍳 Breakfast",
+                    menu: tomorrowMenu?.breakfast?.join(", ") || "No Menu",
 
-                                            menu:
-                                                tomorrowMenu?.breakfast?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.breakfastComing,
 
-                                            coming: bookingStats.breakfastComing,
+                    notComing: bookingStats.breakfastNotComing,
 
-                                            notComing: bookingStats.breakfastNotComing,
+                    noResponse: bookingStats.breakfastNoResponse,
+                  },
 
-                                            noResponse: bookingStats.breakfastNoResponse
-                                        },
+                  {
+                    title: "🍛 Lunch",
 
-                                        {
-                                            title: "🍛 Lunch",
+                    menu: tomorrowMenu?.lunch?.join(", ") || "No Menu",
 
-                                            menu:
-                                                tomorrowMenu?.lunch?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.lunchComing,
 
-                                            coming: bookingStats.lunchComing,
+                    notComing: bookingStats.lunchNotComing,
 
-                                            notComing: bookingStats.lunchNotComing,
+                    noResponse: bookingStats.lunchNoResponse,
+                  },
 
-                                            noResponse: bookingStats.lunchNoResponse
-                                        },
+                  {
+                    title: "🌙 Dinner",
 
-                                        {
-                                            title: "🌙 Dinner",
+                    menu: tomorrowMenu?.dinner?.join(", ") || "No Menu",
 
-                                            menu:
-                                                tomorrowMenu?.dinner?.join(", ")
-                                                || "No Menu",
+                    coming: bookingStats.dinnerComing,
 
-                                            coming: bookingStats.dinnerComing,
+                    notComing: bookingStats.dinnerNotComing,
 
-                                            notComing: bookingStats.dinnerNotComing,
-
-                                            noResponse: bookingStats.dinnerNoResponse
-                                        }
-                                    ].map((meal, index) => (
-
-                                        <div
-                                            key={index}
-                                            className="
+                    noResponse: bookingStats.dinnerNoResponse,
+                  },
+                ].map((meal, index) => (
+                  <div
+                    key={index}
+                    className="
 bg-slate-50
 rounded-2xl
 p-4
@@ -2201,506 +1423,325 @@ border
 hover:shadow-md
 duration-300
 "
-                                        >
-
-                                            <h2 className="
+                  >
+                    <h2
+                      className="
 font-bold
 text-sm
 text-gray-600
 mb-4
-">
-
-                                                {meal.title}
-
-                                            </h2>
-                                            <p className="
+"
+                    >
+                      {meal.title}
+                    </h2>
+                    <p
+                      className="
 text-xs
 text-gray-500
 mb-4
 leading-5
-">
-
-                                                🍽 {meal.menu}
-
-                                            </p>
-                                            <div className="
+"
+                    >
+                      🍽 {meal.menu}
+                    </p>
+                    <div
+                      className="
 space-y-3
-">
-
-                                                <div className="
+"
+                    >
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-green-600
 font-medium
-">
+"
+                        >
+                          Coming
+                        </span>
 
-                                                        Coming
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
+"
+                        >
+                          {meal.coming}
+                        </span>
+                      </div>
 
-                                                        {meal.coming}
-
-                                                    </span>
-
-                                                </div>
-
-
-                                                <div className="
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-red-500
 font-medium
-">
+"
+                        >
+                          Not Coming
+                        </span>
 
-                                                        Not Coming
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
+"
+                        >
+                          {meal.notComing}
+                        </span>
+                      </div>
 
-                                                        {meal.notComing}
-
-                                                    </span>
-
-                                                </div>
-
-
-                                                <div className="
+                      <div
+                        className="
 flex
 justify-between
 items-center
-">
-
-                                                    <span className="
+"
+                      >
+                        <span
+                          className="
 text-gray-500
 font-medium
-">
+"
+                        >
+                          No Reply
+                        </span>
 
-                                                        No Reply
-
-                                                    </span>
-
-                                                    <span className="
+                        <span
+                          className="
 text-3xl
 font-bold
-">
-
-                                                        {meal.noResponse}
-
-                                                    </span>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    ))
-
-                                }
-
-                            </div>
-
-                        </div>
-
+"
+                        >
+                          {meal.noResponse}
+                        </span>
+                      </div>
                     </div>
-                }
-                {
-                    activePage === "students" &&
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {activePage === "students" && (
+          <div className="bg-white p-6 rounded-3xl">
+            <h1 className="text-2xl font-bold mb-6">👨‍🎓 Student Management</h1>
 
-                    <div className="bg-white p-6 rounded-3xl">
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Student Name"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                className="w-full p-4 border rounded-xl"
+              />
 
-                        <h1 className="text-2xl font-bold mb-6">
+              <input
+                type="text"
+                placeholder="Phone Number"
+                value={studentPhone}
+                onChange={(e) => setStudentPhone(e.target.value)}
+                className="w-full p-4 border rounded-xl"
+              />
 
-                            👨‍🎓 Student Management
-
-                        </h1>
-
-                        <div className="space-y-4">
-
-                            <input
-                                type="text"
-                                placeholder="Student Name"
-                                value={studentName}
-                                onChange={(e) =>
-                                    setStudentName(
-                                        e.target.value
-                                    )}
-                                className="w-full p-4 border rounded-xl"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Phone Number"
-                                value={studentPhone}
-                                onChange={(e) =>
-                                    setStudentPhone(
-                                        e.target.value
-                                    )}
-                                className="w-full p-4 border rounded-xl"
-                            />
-
-                            <input
-                                type="password"
-                                placeholder="6 Digit Password"
-                                value={studentPassword}
-                                onChange={(e) =>
-                                    setStudentPassword(
-                                        e.target.value
-                                    )}
-                                className="w-full p-4 border rounded-xl"
-                            />
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) =>
-                                    setStartDate(
-                                        e.target.value
-                                    )
-                                }
-                                className="
+              <input
+                type="password"
+                placeholder="6 Digit Password"
+                value={studentPassword}
+                onChange={(e) => setStudentPassword(e.target.value)}
+                className="w-full p-4 border rounded-xl"
+              />
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="
 w-full
 p-4
 border
 rounded-xl"
-                            />
+              />
 
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={(e) =>
-                                    setEndDate(
-                                        e.target.value
-                                    )
-                                }
-                                className="
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="
 w-full
 p-4
 border
 rounded-xl"
-                            />
-                            <button
-                                onClick={addStudent}
-                                className="
+              />
+              <button
+                onClick={addStudent}
+                className="
 bg-blue-600
 text-white
 px-6
 py-4
 rounded-xl
-">
-
-                                {
-                                    isEditing
-                                        ?
-                                        "Update Student"
-                                        :
-                                        "Add Student"
-                                }
-
-                            </button>
-
-                        </div>
-                        <div className="mt-10">
-
-                            <h2 className="text-2xl font-bold mb-5">
-
-                                📋 Students List
-
-                            </h2>
-                            <input
-                                type="text"
-                                placeholder="Search by Name, Phone or Student ID"
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    setSearchTerm(
-                                        e.target.value
-                                    )
-                                }
-                                className="
+"
+              >
+                {isEditing ? "Update Student" : "Add Student"}
+              </button>
+            </div>
+            <div className="mt-10">
+              <h2 className="text-2xl font-bold mb-5">📋 Students List</h2>
+              <input
+                type="text"
+                placeholder="Search by Name, Phone or Student ID"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="
 w-full
 p-4
 border
 rounded-xl
 mb-6
 "
-                            />
+              />
 
-                            <div className="overflow-x-auto">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-slate-800 text-white">
+                      <th className="p-4 text-left">No</th>
 
-                                <table className="w-full border-collapse">
+                      <th className="p-4 text-left">Student ID</th>
 
-                                    <thead>
+                      <th className="p-4 text-left">Name</th>
 
-                                        <tr className="bg-slate-800 text-white">
+                      <th className="p-4 text-left">Phone</th>
 
-                                            <th className="p-4 text-left">
-                                                No
-                                            </th>
+                      <th className="p-4 text-left">Start Date</th>
 
-                                            <th className="p-4 text-left">
-                                                Student ID
-                                            </th>
+                      <th className="p-4 text-left">End Date</th>
 
-                                            <th className="p-4 text-left">
-                                                Name
-                                            </th>
+                      <th className="p-4 text-left">Status</th>
 
-                                            <th className="p-4 text-left">
-                                                Phone
-                                            </th>
+                      <th className="p-4 text-left">Remaining Days</th>
 
-                                            <th className="p-4 text-left">
-                                                Start Date
-                                            </th>
+                      <th className="p-4 text-left">Actions</th>
+                    </tr>
+                  </thead>
 
-                                            <th className="p-4 text-left">
-                                                End Date
-                                            </th>
-
-                                            <th className="p-4 text-left">
-                                                Status
-                                            </th>
-
-                                            <th className="p-4 text-left">
-                                                Remaining Days
-                                            </th>
-
-                                            <th className="p-4 text-left">
-                                                Actions
-                                            </th>
-                                        </tr>
-
-                                    </thead>
-
-                                    <tbody>
-
-                                        {
-                                            filteredStudents.map((student, index) => (
-
-                                                <tr
-                                                    key={student._id}
-                                                    className="
+                  <tbody>
+                    {filteredStudents.map((student, index) => (
+                      <tr
+                        key={student._id}
+                        className="
 border-b
 hover:bg-slate-100
 "
-                                                >
+                      >
+                        <td className="p-4">{index + 1}</td>
 
-                                                    <td className="p-4">
+                        <td className="p-4">{student.studentId}</td>
 
-                                                        {index + 1}
+                        <td className="p-4">{student.name}</td>
 
-                                                    </td>
+                        <td className="p-4">{student.phone}</td>
 
-                                                    <td className="p-4">
+                        <td className="p-4">
+                          {new Date(
+                            student.studentStartDate,
+                          ).toLocaleDateString()}
+                        </td>
 
-                                                        {student.studentId}
+                        <td className="p-4">
+                          {new Date(
+                            student.studentEndDate,
+                          ).toLocaleDateString()}
+                        </td>
 
-                                                    </td>
-
-                                                    <td className="p-4">
-
-                                                        {student.name}
-
-                                                    </td>
-
-                                                    <td className="p-4">
-
-                                                        {student.phone}
-
-                                                    </td>
-
-                                                    <td className="p-4">
-
-                                                        {
-                                                            new Date(
-                                                                student.studentStartDate
-                                                            ).toLocaleDateString()
-                                                        }
-
-                                                    </td>
-
-                                                    <td className="p-4">
-
-                                                        {
-                                                            new Date(
-                                                                student.studentEndDate
-                                                            ).toLocaleDateString()
-                                                        }
-
-                                                    </td>
-
-
-                                                    <td className="p-4">
-
-                                                        <span
-                                                            className={`
+                        <td className="p-4">
+                          <span
+                            className={`
 
 px-3
 py-1
 rounded-full
 text-white
 
-${new Date(
-                                                                student.studentEndDate
-                                                            ) > new Date()
-
-                                                                    ?
-
-                                                                    "bg-green-500"
-
-                                                                    :
-
-                                                                    "bg-red-500"
-
-                                                                }
+${new Date(student.studentEndDate) > new Date() ? "bg-green-500" : "bg-red-500"}
 
 `}
-                                                        >
+                          >
+                            {new Date(student.studentEndDate) > new Date()
+                              ? "Active"
+                              : "Expired"}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {Math.max(
+                            0,
 
-                                                            {
-                                                                new Date(
-                                                                    student.studentEndDate
-                                                                ) > new Date()
-
-                                                                    ?
-
-                                                                    "Active"
-
-                                                                    :
-
-                                                                    "Expired"
-
-                                                            }
-
-                                                        </span>
-
-                                                    </td>
-                                                    <td className="p-4">
-
-                                                        {
-
-                                                            Math.max(
-
-                                                                0,
-
-                                                                Math.ceil(
-
-                                                                    (
-                                                                        new Date(
-                                                                            student.studentEndDate
-                                                                        )
-
-                                                                        -
-
-                                                                        new Date()
-
-                                                                    )
-
-                                                                    /
-
-                                                                    (
-                                                                        1000 * 60 * 60 * 24
-                                                                    )
-
-                                                                )
-
-                                                            )
-
-                                                        } Days
-
-                                                    </td>
-                                                    <td className="p-4 flex gap-2">
-
-                                                        <button
-                                                            onClick={() =>
-                                                                editStudent(student)
-                                                            }
-                                                            className="
+                            Math.ceil(
+                              (new Date(student.studentEndDate) - new Date()) /
+                                (1000 * 60 * 60 * 24),
+                            ),
+                          )}{" "}
+                          Days
+                        </td>
+                        <td className="p-4 flex gap-2">
+                          <button
+                            onClick={() => editStudent(student)}
+                            className="
 bg-blue-500
 text-white
 px-3
 py-2
 rounded-lg"
-                                                        >
+                          >
+                            ✏️ Edit
+                          </button>
 
-                                                            ✏️ Edit
-
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() =>
-                                                                deleteStudent(
-                                                                    student._id
-                                                                )
-                                                            }
-                                                            className="
+                          <button
+                            onClick={() => deleteStudent(student._id)}
+                            className="
 bg-red-500
 text-white
 px-3
 py-2
 rounded-lg"
-                                                        >
+                          >
+                            🗑 Delete
+                          </button>
 
-                                                            🗑 Delete
-
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() =>
-                                                                reactivateStudent(
-                                                                    student._id
-                                                                )
-                                                            }
-                                                            className="
+                          <button
+                            onClick={() => reactivateStudent(student._id)}
+                            className="
 bg-green-500
 text-white
 px-3
 py-2
 rounded-lg"
-                                                        >
+                          >
+                            🔄 Reactivate
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
-                                                            🔄 Reactivate
-
-                                                        </button>
-
-                                                    </td>
-                                                </tr>
-
-                                            ))
-                                        }
-
-                                    </tbody>
-
-                                </table>
-
-                            </div>
-
-                        </div>
-                    </div>
-                }
-
-                {
-                    activePage === "menu"
-
-                    &&
-
-                    <div className="
+        {activePage === "menu" && (
+          <div
+            className="
 bg-white
 w-full
 max-w-[1800px]
@@ -2711,102 +1752,67 @@ lg:p-8
 xl:p-10
 rounded-[30px]
 shadow-lg
-">
+"
+          >
+            <div className="mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold">🍛 Weekly Menu</h1>
 
-                        <div className="mb-8">
+              <p className="text-gray-500 mt-2">
+                Create and manage weekly menu
+              </p>
+            </div>
 
-                            <h1 className="text-2xl md:text-3xl font-bold">
+            <div>
+              <label className="font-semibold">Select Day</label>
 
-                                🍛 Weekly Menu
+              <select
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(e.target.value)}
+                className="w-full mt-2 p-4 rounded-xl border"
+              >
+                <option>Sunday</option>
+                <option>Monday</option>
+                <option>Tuesday</option>
+                <option>Wednesday</option>
+                <option>Thursday</option>
+                <option>Friday</option>
+                <option>Saturday</option>
+              </select>
+            </div>
 
-                            </h1>
-
-                            <p className="text-gray-500 mt-2">
-
-                                Create and manage weekly menu
-
-                            </p>
-
-                        </div>
-
-
-
-                        <div>
-
-                            <label className="font-semibold">
-
-                                Select Day
-
-                            </label>
-
-                            <select
-                                value={selectedDay}
-                                onChange={(e) =>
-                                    setSelectedDay(
-                                        e.target.value
-                                    )
-                                }
-                                className="w-full mt-2 p-4 rounded-xl border"
-                            >
-
-                                <option>Sunday</option>
-                                <option>Monday</option>
-                                <option>Tuesday</option>
-                                <option>Wednesday</option>
-                                <option>Thursday</option>
-                                <option>Friday</option>
-                                <option>Saturday</option>
-
-                            </select>
-
-                        </div>
-
-
-
-                        {
-                            [
-                                {
-                                    title: "🍳 Breakfast",
-                                    data: breakfast,
-                                    type: "breakfast"
-                                },
-                                {
-                                    title: "🍛 Lunch",
-                                    data: lunch,
-                                    type: "lunch"
-                                },
-                                {
-                                    title: "🌙 Dinner",
-                                    data: dinner,
-                                    type: "dinner"
-                                }
-                            ].map((meal) => (
-
-                                <div
-                                    key={meal.type}
-                                    className="mt-8 bg-slate-50 p-6 rounded-3xl"
-                                >
-
-                                    <div className="
+            {[
+              {
+                title: "🍳 Breakfast",
+                data: breakfast,
+                type: "breakfast",
+              },
+              {
+                title: "🍛 Lunch",
+                data: lunch,
+                type: "lunch",
+              },
+              {
+                title: "🌙 Dinner",
+                data: dinner,
+                type: "dinner",
+              },
+            ].map((meal) => (
+              <div key={meal.type} className="mt-8 bg-slate-50 p-6 rounded-3xl">
+                <div
+                  className="
 flex
 flex-col
 sm:flex-row
 justify-between
 gap-4
 items-center
-">
+"
+                >
+                  <h2 className="font-bold text-xl">{meal.title}</h2>
 
-                                        <h2 className="font-bold text-xl">
-
-                                            {meal.title}
-
-                                        </h2>
-
-                                        <button
-                                            onClick={() =>
-                                                addItem(meal.type)
-                                            }
-                                            className="
+                  <button
+                    onClick={() => addItem(meal.type)}
+                    className="
 w-full
 sm:w-auto
 bg-blue-600
@@ -2815,63 +1821,40 @@ px-5
 py-3
 rounded-xl
 "
-                                        >
+                  >
+                    + Add Item
+                  </button>
+                </div>
 
-                                            + Add Item
-
-                                        </button>
-
-                                    </div>
-
-
-
-                                    <div className="space-y-4 mt-5">
-
-                                        {
-
-                                            meal.data.map((item, index) => (
-
-                                                <div
-                                                    key={index}
-                                                    className="
+                <div className="space-y-4 mt-5">
+                  {meal.data.map((item, index) => (
+                    <div
+                      key={index}
+                      className="
 flex
 flex-col
 sm:flex-row
 gap-3
 "
-                                                >
-
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Enter item"
-                                                        value={item}
-                                                        onChange={(e) =>
-
-                                                            updateItem(
-                                                                meal.type,
-                                                                index,
-                                                                e.target.value
-                                                            )
-
-                                                        }
-                                                        className="
+                    >
+                      <input
+                        type="text"
+                        placeholder="Enter item"
+                        value={item}
+                        onChange={(e) =>
+                          updateItem(meal.type, index, e.target.value)
+                        }
+                        className="
 flex-1
 p-4
 border
 rounded-xl
 "
-                                                    />
+                      />
 
-                                                    <button
-                                                        onClick={() =>
-
-                                                            removeItem(
-                                                                meal.type,
-                                                                index
-                                                            )
-
-                                                        }
-                                                        className="
+                      <button
+                        onClick={() => removeItem(meal.type, index)}
+                        className="
 w-full
 sm:w-auto
 bg-red-500
@@ -2879,33 +1862,18 @@ text-white
 px-6
 rounded-xl
 "
-                                                    >
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
 
-                                                        ✕
-
-                                                    </button>
-
-                                                </div>
-
-                                            ))
-
-                                        }
-
-                                    </div>
-
-                                </div>
-
-                            ))
-
-                        }
-
-
-
-                        <button
-
-                            onClick={saveMenu}
-
-                            className="
+            <button
+              onClick={saveMenu}
+              className="
 mt-10
 w-full
 md:w-auto
@@ -2919,915 +1887,550 @@ rounded-2xl
 hover:scale-105
 duration-300
 "
+            >
+              📋 Save Menu
+            </button>
 
-                        >
+            <div className="mt-12">
+              <h1 className="text-2xl font-bold">📋 Saved Menus</h1>
 
-                            📋  Save Menu
-
-                        </button>
-
-
-                        <div className="mt-12">
-
-                            <h1 className="text-2xl font-bold">
-
-                                📋 Saved Menus
-
-                            </h1>
-
-                            <div className="
+              <div
+                className="
 grid
 grid-cols-1
 md:grid-cols-2
 xl:grid-cols-3
 gap-6
 mt-6
-">
-
-                                {
-                                    savedMenus.length === 0 ?
-
-                                        <div className="col-span-full text-center p-10">
-
-                                            <p className="text-gray-500">
-
-                                                No menu created yet
-
-                                            </p>
-
-                                        </div>
-
-                                        :
-
-                                        savedMenus.map((menu, index) => (
-
-                                            <div
-                                                key={index}
-                                                className="
+"
+              >
+                {savedMenus.length === 0 ? (
+                  <div className="col-span-full text-center p-10">
+                    <p className="text-gray-500">No menu created yet</p>
+                  </div>
+                ) : (
+                  savedMenus.map((menu, index) => (
+                    <div
+                      key={index}
+                      className="
 bg-slate-100
 rounded-3xl
 p-6
 shadow
 "
-                                            >
+                    >
+                      <h2 className="font-bold text-xl">{menu.day}</h2>
 
-                                                <h2 className="font-bold text-xl">
+                      <div className="mt-4">
+                        <p className="font-semibold">🍳 Breakfast</p>
 
-                                                    {menu.day}
+                        {menu.breakfast.map((item, i) => (
+                          <p key={i}>• {item}</p>
+                        ))}
+                      </div>
 
-                                                </h2>
+                      <div className="mt-4">
+                        <p className="font-semibold">🍛 Lunch</p>
 
+                        {menu.lunch.map((item, i) => (
+                          <p key={i}>• {item}</p>
+                        ))}
+                      </div>
 
-                                                <div className="mt-4">
+                      <div className="mt-4">
+                        <p className="font-semibold">🌙 Dinner</p>
 
-                                                    <p className="font-semibold">
-                                                        🍳 Breakfast
-                                                    </p>
-
-                                                    {
-                                                        menu.breakfast.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-
-                                                <div className="mt-4">
-
-                                                    <p className="font-semibold">
-                                                        🍛 Lunch
-                                                    </p>
-
-                                                    {
-                                                        menu.lunch.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-
-                                                <div className="mt-4">
-
-                                                    <p className="font-semibold">
-                                                        🌙 Dinner
-                                                    </p>
-
-                                                    {
-                                                        menu.dinner.map((item, i) => (
-
-                                                            <p key={i}>
-                                                                • {item}
-                                                            </p>
-
-                                                        ))
-                                                    }
-
-                                                </div>
-
-                                            </div>
-
-                                        ))
-
-                                }
-
-                            </div>
-
-                        </div>
-
-
+                        {menu.dinner.map((item, i) => (
+                          <p key={i}>• {item}</p>
+                        ))}
+                      </div>
                     </div>
-                }
-                {
-                    activePage === "extra"
-
-                    &&
-
-                    <div
-                        className="
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {activePage === "extra" && (
+          <div
+            className="
 bg-white
 p-6
 rounded-3xl
 space-y-6
 "
-                    >
-
-                        <div
-                            className="
+          >
+            <div
+              className="
 flex
 gap-3
 border-b
 pb-4
 "
-                        >
-
-                            <button
-
-                                onClick={() =>
-                                    setExtraTab(
-                                        "payment"
-                                    )
-                                }
-
-                                className={`
+            >
+              <button
+                onClick={() => setExtraTab("payment")}
+                className={`
 
 px-5
 py-3
 rounded-xl
 
-${extraTab === "payment"
-
-                                        ?
-
-                                        "bg-blue-600 text-white"
-
-                                        :
-
-                                        "bg-slate-100"
-
-                                    }
+${extraTab === "payment" ? "bg-blue-600 text-white" : "bg-slate-100"}
 
 `}
+              >
+                💳 Payment Setup
+              </button>
 
-                            >
-
-                                💳 Payment Setup
-
-                            </button>
-
-                            <button
-
-                                onClick={() =>
-                                    setExtraTab(
-                                        "items"
-                                    )
-                                }
-
-                                className={`
+              <button
+                onClick={() => setExtraTab("items")}
+                className={`
 
 px-5
 py-3
 rounded-xl
 
-${extraTab === "items"
-
-                                        ?
-
-                                        "bg-blue-600 text-white"
-
-                                        :
-
-                                        "bg-slate-100"
-
-                                    }
+${extraTab === "items" ? "bg-blue-600 text-white" : "bg-slate-100"}
 
 `}
+              >
+                🍗 Extra Items
+              </button>
 
-                            >
-
-                                🍗 Extra Items
-
-                            </button>
-
-                            <button
-
-                                onClick={() =>
-                                    setExtraTab(
-                                        "orders"
-                                    )
-                                }
-
-                                className={`
+              <button
+                onClick={() => setExtraTab("orders")}
+                className={`
 
 px-5
 py-3
 rounded-xl
 
-${extraTab === "orders"
-
-                                        ?
-
-                                        "bg-blue-600 text-white"
-
-                                        :
-
-                                        "bg-slate-100"
-
-                                    }
+${extraTab === "orders" ? "bg-blue-600 text-white" : "bg-slate-100"}
 
 `}
+              >
+                📋 Orders
+              </button>
+            </div>
 
-                            >
-
-                                📋 Orders
-
-                            </button>
-
-                        </div>
-
-                        {
-                            extraTab === "payment"
-
-                            &&
-
-                            <div
-                                className="
+            {extraTab === "payment" && (
+              <div
+                className="
 space-y-4
 "
-                            >
-
-                                <h1
-                                    className="
+              >
+                <h1
+                  className="
 text-2xl
 font-bold
 "
-                                >
+                >
+                  💳 Payment Setup
+                </h1>
 
-                                    💳 Payment Setup
-
-                                </h1>
-
-                                <input
-
-                                    type="text"
-
-                                    placeholder="UPI Name"
-
-                                    value={upiName}
-
-                                    onChange={(e) =>
-
-                                        setUpiName(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <input
+                  type="text"
+                  placeholder="UPI Name"
+                  value={upiName}
+                  onChange={(e) => setUpiName(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
-                                />
+                />
 
-                                <input
-
-                                    type="text"
-
-                                    placeholder="UPI ID"
-
-                                    value={upiId}
-
-                                    onChange={(e) =>
-
-                                        setUpiId(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <input
+                  type="text"
+                  placeholder="UPI ID"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
-                                />
+                />
 
-                                <button
-
-                                    onClick={
-                                        savePaymentInfo
-                                    }
-
-                                    className="
+                <button
+                  onClick={savePaymentInfo}
+                  className="
 bg-green-600
 text-white
 px-8
 py-4
 rounded-xl
 "
-
-                                >
-
-                                    {
-
-                                        user?.upiId
-
-                                            ?
-
-                                            "Update Payment Info"
-
-                                            :
-
-                                            "Save Payment Info"
-
-                                    }
-
-                                </button>
-
-                            </div>
-
-                        }
-                        {
-                            extraTab === "items"
-
-                            &&
-
-                            <div
-                                className="
+                >
+                  {user?.upiId ? "Update Payment Info" : "Save Payment Info"}
+                </button>
+              </div>
+            )}
+            {extraTab === "items" && (
+              <div
+                className="
 space-y-5
 "
-                            >
-
-                                <h1
-                                    className="
+              >
+                <h1
+                  className="
 text-2xl
 font-bold
 "
-                                >
+                >
+                  🍗 Extra Meal Items
+                </h1>
 
-                                    🍗 Extra Meal Items
-
-                                </h1>
-
-                                <select
-
-                                    value={extraDay}
-
-                                    onChange={(e) =>
-
-                                        setExtraDay(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <select
+                  value={extraDay}
+                  onChange={(e) => setExtraDay(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
+                >
+                  {days.map((day) => (
+                    <option key={day}>{day}</option>
+                  ))}
+                </select>
 
-                                >
-
-                                    {days.map(day => (
-
-                                        <option
-                                            key={day}
-                                        >
-
-                                            {day}
-
-                                        </option>
-
-                                    ))}
-
-                                </select>
-
-                                <select
-
-                                    value={
-                                        extraMealType
-                                    }
-
-                                    onChange={(e) =>
-
-                                        setExtraMealType(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <select
+                  value={extraMealType}
+                  onChange={(e) => setExtraMealType(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
+                >
+                  <option value="breakfast">Breakfast</option>
 
-                                >
+                  <option value="lunch">Lunch</option>
 
-                                    <option value="breakfast">
+                  <option value="dinner">Dinner</option>
+                </select>
 
-                                        Breakfast
-
-                                    </option>
-
-                                    <option value="lunch">
-
-                                        Lunch
-
-                                    </option>
-
-                                    <option value="dinner">
-
-                                        Dinner
-
-                                    </option>
-
-                                </select>
-
-                                <input
-
-                                    type="text"
-
-                                    placeholder="Item Name"
-
-                                    value={extraName}
-
-                                    onChange={(e) =>
-
-                                        setExtraName(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <input
+                  type="text"
+                  placeholder="Item Name"
+                  value={extraName}
+                  onChange={(e) => setExtraName(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
-                                />
+                />
 
-                                <input
-
-                                    type="number"
-
-                                    placeholder="Price"
-
-                                    value={extraPrice}
-
-                                    onChange={(e) =>
-
-                                        setExtraPrice(
-                                            e.target.value
-                                        )
-
-                                    }
-
-                                    className="
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={extraPrice}
+                  onChange={(e) => setExtraPrice(e.target.value)}
+                  className="
 w-full
 p-4
 border
 rounded-xl
 "
-                                />
-                                <button
-
-                                    onClick={
-
-                                        editingExtraId
-
-                                            ?
-
-                                            updateExtraItem
-
-                                            :
-
-                                            saveExtraItem
-
-                                    }
-
-                                    className="
+                />
+                <button
+                  onClick={editingExtraId ? updateExtraItem : saveExtraItem}
+                  className="
 bg-green-600
 text-white
 px-8
 py-4
 rounded-xl
 "
+                >
+                  {editingExtraId ? "Update Item" : "Save Item"}
+                </button>
 
-                                >
-
-                                    {
-
-                                        editingExtraId
-
-                                            ?
-
-                                            "Update Item"
-
-                                            :
-
-                                            "Save Item"
-
-                                    }
-
-                                </button>
-
-                                <div
-                                    className="
+                <div
+                  className="
 overflow-x-auto
 rounded-xl
 border
 "
-                                >
-
-                                    <table
-                                        className="
+                >
+                  <table
+                    className="
 w-full
 "
-                                    >
-
-                                        <thead>
-
-                                            <tr
-                                                className="
+                  >
+                    <thead>
+                      <tr
+                        className="
 bg-slate-900
 text-white
 "
-                                            >
+                      >
+                        <th className="p-4">Day</th>
 
-                                                <th className="p-4">
-                                                    Day
-                                                </th>
+                        <th className="p-4">Meal</th>
 
-                                                <th className="p-4">
-                                                    Meal
-                                                </th>
+                        <th className="p-4">Item</th>
 
-                                                <th className="p-4">
-                                                    Item
-                                                </th>
+                        <th className="p-4">Price</th>
 
-                                                <th className="p-4">
-                                                    Price
-                                                </th>
+                        <th className="p-4">Actions</th>
+                      </tr>
+                    </thead>
 
-                                                <th className="p-4">
-                                                    Actions
-                                                </th>
-
-                                            </tr>
-
-                                        </thead>
-
-                                        <tbody>
-
-                                            {
-
-                                                extraItems.map(
-
-                                                    item => (
-
-                                                        <tr
-                                                            key={item._id}
-                                                            className="
+                    <tbody>
+                      {extraItems.map((item) => (
+                        <tr
+                          key={item._id}
+                          className="
 border-b
 hover:bg-slate-100
 "
-                                                        >
+                        >
+                          <td className="p-4">{item.day}</td>
 
-                                                            <td className="p-4">
+                          <td className="p-4">{item.mealType}</td>
 
-                                                                {item.day}
+                          <td className="p-4">{item.itemName}</td>
 
-                                                            </td>
+                          <td className="p-4">₹{item.price}</td>
 
-                                                            <td className="p-4">
-
-                                                                {item.mealType}
-
-                                                            </td>
-
-                                                            <td className="p-4">
-
-                                                                {item.itemName}
-
-                                                            </td>
-
-                                                            <td className="p-4">
-
-                                                                ₹{item.price}
-
-                                                            </td>
-
-                                                            <td
-                                                                className="
+                          <td
+                            className="
 p-4
 flex
 gap-2
 "
-                                                            >
-
-                                                                <button
-
-                                                                    onClick={() =>
-                                                                        editExtraItem(
-                                                                            item
-                                                                        )
-                                                                    }
-
-                                                                    className="
+                          >
+                            <button
+                              onClick={() => editExtraItem(item)}
+                              className="
 bg-blue-500
 text-white
 px-3
 py-2
 rounded-lg
 "
+                            >
+                              ✏️
+                            </button>
 
-                                                                >
-
-                                                                    ✏️
-
-                                                                </button>
-
-                                                                <button
-
-                                                                    onClick={() =>
-
-                                                                        deleteExtraItem(
-                                                                            item._id
-                                                                        )
-
-                                                                    }
-
-                                                                    className="
+                            <button
+                              onClick={() => deleteExtraItem(item._id)}
+                              className="
 bg-red-500
 text-white
 px-3
 py-2
 rounded-lg
 "
-
-                                                                >
-
-                                                                    🗑
-
-                                                                </button>
-
-                                                            </td>
-
-                                                        </tr>
-
-                                                    )
-
-                                                )
-
-                                            }
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-
-                            </div>
-
-                        }
-                        {
-                            extraTab === "orders"
-
-                            &&
-
-                            <div
-                                className="
+                            >
+                              🗑
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            {extraTab === "orders" && (
+              <div
+                className="
 space-y-4
 "
-                            >
-
-                                <h1
-                                    className="
+              >
+                <h1
+                  className="
 text-2xl
 font-bold
 "
-                                >
+                >
+                  📋 Extra Orders
+                </h1>
 
-                                    📋 Extra Orders
-
-                                </h1>
-
-                                {
-
-                                    orders.length === 0
-
-                                        ?
-
-                                        <p>
-
-                                            No Orders
-
-                                        </p>
-
-                                        :
-
-                                        orders.map(
-
-                                            order => (
-
-                                                <div
-
-                                                    key={order._id}
-
-                                                    className="
+                {orders.length === 0 ? (
+                  <p>No Orders</p>
+                ) : (
+                  orders.map((order) => (
+                    <div
+                      key={order._id}
+                      className="
 bg-slate-100
 rounded-xl
 p-5
 space-y-3
 "
+                    >
+                      <p>
+                        🆔
+                        {order.studentId}
+                      </p>
 
-                                                >
+                      <div className="bg-white rounded-xl p-3 space-y-2">
+                        <h3 className="font-bold">💳 Payment History</h3>
 
-                                                    <p>
+                        {order.paymentHistory?.length > 0 ? (
+                          order.paymentHistory.map((payment, index) => (
+                            <div
+                              key={index}
+                              className="border rounded-lg p-2 text-sm"
+                            >
+                              <p>Payment {index + 1}</p>
 
-                                                        🆔
+                              <p>💰 ₹{payment.amount}</p>
 
-                                                        {order.studentId}
+                              <div className="flex items-center gap-2">
+                                <span>
+                                  💳 Transaction:
+                                  <b>
+                                    {payment.transactionId || "Not Provided"}
+                                  </b>
+                                </span>
 
-                                                    </p>
+                                {payment.transactionId && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await navigator.clipboard.writeText(
+                                          payment.transactionId || "",
+                                        );
+                                        alert("✅ UTR Copied Successfully");
+                                      } catch (error) {
+                                        alert("❌ Copy failed");
+                                      }
+                                    }}
+                                    className="ml-2 text-slate-500 hover:text-blue-600 text-xl"
+                                    title="Copy UTR"
+                                  >
+                                    📋
+                                  </button>
+                                )}
+                              </div>
 
-                                                    <p>
+                              <div className="mt-2">
+                                <p className="font-semibold">
+                                  🍗 Ordered Items:
+                                </p>
 
-                                                        💰 ₹
+                                {payment.items?.length > 0 ? (
+                                  payment.items.map((item, i) => (
+                                    <p key={i}>
+                                      • {item.itemName} x{item.quantity}
+                                    </p>
+                                  ))
+                                ) : (
+                                  <p>No items found</p>
+                                )}
+                              </div>
 
-                                                        {order.extraTotal}
+                              <p>
+                                {payment.status === "confirmed"
+                                  ? "✅ Confirmed"
+                                  : "⏳ Waiting"}
+                              </p>
 
-                                                    </p>
-                                                    <p>
+                              {payment.status !== "confirmed" && (
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await API.put(
+                                        `/booking/confirm-payment/${order._id}/${index}`,
+                                      );
 
-                                                        💳 Transaction:
+                                      toast.success("Payment Confirmed 🎉");
 
-                                                        <b>
-
-                                                            {
-
-                                                                order.transactionId
-
-                                                                ||
-
-                                                                "Not Provided"
-
-                                                            }
-
-                                                        </b>
-
-                                                    </p>
-                                                    <div>
-
-                                                        🍗 Items:
-
-                                                        {
-                                                            order.extraItems?.length > 0
-
-                                                                ?
-
-                                                                order.extraItems.map(
-
-                                                                    item => (
-
-                                                                        <div
-                                                                            key={item.itemId}
-                                                                            className="
+                                      fetchOrders();
+                                    } catch (error) {
+                                      toast.error("Failed");
+                                    }
+                                  }}
+                                  className="
+bg-green-600
+text-white
+px-4
+py-2
+rounded-lg
+mt-2
+"
+                                >
+                                  ✅ Confirm Payment
+                                </button>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <>
+                            <p>💰 ₹{order.extraTotal}</p>
+                            <p>
+                              💳 Transaction:
+                              <b>{order.transactionId || "Not Provided"}</b>
+                            </p>
+                          </>
+                        )}
+                      </div>
+                      <div>
+                        🍗 Items:
+                        {order.extraItems?.length > 0 ? (
+                          groupItems(order.extraItems).map((item) => (
+                            <div
+                              key={item.itemId}
+                              className="
 bg-white
 p-3
 rounded-lg
 mb-2
 "
-                                                                        >
+                            >
+                              <div>
+                                🍗 {item.itemName}x{item.quantity}
+                              </div>
 
-                                                                            <div>
-
-                                                                                🍗 {item.itemName}
-
-                                                                                x
-
-                                                                                {item.quantity}
-
-                                                                            </div>
-
-                                                                            <div
-                                                                                className="
+                              <div
+                                className="
 text-sm
 text-gray-500
 "
-                                                                            >
+                              >
+                                🍽
+                                {item.mealType?.charAt(0).toUpperCase() +
+                                  item.mealType?.slice(1)}
+                              </div>
 
-                                                                                🍽
-
-                                                                                {
-
-                                                                                    item.mealType
-                                                                                        ?.charAt(0)
-                                                                                        .toUpperCase()
-
-                                                                                    +
-
-                                                                                    item.mealType
-                                                                                        ?.slice(1)
-
-                                                                                }
-
-                                                                            </div>
-
-                                                                            <div
-                                                                                className="
+                              <div
+                                className="
 text-sm
 text-gray-500
 "
-                                                                            >
+                              >
+                                📅
+                                {new Date(order.bookingDate).toLocaleDateString(
+                                  "en-US",
 
-                                                                                📅
+                                  {
+                                    weekday: "long",
+                                  },
+                                )}
+                              </div>
 
-                                                                                {
+                              <div>₹{item.price * item.quantity}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <p>No extra items</p>
+                        )}
+                      </div>
 
-                                                                                    new Date(
-                                                                                        order.bookingDate
-                                                                                    )
-
-                                                                                        .toLocaleDateString(
-
-                                                                                            "en-US",
-
-                                                                                            {
-                                                                                                weekday: "long"
-                                                                                            }
-
-                                                                                        )
-
-                                                                                }
-
-                                                                            </div>
-
-                                                                            <div>
-
-                                                                                ₹
-
-                                                                                {item.price * item.quantity}
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    )
-
-                                                                )
-                                                                :
-
-                                                                <p>
-
-                                                                    No extra items
-
-                                                                </p>
-
-                                                        }
-
-                                                    </div>
-
-                                                    <div
-                                                        className={`
+                      <div
+                        className={`
 
 text-white
 px-4
@@ -3835,495 +2438,350 @@ py-2
 rounded-xl
 inline-block
 
-${order.orderStatus === "confirmed"
-
-                                                                ?
-
-                                                                "bg-green-500"
-
-                                                                :
-
-                                                                "bg-yellow-500"
-
-                                                            }
+${order.orderStatus === "confirmed" ? "bg-green-500" : "bg-yellow-500"}
 
 `}
+                      >
+                        {order.orderStatus === "confirmed"
+                          ? "✅ Confirmed"
+                          : "⏳ Waiting"}
+                      </div>
 
-                                                    >
-
-                                                        {
-
-                                                            order.orderStatus === "confirmed"
-
-                                                                ?
-
-                                                                "✅ Confirmed"
-
-                                                                :
-
-                                                                "⏳ Waiting"
-
-                                                        }
-
-                                                    </div>
-
-                                                    {
-
-                                                        order.orderStatus !== "confirmed"
-
-                                                        &&
-
-                                                        <button
-
-                                                            onClick={() =>
-
-                                                                openOrder(
-                                                                    order
-                                                                )
-
-                                                            }
-
-                                                            className="
+                      {order.orderStatus !== "confirmed" && (
+                        <button
+                          onClick={() => openOrder(order)}
+                          className="
 bg-blue-600
 text-white
 px-5
 py-3
 rounded-xl
 "
-
-                                                        >
-
-                                                            👁 View
-
-                                                        </button>
-
-                                                    }
-
-                                                </div>
-
-                                            )
-
-                                        )
-
-                                }
-
-                            </div>
-                        }
+                        >
+                          👁 View
+                        </button>
+                      )}
                     </div>
-
-                }
-                {
-                    activePage === "bookings"
-
-                    &&
-
-                    <div className="
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {activePage === "bookings" && (
+          <div
+            className="
 bg-white
 p-6
 rounded-3xl
 space-y-6
-">
+"
+          >
+            <h1 className="text-2xl font-bold">📋 Meal Attendance</h1>
 
-                        <h1 className="
-text-3xl
-font-bold
-">
+            <div className="flex items-center justify-center gap-8 mb-4">
+              <button
+                onClick={() => {
+                  const newDate = new Date(attendanceDate);
+                  newDate.setDate(newDate.getDate() - 1);
+                  setAttendanceDate(newDate);
+                }}
+                className="text-3xl font-bold"
+              >
+                ⬅
+              </button>
 
-                            📋 Meal Attendance
+              <div className="text-center">
+                <h2 className="text-xl font-bold">
+                  {attendanceDate.toLocaleDateString("en-IN", {
+                    weekday: "long",
+                  })}
+                </h2>
 
-                        </h1>
+                <p className="text-gray-600 font-semibold">
+                  {attendanceDate.toLocaleDateString("en-IN")}
+                </p>
+              </div>
 
+              <button
+                onClick={() => {
+                  const newDate = new Date(attendanceDate);
+                  newDate.setDate(newDate.getDate() + 1);
+                  setAttendanceDate(newDate);
+                }}
+                className="text-3xl font-bold"
+              >
+                ➡
+              </button>
+            </div>
+            {/* Search */}
 
-                        {/* Search */}
-
-                        <div className="
+            <div
+              className="
 flex
 gap-3
 flex-col
 md:flex-row
-">
-
-                            <input
-                                type="text"
-                                placeholder="
+"
+            >
+              <input
+                type="text"
+                placeholder="
 Search Student ID / Name
 "
-
-                                value={bookingSearch}
-
-                                onChange={(e) => {
-
-                                    setBookingSearch(
-                                        e.target.value
-                                    );
-
-                                }}
-
-                                className="
+                value={bookingSearch}
+                onChange={(e) => {
+                  setBookingSearch(e.target.value);
+                }}
+                className="
 flex-1
 p-4
 border
 rounded-xl
 "
-                            />
+              />
+            </div>
 
-                        </div>
+            {/* Attendance Table */}
 
-
-                        {/* Attendance Table */}
-
-                        <div className="
+            <div
+              className="
 overflow-x-auto
 rounded-3xl
 border
-">
-
-                            <table className="
+"
+            >
+              <table
+                className="
 w-full
-">
-
-                                <thead>
-
-                                    <tr className="
+"
+              >
+                <thead>
+                  <tr
+                    className="
 bg-slate-900
 text-white
-">
-
-                                        <th className="
+"
+                  >
+                    <th
+                      className="
 p-4
 text-left
-">
+"
+                    >
+                      ID
+                    </th>
 
-                                            ID
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-left
-">
+"
+                    >
+                      Name
+                    </th>
 
-                                            Name
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-left
-">
+"
+                    >
+                      Phone
+                    </th>
 
-                                            Phone
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-center
-">
+"
+                    >
+                      🍳
+                    </th>
 
-                                            🍳
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-center
-">
+"
+                    >
+                      🍛
+                    </th>
 
-                                            🍛
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-center
-">
+"
+                    >
+                      🌙
+                    </th>
 
-                                            🌙
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-center
-">
+"
+                    >
+                      🍗 Extras
+                    </th>
 
-                                            🍗 Extras
-
-                                        </th>
-
-                                        <th className="
+                    <th
+                      className="
 p-4
 text-center
-">
+"
+                    >
+                      Days Left
+                    </th>
+                  </tr>
+                </thead>
 
-                                            Days Left
+                <tbody>
+                  {attendanceList
 
-                                        </th>
+                    .filter(
+                      (student) =>
+                        student.studentId
+                          ?.toLowerCase()
 
-                                    </tr>
+                          .includes(bookingSearch.toLowerCase()) ||
+                        student.name
+                          ?.toLowerCase()
 
-                                </thead>
+                          .includes(bookingSearch.toLowerCase()),
+                    )
 
-                                <tbody>
-
-                                    {
-
-                                        attendanceList
-
-                                            .filter(
-
-                                                student =>
-
-                                                    student.studentId
-                                                        ?.toLowerCase()
-
-                                                        .includes(
-
-                                                            bookingSearch
-                                                                .toLowerCase()
-
-                                                        )
-
-                                                    ||
-
-                                                    student.name
-                                                        ?.toLowerCase()
-
-                                                        .includes(
-
-                                                            bookingSearch
-                                                                .toLowerCase()
-
-                                                        )
-
-                                            )
-
-                                            .map(
-
-                                                student => (
-
-                                                    <tr
-
-                                                        key={student._id}
-
-                                                        className="
+                    .map((student) => (
+                      <tr
+                        key={student._id}
+                        className="
 border-b
 hover:bg-slate-100
 duration-300
 "
-
-                                                    >
-
-                                                        <td className="
+                      >
+                        <td
+                          className="
 p-4
 font-semibold
-">
-
-                                                            {student.studentId}
-
-                                                        </td>
-
-                                                        <td className="
-p-4
-">
-
-                                                            {student.name}
-
-                                                        </td>
-
-                                                        <td className="
-p-4
-">
-
-                                                            {student.phone}
-
-                                                        </td>
-
-
-                                                        <td className="
-p-4
-text-center
-text-2xl
-">
-
-                                                            {
-
-                                                                student.breakfast === true
-
-                                                                    ?
-
-                                                                    "✅"
-
-                                                                    :
-
-                                                                    student.breakfast === false
-
-                                                                        ?
-
-                                                                        "❌"
-
-                                                                        :
-
-                                                                        "⏳"
-
-                                                            }
-
-                                                        </td>
-
-
-                                                        <td className="
-p-4
-text-center
-text-2xl
-">
-
-                                                            {
-
-                                                                student.lunch === true
-
-                                                                    ?
-
-                                                                    "✅"
-
-                                                                    :
-
-                                                                    student.lunch === false
-
-                                                                        ?
-
-                                                                        "❌"
-
-                                                                        :
-
-                                                                        "⏳"
-
-                                                            }
-
-                                                        </td>
-
-
-                                                        <td className="
-p-4
-text-center
-text-2xl
-">
-
-                                                            {
-
-                                                                student.dinner === true
-
-                                                                    ?
-
-                                                                    "✅"
-
-                                                                    :
-
-                                                                    student.dinner === false
-
-                                                                        ?
-
-                                                                        "❌"
-
-                                                                        :
-
-                                                                        "⏳"
-
-                                                            }
-
-                                                        </td>
-
-
-                                                        <td className="
-p-4
-">
-
-                                                            {
-
-                                                                student.extraItems?.length > 0
-
-                                                                    ?
-
-                                                                    student.extraItems.map(
-
-                                                                        (item, index) => (
-
-                                                                            <div
-
-                                                                                key={index}
-
-                                                                                className="
-bg-blue-50
-rounded-lg
-px-2
-py-1
-mb-1
-text-sm
 "
+                        >
+                          {student.studentId}
+                        </td>
 
-                                                                            >
+                        <td
+                          className="
+p-4
+"
+                        >
+                          {student.name}
+                        </td>
 
-                                                                                🍗
+                        <td
+                          className="
+p-4
+"
+                        >
+                          {student.phone}
+                        </td>
 
-                                                                                {item.itemName}
+                        <td
+                          className="
+p-4
+text-center
+text-2xl
+"
+                        >
+                          {student.breakfast === true
+                            ? "✅"
+                            : student.breakfast === false
+                              ? "❌"
+                              : "⏳"}
+                        </td>
 
+                        <td
+                          className="
+p-4
+text-center
+text-2xl
+"
+                        >
+                          {student.lunch === true
+                            ? "✅"
+                            : student.lunch === false
+                              ? "❌"
+                              : "⏳"}
+                        </td>
 
-                                                                                --x
+                        <td
+                          className="
+p-4
+text-center
+text-2xl
+"
+                        >
+                          {student.dinner === true
+                            ? "✅"
+                            : student.dinner === false
+                              ? "❌"
+                              : "⏳"}
+                        </td>
 
-                                                                                {item.quantity}
+                        <td
+                          className="
+p-4
+"
+                        >
+                          {student.extraItems?.length > 0 ? (
+                            <>
+                              {["breakfast", "lunch", "dinner"].map((meal) => {
+                                const items = groupItems(
+                                  student.extraItems,
+                                ).filter((item) => item.mealType === meal);
 
-                                                                            </div>
+                                if (items.length === 0) return null;
 
-                                                                        )
+                                return (
+                                  <div key={meal} className="mb-2">
+                                    <div className="font-bold capitalize">
+                                      {meal}:
+                                    </div>
 
-                                                                    )
+                                    {items.map((item, index) => (
+                                      <div key={index} className="ml-3 text-sm">
+                                        • {item.itemName} (x{item.quantity})
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })}
+                            </>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
 
-                                                                    :
-
-                                                                    <span className="
-text-gray-400
-">
-
-                                                                        -
-
-                                                                    </span>
-
-                                                            }
-
-                                                        </td>
-
-
-                                                        <td className="
+                        <td
+                          className="
 p-4
 text-center
 font-bold
-">
-
-                                                            {student.remainingDays}
-
-                                                        </td>
-
-                                                    </tr>
-
-                                                )
-
-                                            )
-
-                                    }
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-                    </div>
-                }
-
+"
+                        >
+                          {student.remainingDays}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
-            {
-                reactivateModal &&
-
-                <div className="
+          </div>
+        )}
+      </div>
+      {reactivateModal && (
+        <div
+          className="
 fixed
 inset-0
 bg-black/50
@@ -4331,100 +2789,77 @@ flex
 justify-center
 items-center
 z-50
-">
-
-                    <div className="
+"
+        >
+          <div
+            className="
 bg-white
 p-6
 rounded-3xl
 w-[400px]
 space-y-4
-">
+"
+          >
+            <h1 className="text-2xl font-bold">🔄 Reactivate Student</h1>
 
-                        <h1 className="text-2xl font-bold">
-
-                            🔄 Reactivate Student
-
-                        </h1>
-
-                        <input
-                            type="date"
-                            value={newStartDate}
-                            onChange={(e) =>
-                                setNewStartDate(
-                                    e.target.value
-                                )
-                            }
-                            className="
+            <input
+              type="date"
+              value={newStartDate}
+              onChange={(e) => setNewStartDate(e.target.value)}
+              className="
 w-full
 p-4
 border
 rounded-xl"
-                        />
+            />
 
-                        <input
-                            type="date"
-                            value={newEndDate}
-                            onChange={(e) =>
-                                setNewEndDate(
-                                    e.target.value
-                                )
-                            }
-                            className="
+            <input
+              type="date"
+              value={newEndDate}
+              onChange={(e) => setNewEndDate(e.target.value)}
+              className="
 w-full
 p-4
 border
 rounded-xl"
-                        />
+            />
 
-                        <div className="
+            <div
+              className="
 flex
 gap-4
-">
-
-                            <button
-                                onClick={submitReactivate}
-                                className="
+"
+            >
+              <button
+                onClick={submitReactivate}
+                className="
 flex-1
 bg-green-500
 text-white
 p-4
 rounded-xl"
-                            >
+              >
+                Submit
+              </button>
 
-                                Submit
-
-                            </button>
-
-                            <button
-                                onClick={() =>
-                                    setReactivateModal(false)
-                                }
-                                className="
+              <button
+                onClick={() => setReactivateModal(false)}
+                className="
 flex-1
 bg-red-500
 text-white
 p-4
 rounded-xl"
-                            >
-
-                                Cancel
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            }
-            {
-                orderModal
-
-                &&
-
-                <div
-                    className="
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {orderModal && (
+        <div
+          className="
 fixed
 inset-0
 bg-black/50
@@ -4433,10 +2868,9 @@ justify-center
 items-center
 z-50
 "
-                >
-
-                    <div
-                        className="
+        >
+          <div
+            className="
 bg-white
 w-[500px]
 max-h-[80vh]
@@ -4445,260 +2879,128 @@ rounded-3xl
 p-6
 space-y-5
 "
-                    >
-
-                        <div
-                            className="
+          >
+            <div
+              className="
 flex
 justify-between
 items-center
 "
-                        >
-
-                            <h1
-                                className="
+            >
+              <h1
+                className="
 text-2xl
 font-bold
 "
-                            >
+              >
+                📋 Order Details
+              </h1>
 
-                                📋 Order Details
-
-                            </h1>
-
-                            <button
-
-                                onClick={() =>
-
-                                    setOrderModal(
-                                        false
-                                    )
-
-                                }
-
-                                className="
+              <button
+                onClick={() => setOrderModal(false)}
+                className="
 text-2xl
 font-bold
 "
+              >
+                ✕
+              </button>
+            </div>
 
-                            >
-
-                                ✕
-
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            className="
+            <div
+              className="
 bg-slate-100
 rounded-xl
 p-4
 space-y-2
 "
-                        >
+            >
+              <p>
+                👤 Name:
+                <b>{selectedOrder?.student?.name}</b>
+              </p>
 
-                            <p>
+              <p>
+                📞 Phone:
+                <b>{selectedOrder?.student?.phone}</b>
+              </p>
 
-                                👤 Name:
+              <p>
+                🆔 Student ID:
+                <b>{selectedOrder?.studentId}</b>
+              </p>
 
-                                <b>
+              <p>
+                📅 Order Date:
+                <b>{new Date(selectedOrder?.createdAt).toLocaleString()}</b>
+              </p>
+            </div>
 
-                                    {selectedOrder?.student?.name}
+            <div className="space-y-3">
+              <h2 className="font-bold">💳 Payment History</h2>
 
-                                </b>
+              {selectedOrder?.paymentHistory?.map((payment, index) => (
+                <div key={index} className="bg-slate-100 rounded-xl p-3">
+                  <p>Payment {index + 1}</p>
+                  <p>💰 Amount: ₹{payment.amount}</p>
+                  <p>
+                    💳 Transaction:
+                    <b>{payment.transactionId || "Not Provided"}</b>
+                  </p>
 
-                            </p>
+                  <p>
+                    {payment.status === "confirmed"
+                      ? "✅ Confirmed"
+                      : "⏳ Waiting"}
+                  </p>
+                </div>
+              ))}
+            </div>
 
-                            <p>
-
-                                📞 Phone:
-
-                                <b>
-
-                                    {selectedOrder?.student?.phone}
-
-                                </b>
-
-                            </p>
-
-                            <p>
-
-                                🆔 Student ID:
-
-                                <b>
-
-                                    {selectedOrder?.studentId}
-
-                                </b>
-
-                            </p>
-
-                            <p>
-
-                                📅 Order Date:
-
-                                <b>
-
-                                    {
-
-                                        new Date(
-
-                                            selectedOrder?.createdAt
-
-                                        ).toLocaleString()
-
-                                    }
-
-                                </b>
-
-                            </p>
-
-                        </div>
-
-
-                        <p>
-
-                            💰 Amount:
-
-                            <b>
-
-                                ₹{selectedOrder?.extraTotal}
-
-                            </b>
-
-                        </p>
-
-
-                        <p>
-
-                            💳 Transaction:
-
-                            <b>
-
-                                {
-
-                                    selectedOrder?.transactionId
-
-                                    ||
-
-                                    "Not Provided"
-
-                                }
-
-                            </b>
-
-                        </p>
-
-
-                        <div>
-
-                            <h2
-                                className="
+            <div>
+              <h2
+                className="
 font-bold
 mb-3
 "
-                            >
+              >
+                🍗 Items
+              </h2>
 
-                                🍗 Items
-
-                            </h2>
-
-                            {
-
-                                selectedOrder?.extraItems?.map(
-
-                                    item => (
-
-                                        <div
-
-                                            key={item.itemId}
-
-                                            className="
+              {selectedOrder?.extraItems?.map((item) => (
+                <div
+                  key={item.itemId}
+                  className="
 bg-slate-100
 rounded-xl
 p-3
 mb-2
 "
-                                        >
+                >
+                  {item.itemName}x{item.quantity}— ₹{item.price * item.quantity}
+                </div>
+              ))}
+            </div>
 
-                                            {item.itemName}
-
-                                            x
-
-                                            {item.quantity}
-
-                                            —
-
-                                            ₹
-
-                                            {
-
-                                                item.price *
-
-                                                item.quantity
-
-                                            }
-
-                                        </div>
-
-                                    )
-
-                                )
-
-                            }
-
-                        </div>
-
-
-                        {
-
-                            selectedOrder?.orderStatus
-
-                            !==
-
-                            "confirmed"
-
-                            &&
-
-                            <button
-
-                                onClick={() =>
-
-                                    confirmOrder(
-
-                                        selectedOrder._id
-
-                                    )
-
-                                }
-
-                                className="
+            {selectedOrder?.orderStatus !== "confirmed" && (
+              <button
+                onClick={() => confirmOrder(selectedOrder._id)}
+                className="
 w-full
 bg-green-600
 text-white
 p-4
 rounded-xl
 "
-
-                            >
-
-                                ✅ Confirm Order
-
-                            </button>
-
-                        }
-
-                    </div>
-
-                </div>
-
-            }
-        </div >
-
-    )
-
+              >
+                ✅ Confirm Order
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default OwnerDashboard;

@@ -79,6 +79,30 @@ const bookingSchema = new mongoose.Schema(
             default: ""
 
         },
+   paymentHistory: [
+    {
+        transactionId: String,
+        amount: Number,
+        status: {
+            type: String,
+            enum: ["pending", "confirmed"],
+            default: "pending"
+        },
+        items: [
+            {
+                itemId: String,
+                itemName: String,
+                quantity: Number,
+                price: Number,
+                mealType: String
+            }
+        ],
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }
+],
     },
     {
         timestamps: true

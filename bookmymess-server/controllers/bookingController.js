@@ -1,5 +1,5 @@
 const Booking = require("../models/Booking");
-
+const OrderHistory = require("../models/OrderHistory");
 const saveBooking = async (req, res) => {
 
     try {
@@ -19,6 +19,55 @@ const saveBooking = async (req, res) => {
             transactionId = ""
 
         } = req.body;
+        const cleanExtraItems = (extraItems || []).map((item) => ({
+    itemId: item.itemId || item._id,
+    itemName: item.itemName,
+    quantity: Number(item.quantity || 0),
+    price: Number(item.price || 0),
+    mealType: item.mealType
+}));
+
+const mergeSameItems = (items) => {
+    const map = {};
+
+    items.forEach((item) => {
+        const key = `${item.itemName}-${item.mealType}`;
+
+        if (!map[key]) {
+            map[key] = { ...item };
+        } else {
+            map[key].quantity += Number(item.quantity || 0);
+        }
+    });
+
+    return Object.values(map);
+};
+
+const newPaymentItems = mergeSameItems(cleanExtraItems);
+        if (Number(extraTotal) > 0 && transactionId?.trim()) {
+
+    const usedTransaction =
+        await Booking.findOne({
+
+            messId,
+
+            "paymentHistory.transactionId":
+                transactionId.trim()
+
+        });
+
+    if (usedTransaction) {
+
+        return res.status(400).json({
+
+            message:
+                "This UTR is already used"
+
+        });
+
+    }
+
+}
 
         /* close time */
 
@@ -88,15 +137,68 @@ const saveBooking = async (req, res) => {
 
             existingBooking.dinner =
                 dinner;
+const cleanExtraItems = (extraItems || []).map((item) => ({
+    itemId: item.itemId || item._id,
+    itemName: item.itemName,
+    quantity: Number(item.quantity || 0),
+    price: Number(item.price || 0),
+    mealType: item.mealType
+}));
+const mergedItems = [...(existingBooking.extraItems || [])];
 
-            existingBooking.extraItems =
-                extraItems || [];
+newPaymentItems.forEach((newItem) => {
+    const oldItem = mergedItems.find(
+        (item) =>
+            String(item.itemId) === String(newItem.itemId) &&
+            item.mealType === newItem.mealType
+    );
 
-            existingBooking.extraTotal =
-                Number(extraTotal) || 0;
+    if (oldItem) {
+        oldItem.quantity =
+            Number(oldItem.quantity || 0) +
+            Number(newItem.quantity || 0);
+    } else {
+        mergedItems.push({
+            ...newItem,
+            quantity: Number(newItem.quantity || 0)
+        });
+    }
+});
 
-            existingBooking.transactionId =
-                transactionId || "";
+existingBooking.extraItems = mergedItems;
+
+existingBooking.extraTotal =
+    mergedItems.reduce(
+        (total, item) =>
+            total + Number(item.price || 0) * Number(item.quantity || 0),
+        0
+    );
+
+existingBooking.paymentHistory =
+    existingBooking.paymentHistory || [];
+
+existingBooking.paymentHistory.push({
+    transactionId: transactionId || "",
+    amount: Number(extraTotal) || 0,
+    status: "pending",
+    items: newPaymentItems
+});
+
+await OrderHistory.create({
+    studentId,
+    messId,
+    bookingDate: existingBooking.bookingDate,
+    extraItems: newPaymentItems,
+    extraTotal: Number(extraTotal) || 0,
+    transactionId: transactionId || "",
+    orderStatus: "pending"
+});
+
+existingBooking.orderStatus = "pending";
+
+existingBooking.transactionId =
+    transactionId || "";
+                existingBooking.orderStatus = "pending";
             await existingBooking.save();
 
             return res.status(200).json({
@@ -134,9 +236,29 @@ const saveBooking = async (req, res) => {
                     Number(extraTotal) || 0,
 
                 transactionId:
-                    transactionId || ""
+    transactionId || "",
 
+paymentHistory:
+    Number(extraTotal) > 0
+        ? [
+            {
+                transactionId: transactionId || "",
+                amount: Number(extraTotal) || 0,
+                status: "pending",
+                 items: extraItems || []
+            }
+        ]
+        : []
             });
+            await OrderHistory.create({
+    studentId,
+    messId,
+    bookingDate: tomorrow,
+    extraItems: extraItems || [],
+    extraTotal: Number(extraTotal) || 0,
+    transactionId: transactionId || "",
+    orderStatus: "pending"
+});
 
         res.status(201).json({
 
@@ -721,15 +843,23 @@ const getExtraOrders =
 
                     },
 
-                    {
-
-                        $sort: {
-
-                            createdAt: -1
-
-                        }
-
-                    }
+                   {
+    $addFields: {
+        statusPriority: {
+            $cond: [
+                { $eq: ["$orderStatus", "pending"] },
+                0,
+                1
+            ]
+        }
+    }
+},
+{
+    $sort: {
+        statusPriority: 1,
+        updatedAt: -1
+    }
+}
 
                 ]);
 
@@ -752,55 +882,38 @@ const getExtraOrders =
         }
 
     }
-const confirmOrder =
-    async (req, res) => {
+const confirmOrder = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
 
-        try {
-
-            const booking =
-
-                await Booking.findByIdAndUpdate(
-
-                    req.params.id,
-
-                    {
-
-                        orderStatus:
-                            "confirmed"
-
-                    },
-
-                    {
-
-                        new: true
-
-                    }
-
-                );
-
-            res.json({
-
-                success: true,
-
-                booking
-
+        if (!booking) {
+            return res.status(404).json({
+                message: "Booking not found"
             });
-
         }
 
-        catch (error) {
+        booking.orderStatus = "confirmed";
 
-            res.status(500)
-                .json({
+        booking.paymentHistory = (booking.paymentHistory || []).map(
+            (payment) => {
+                payment.status = "confirmed";
+                return payment;
+            }
+        );
 
-                    message:
-                        error.message
+        await booking.save();
 
-                });
+        res.json({
+            success: true,
+            booking
+        });
 
-        }
-
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
     }
+};
 const getTodayExtraSummary =
     async (req, res) => {
 
@@ -903,6 +1016,103 @@ const getTodayExtraSummary =
         }
 
     };
+    const getLatestOrderStatus = async (req, res) => {
+    try {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        const tomorrowEnd = new Date(tomorrow);
+        tomorrowEnd.setHours(23, 59, 59, 999);
+
+        const booking = await Booking.findOne({
+            studentId: req.params.studentId,
+            extraTotal: { $gt: 0 },
+            bookingDate: {
+                $gte: tomorrow,
+                $lte: tomorrowEnd
+            }
+        }).sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            booking
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+const confirmPayment = async (req, res) => {
+    try {
+        const { bookingId, paymentIndex } = req.params;
+
+        const booking = await Booking.findById(bookingId);
+
+        if (!booking) {
+            return res.status(404).json({
+                message: "Booking not found"
+            });
+        }
+
+        if (!booking.paymentHistory[paymentIndex]) {
+            return res.status(404).json({
+                message: "Payment not found"
+            });
+        }
+
+        booking.paymentHistory[paymentIndex].status = "confirmed";
+       const confirmedTransactionId =
+    booking.paymentHistory[paymentIndex].transactionId?.trim();
+
+await OrderHistory.updateMany(
+    {
+        studentId: booking.studentId,
+        transactionId: confirmedTransactionId
+    },
+    {
+        orderStatus: "confirmed"
+    }
+);
+
+        const allConfirmed = booking.paymentHistory.every(
+            (payment) => payment.status === "confirmed"
+        );
+
+        booking.orderStatus = allConfirmed ? "confirmed" : "pending";
+
+        await booking.save();
+
+        res.json({
+            success: true,
+            booking
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+const getOrderHistory = async (req, res) => {
+    try {
+        const history = await OrderHistory.find({
+            studentId: req.params.studentId
+        }).sort({
+            createdAt: -1
+        });
+
+        res.json(history);
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
 module.exports = {
 
     saveBooking,
@@ -912,6 +1122,8 @@ module.exports = {
     getStudentAttendance,
     getExtraOrders,
     confirmOrder,
-    getTodayExtraSummary
-
+        confirmPayment,
+        getOrderHistory,
+    getTodayExtraSummary,
+    getLatestOrderStatus
 }

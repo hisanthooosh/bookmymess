@@ -46,6 +46,10 @@ function StudentDashboard() {
     const [selectedExtras,
         setSelectedExtras] =
         useState([]);
+        const [orderStatus, setOrderStatus] =
+    useState("");
+    const [orderHistory, setOrderHistory] =
+    useState([]);
     const closeTime = new Date();
 
     closeTime.setHours(
@@ -252,6 +256,38 @@ function StudentDashboard() {
             }
 
         };
+        const fetchOrderStatus = async () => {
+    try {
+
+        const res = await API.get(
+            `/booking/status/${user.studentId}`
+        );
+
+        if (res.data.booking) {
+            setOrderStatus(
+                res.data.booking.orderStatus
+            );
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+const fetchOrderHistory = async () => {
+    try {
+
+        const res = await API.get(
+           `/booking/history/${user.studentId}`
+        );
+
+        setOrderHistory(res.data);
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+};
     useEffect(() => {
 
         fetchTodayMenu();
@@ -262,7 +298,10 @@ function StudentDashboard() {
 
         fetchExtraItems();
 
-        fetchPaymentInfo();
+       fetchPaymentInfo();
+
+fetchOrderStatus();
+fetchOrderHistory();
 
     }, []);
     useEffect(() => {
@@ -362,6 +401,9 @@ function StudentDashboard() {
                 setIsEditing(
                     false
                 );
+                setSelectedExtras([]);
+setTransactionId("");
+setPaid(false);
 
                 alert(
 
@@ -620,6 +662,23 @@ text-left
                         📋 Meal Booking
 
                     </button>
+                    <button
+    className="
+w-full
+p-4
+bg-slate-800
+rounded-xl
+text-left
+"
+    onClick={() => {
+
+        setActivePage("history");
+        setSidebarOpen(false);
+
+    }}
+>
+    📜 Order History
+</button>
 
                 </div>
                 <div className="mt-auto pt-6">
@@ -1541,6 +1600,19 @@ text-white
                                     ₹{totalAmount}
 
                                 </div>
+                                {orderStatus && (
+    <div className="bg-white text-black rounded-xl p-4 mt-4">
+        <h3 className="text-lg font-bold mb-2">
+            📦 Extra Order Status
+        </h3>
+
+        <p className="font-bold">
+            {orderStatus === "confirmed"
+                ? "✅ Order Confirmed"
+                : "⏳ Order Pending"}
+        </p>
+    </div>
+)}
 
                             </div>
                             {
@@ -1629,6 +1701,21 @@ text-black
 "
 
                                     />
+                                    {transactionId && (
+  <button
+    onClick={async () => {
+      try {
+        await navigator.clipboard.writeText(transactionId);
+        alert("✅ UTR Copied Successfully");
+      } catch (error) {
+        alert("❌ Copy failed");
+      }
+    }}
+    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+  >
+    📋 Copy UTR
+  </button>
+)}
 
                                     <button
 
@@ -1836,6 +1923,75 @@ space-y-3
 
                     </div>
                 }
+                {
+    activePage === "history" &&
+
+    <div className="bg-white p-6 rounded-3xl">
+
+        <h1 className="text-2xl font-bold mb-6">
+            📜 Order History
+        </h1>
+
+        {orderHistory.length === 0 ? (
+
+            <p>No Orders Found</p>
+
+        ) : (
+
+            orderHistory.map((order) => (
+
+                <div
+                    key={order._id}
+                    className="bg-slate-100 p-4 rounded-xl mb-4"
+                >
+
+                    <p>
+                        📅 Date:
+                        <b>
+                           {new Date(order.createdAt).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+})}
+                        </b>
+                    </p>
+
+                    <p>
+                        💰 Amount:
+                        <b>
+                            ₹{order.extraTotal}
+                        </b>
+                    </p>
+
+                    <p>
+                        💳 UTR:
+                        <b>
+                            {order.transactionId || "Not Provided"}
+                        </b>
+                    </p>
+
+                    <p>
+                        Status:
+                        <b>
+                            {
+                                order.orderStatus === "confirmed"
+                                    ? " ✅ Confirmed"
+                                    : " ⏳ Pending"
+                            }
+                        </b>
+                    </p>
+
+                </div>
+
+            ))
+
+        )}
+
+    </div>
+}
 
             </div>
 
