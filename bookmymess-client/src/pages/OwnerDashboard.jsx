@@ -116,6 +116,11 @@ function OwnerDashboard() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [endDate, setEndDate] = useState("");
+  const [mealPlan, setMealPlan] = useState({
+    breakfast: true,
+    lunch: true,
+    dinner: true,
+  });
 
   const addItem = (type) => {
     if (type === "breakfast") {
@@ -1582,6 +1587,55 @@ p-4
 border
 rounded-xl"
               />
+              <div className="border rounded-xl p-4">
+                <h3 className="font-semibold mb-3">🍽 Meal Plan</h3>
+
+                <div className="flex gap-6 flex-wrap">
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={mealPlan.breakfast}
+                      onChange={(e) =>
+                        setMealPlan({
+                          ...mealPlan,
+                          breakfast: e.target.checked,
+                        })
+                      }
+                    />
+                    Breakfast
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={mealPlan.lunch}
+                      onChange={(e) =>
+                        setMealPlan({
+                          ...mealPlan,
+                          lunch: e.target.checked,
+                        })
+                      }
+                    />
+                    Lunch
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={mealPlan.dinner}
+                      onChange={(e) =>
+                        setMealPlan({
+                          ...mealPlan,
+                          dinner: e.target.checked,
+                        })
+                      }
+                    />
+                    Dinner
+                  </label>
+
+                </div>
+              </div>
               <button
                 onClick={addStudent}
                 className="
@@ -1688,7 +1742,7 @@ ${new Date(student.studentEndDate) > new Date() ? "bg-green-500" : "bg-red-500"}
 
                             Math.ceil(
                               (new Date(student.studentEndDate) - new Date()) /
-                                (1000 * 60 * 60 * 24),
+                              (1000 * 60 * 60 * 24),
                             ),
                           )}{" "}
                           Days

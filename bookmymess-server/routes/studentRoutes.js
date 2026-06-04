@@ -19,7 +19,8 @@ router.post(
                 password,
                 messId,
                 startDate,
-                endDate
+                endDate,
+                mealPlan
             } = req.body;
 
             // check existing phone
@@ -101,7 +102,6 @@ router.post(
 
             // create student
             const student =
-
                 await User.create({
 
                     name,
@@ -112,7 +112,13 @@ router.post(
                     role: "student",
 
                     studentStartDate: startDate,
-                    studentEndDate: endDate
+                    studentEndDate: endDate,
+
+                    mealPlan: mealPlan || {
+                        breakfast: true,
+                        lunch: true,
+                        dinner: true
+                    }
 
                 });
 
@@ -191,7 +197,8 @@ router.put(
                 name,
                 phone,
                 studentStartDate,
-                studentEndDate
+                studentEndDate,
+                mealPlan
             } = req.body;
 
             const student =
@@ -204,7 +211,8 @@ router.put(
                         name,
                         phone,
                         studentStartDate,
-                        studentEndDate
+                        studentEndDate,
+                        mealPlan
                     },
 
                     {
@@ -490,15 +498,15 @@ router.get(
                     students.map(
                         async (student) => {
 
-                           const selectedDate = req.query.date
-    ? new Date(req.query.date)
-    : new Date();
+                            const selectedDate = req.query.date
+                                ? new Date(req.query.date)
+                                : new Date();
 
-selectedDate.setHours(0, 0, 0, 0);
+                            selectedDate.setHours(0, 0, 0, 0);
 
-const selectedDateEnd = new Date(selectedDate);
+                            const selectedDateEnd = new Date(selectedDate);
 
-selectedDateEnd.setHours(23, 59, 59, 999);
+                            selectedDateEnd.setHours(23, 59, 59, 999);
 
                             const booking =
                                 await Booking.findOne({
@@ -509,12 +517,12 @@ selectedDateEnd.setHours(23, 59, 59, 999);
                                     messId:
                                         req.params.messId,
 
-                                  orderStatus: "confirmed",
+                                    orderStatus: "confirmed",
 
-bookingDate: {
-  $gte: selectedDate,
-  $lte: selectedDateEnd
-}
+                                    bookingDate: {
+                                        $gte: selectedDate,
+                                        $lte: selectedDateEnd
+                                    }
                                 });
 
 
