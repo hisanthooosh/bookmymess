@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "https://bookmymess.me/api"
+    baseURL: "http://localhost:5000/api"
 });
 
 export default API;

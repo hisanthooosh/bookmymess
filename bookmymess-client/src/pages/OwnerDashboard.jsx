@@ -171,7 +171,7 @@ function OwnerDashboard() {
     try {
       const res = await API.get(`/booking/extra-orders/${user.messId}`);
 
-      console.log("Orders Data:", res.data);
+      
 
       setOrders(res.data);
     } catch (error) {
@@ -336,7 +336,7 @@ function OwnerDashboard() {
         `/student/attendance-list/${user.messId}?date=${formattedDate}`,
       );
 
-      console.log("Attendance Data:", res.data);
+      
 
       setAttendanceList(res.data);
     } catch (error) {
@@ -454,15 +454,14 @@ function OwnerDashboard() {
       try {
         await API.put(
           `/student/update/${editingStudentId}`,
-
           {
             name: studentName,
             phone: studentPhone,
             studentStartDate: startDate,
             studentEndDate: endDate,
+            mealPlan,
           },
         );
-
         toast.success("Student Updated 🎉");
 
         setIsEditing(false);
@@ -486,9 +485,9 @@ function OwnerDashboard() {
     }
 
     try {
-      const res = await API.post(
+     
+      await API.post(
         "/student/add",
-
         {
           name: studentName,
           phone: studentPhone,
@@ -496,6 +495,7 @@ function OwnerDashboard() {
           startDate,
           endDate,
           messId: user.messId,
+          mealPlan,
         },
       );
 
@@ -550,6 +550,14 @@ function OwnerDashboard() {
     setStartDate(student.studentStartDate?.split("T")[0]);
 
     setEndDate(student.studentEndDate?.split("T")[0]);
+
+    setMealPlan(
+      student.mealPlan || {
+        breakfast: true,
+        lunch: true,
+        dinner: true,
+      }
+    );
   };
   const filteredStudents = students.filter(
     (student) =>
@@ -1588,11 +1596,26 @@ border
 rounded-xl"
               />
               <div className="border rounded-xl p-4">
-                <h3 className="font-semibold mb-3">🍽 Meal Plan</h3>
+                <h3 className="font-semibold mb-4 text-lg">
+                  🍽 Meal Plan
+                </h3>
 
-                <div className="flex gap-6 flex-wrap">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                  <label className="flex items-center gap-2">
+                  <label
+                    className="
+      flex
+      items-center
+      gap-3
+      p-4
+      border
+      rounded-xl
+      cursor-pointer
+      bg-slate-50
+      hover:bg-blue-50
+      duration-300
+      "
+                  >
                     <input
                       type="checkbox"
                       checked={mealPlan.breakfast}
@@ -1602,11 +1625,28 @@ rounded-xl"
                           breakfast: e.target.checked,
                         })
                       }
+                      className="w-6 h-6"
                     />
-                    Breakfast
+
+                    <span className="font-medium text-lg">
+                      🍳 Breakfast
+                    </span>
                   </label>
 
-                  <label className="flex items-center gap-2">
+                  <label
+                    className="
+      flex
+      items-center
+      gap-3
+      p-4
+      border
+      rounded-xl
+      cursor-pointer
+      bg-slate-50
+      hover:bg-blue-50
+      duration-300
+      "
+                  >
                     <input
                       type="checkbox"
                       checked={mealPlan.lunch}
@@ -1616,11 +1656,28 @@ rounded-xl"
                           lunch: e.target.checked,
                         })
                       }
+                      className="w-6 h-6"
                     />
-                    Lunch
+
+                    <span className="font-medium text-lg">
+                      🍛 Lunch
+                    </span>
                   </label>
 
-                  <label className="flex items-center gap-2">
+                  <label
+                    className="
+      flex
+      items-center
+      gap-3
+      p-4
+      border
+      rounded-xl
+      cursor-pointer
+      bg-slate-50
+      hover:bg-blue-50
+      duration-300
+      "
+                  >
                     <input
                       type="checkbox"
                       checked={mealPlan.dinner}
@@ -1630,13 +1687,16 @@ rounded-xl"
                           dinner: e.target.checked,
                         })
                       }
+                      className="w-6 h-6"
                     />
-                    Dinner
+
+                    <span className="font-medium text-lg">
+                      🌙 Dinner
+                    </span>
                   </label>
 
                 </div>
-              </div>
-              <button
+              </div>              <button
                 onClick={addStudent}
                 className="
 bg-blue-600
@@ -1681,6 +1741,8 @@ mb-6
 
                       <th className="p-4 text-left">End Date</th>
 
+                      <th className="p-4 text-left">Meal Plan</th>
+
                       <th className="p-4 text-left">Status</th>
 
                       <th className="p-4 text-left">Remaining Days</th>
@@ -1717,7 +1779,15 @@ hover:bg-slate-100
                             student.studentEndDate,
                           ).toLocaleDateString()}
                         </td>
-
+                        <td className="p-4">
+                          {[
+                            student.mealPlan?.breakfast && "🍳 Breakfast",
+                            student.mealPlan?.lunch && "🍛 Lunch",
+                            student.mealPlan?.dinner && "🌙 Dinner",
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </td>
                         <td className="p-4">
                           <span
                             className={`

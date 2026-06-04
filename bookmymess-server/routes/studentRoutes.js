@@ -121,7 +121,7 @@ router.post(
                     }
 
                 });
-
+            
             res.status(201).json({
 
                 success: true,
@@ -157,13 +157,14 @@ router.get(
         try {
 
             const students =
-
                 await User.find({
 
                     messId: req.params.messId,
                     role: "student"
 
                 }).select("-password");
+
+           
 
             res.status(200).json({
 
