@@ -1688,7 +1688,7 @@ ${new Date(student.studentEndDate) > new Date() ? "bg-green-500" : "bg-red-500"}
 
                             Math.ceil(
                               (new Date(student.studentEndDate) - new Date()) /
-                                (1000 * 60 * 60 * 24),
+                              (1000 * 60 * 60 * 24),
                             ),
                           )}{" "}
                           Days
@@ -2308,10 +2308,19 @@ space-y-3
                                         alert("❌ Copy failed");
                                       }
                                     }}
-                                    className="ml-2 text-slate-500 hover:text-blue-600 text-xl"
-                                    title="Copy UTR"
+                                    className="
+      ml-2
+      bg-blue-600
+      hover:bg-blue-700
+      text-white
+      px-3
+      py-1
+      rounded-lg
+      text-sm
+      font-medium
+    "
                                   >
-                                    📋
+                                    Copy UTR
                                   </button>
                                 )}
                               </div>
