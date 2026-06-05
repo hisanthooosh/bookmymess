@@ -2182,7 +2182,7 @@ rounded-xl
                 <button
                   onClick={savePaymentInfo}
                   className="
-bg-green-600
+bg-blue-600
 text-white
 px-8
 py-4
