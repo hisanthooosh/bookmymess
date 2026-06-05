@@ -2685,6 +2685,7 @@ p-4
 "
                         >
                           {student.name}
+
                         </td>
 
                         <td
@@ -2702,11 +2703,13 @@ text-center
 text-2xl
 "
                         >
-                          {student.breakfast === true
-                            ? "✅"
-                            : student.breakfast === false
-                              ? "❌"
-                              : "⏳"}
+                          {!student.mealPlan?.breakfast
+                            ? "🔒"
+                            : student.breakfast === true
+                              ? "✅"
+                              : student.breakfast === false
+                                ? "❌"
+                                : "⏳"}
                         </td>
 
                         <td
@@ -2716,11 +2719,13 @@ text-center
 text-2xl
 "
                         >
-                          {student.lunch === true
-                            ? "✅"
-                            : student.lunch === false
-                              ? "❌"
-                              : "⏳"}
+                          {!student.mealPlan?.lunch
+                            ? "🔒"
+                            : student.lunch === true
+                              ? "✅"
+                              : student.lunch === false
+                                ? "❌"
+                                : "⏳"}
                         </td>
 
                         <td
@@ -2730,11 +2735,13 @@ text-center
 text-2xl
 "
                         >
-                          {student.dinner === true
-                            ? "✅"
-                            : student.dinner === false
-                              ? "❌"
-                              : "⏳"}
+                          {!student.mealPlan?.dinner
+                            ? "🔒"
+                            : student.dinner === true
+                              ? "✅"
+                              : student.dinner === false
+                                ? "❌"
+                                : "⏳"}
                         </td>
 
                         <td
