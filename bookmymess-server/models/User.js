@@ -51,7 +51,20 @@ const userSchema = new mongoose.Schema(
             default: ""
 
         },
-
+        mealPlan: {
+            breakfast: {
+                type: Boolean,
+                default: true
+            },
+            lunch: {
+                type: Boolean,
+                default: true
+            },
+            dinner: {
+                type: Boolean,
+                default: true
+            }
+        },
         upiName: {
 
             type: String,

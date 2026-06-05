@@ -11,6 +11,11 @@ function StudentDashboard() {
     const user = JSON.parse(
         localStorage.getItem("user")
     );
+    const mealPlan = user?.mealPlan || {
+        breakfast: true,
+        lunch: true,
+        dinner: true
+    };
     const [breakfast, setBreakfast] =
         useState(null);
 
@@ -46,10 +51,10 @@ function StudentDashboard() {
     const [selectedExtras,
         setSelectedExtras] =
         useState([]);
-        const [orderStatus, setOrderStatus] =
-    useState("");
+    const [orderStatus, setOrderStatus] =
+        useState("");
     const [orderHistory, setOrderHistory] =
-    useState([]);
+        useState([]);
     const closeTime = new Date();
 
     closeTime.setHours(
@@ -256,38 +261,38 @@ function StudentDashboard() {
             }
 
         };
-        const fetchOrderStatus = async () => {
-    try {
+    const fetchOrderStatus = async () => {
+        try {
 
-        const res = await API.get(
-            `/booking/status/${user.studentId}`
-        );
-
-        if (res.data.booking) {
-            setOrderStatus(
-                res.data.booking.orderStatus
+            const res = await API.get(
+                `/booking/status/${user.studentId}`
             );
+
+            if (res.data.booking) {
+                setOrderStatus(
+                    res.data.booking.orderStatus
+                );
+            }
+
+        } catch (error) {
+            console.log(error);
         }
+    };
+    const fetchOrderHistory = async () => {
+        try {
 
-    } catch (error) {
-        console.log(error);
-    }
-};
-const fetchOrderHistory = async () => {
-    try {
+            const res = await API.get(
+                `/booking/history/${user.studentId}`
+            );
 
-        const res = await API.get(
-           `/booking/history/${user.studentId}`
-        );
+            setOrderHistory(res.data);
 
-        setOrderHistory(res.data);
+        } catch (error) {
 
-    } catch (error) {
+            console.log(error);
 
-        console.log(error);
-
-    }
-};
+        }
+    };
     useEffect(() => {
 
         fetchTodayMenu();
@@ -298,10 +303,10 @@ const fetchOrderHistory = async () => {
 
         fetchExtraItems();
 
-       fetchPaymentInfo();
+        fetchPaymentInfo();
 
-fetchOrderStatus();
-fetchOrderHistory();
+        fetchOrderStatus();
+        fetchOrderHistory();
 
     }, []);
     useEffect(() => {
@@ -338,14 +343,16 @@ fetchOrderHistory();
 
                 if (
 
-                    breakfast === null ||
-                    lunch === null ||
-                    dinner === null
+                    (mealPlan.breakfast && breakfast === null) ||
+
+                    (mealPlan.lunch && lunch === null) ||
+
+                    (mealPlan.dinner && dinner === null)
 
                 ) {
 
                     return alert(
-                        "Please select all meals"
+                        "Please select all available meals"
                     );
 
                 }
@@ -402,8 +409,8 @@ fetchOrderHistory();
                     false
                 );
                 setSelectedExtras([]);
-setTransactionId("");
-setPaid(false);
+                setTransactionId("");
+                setPaid(false);
 
                 alert(
 
@@ -663,22 +670,22 @@ text-left
 
                     </button>
                     <button
-    className="
+                        className="
 w-full
 p-4
 bg-slate-800
 rounded-xl
 text-left
 "
-    onClick={() => {
+                        onClick={() => {
 
-        setActivePage("history");
-        setSidebarOpen(false);
+                            setActivePage("history");
+                            setSidebarOpen(false);
 
-    }}
->
-    📜 Order History
-</button>
+                        }}
+                    >
+                        📜 Order History
+                    </button>
 
                 </div>
                 <div className="mt-auto pt-6">
@@ -1057,79 +1064,62 @@ break-words
 
                                 </div>
 
-                                <div className="
-grid
-grid-cols-2
-gap-3
-">
+                                {
+                                    !mealPlan.breakfast ?
 
-                                    <button
+                                        <div className="
+    bg-gray-700
+    text-white
+    p-4
+    rounded-xl
+    text-center
+    font-bold
+    ">
+                                            🔒 Breakfast Not Included In Your Plan
+                                        </div>
 
-                                        onClick={() => {
+                                        :
 
-                                            if (isEditing) {
+                                        <div className="
+    grid
+    grid-cols-2
+    gap-3
+    ">
 
-                                                setBreakfast(true)
+                                            <button
+                                                onClick={() => {
+                                                    if (isEditing && mealPlan.breakfast) {
+                                                        setBreakfast(true);
+                                                    }
+                                                }}
+                                                className={`
+    p-4
+    rounded-xl
+    font-bold
+    ${breakfast ? "bg-green-700" : "bg-white text-black"}
+    `}
+                                            >
+                                                ✅ I am Coming
+                                            </button>
 
-                                            }
+                                            <button
+                                                onClick={() => {
+                                                    if (isEditing && mealPlan.breakfast) {
+                                                        setBreakfast(false);
+                                                    }
+                                                }}
+                                                className={`
+    p-4
+    rounded-xl
+    font-bold
+    ${breakfast === false ? "bg-red-600" : "bg-white text-black"}
+    `}
+                                            >
+                                                ❌ Not Coming
+                                            </button>
 
-                                        }}
-
-                                        className={`
-
-p-4
-rounded-xl
-font-bold
-
-${breakfast
-                                                ?
-                                                "bg-green-700"
-                                                :
-                                                "bg-white text-black"
-                                            }
-
-`}
-
-                                    >
-
-                                        ✅ I am Coming
-
-                                    </button>
-
-                                    <button
-
-                                        onClick={() => {
-
-                                            if (isEditing) {
-
-                                                setBreakfast(false)
-
-                                            }
-
-                                        }}
-
-                                        className={`
-
-p-4
-rounded-xl
-font-bold
-
-${breakfast === false
-                                                ?
-                                                "bg-red-600"
-                                                :
-                                                "bg-white text-black"
-                                            }
-
-`}
-
-                                    >
-
-                                        ❌ Not Coming
-
-                                    </button>
-
-                                </div>
+                                        </div>
+                                }
 
                             </div>
 
@@ -1194,80 +1184,100 @@ break-words
 
                                 </div>
 
-                                <div className="
-grid
-grid-cols-2
-gap-3
-">
+                                {
+                                    !mealPlan.lunch ?
 
-                                    <button
+                                        <div className="
+    bg-gray-700
+    text-white
+    p-4
+    rounded-xl
+    text-center
+    font-bold
+    ">
+                                            🔒 Lunch Not Included In Your Plan
+                                        </div>
 
-                                        onClick={() => {
+                                        :
 
-                                            if (isEditing) {
+                                        <div className="
+    grid
+    grid-cols-2
+    gap-3
+    ">
 
-                                                setLunch(true)
+                                            <button
 
-                                            }
+                                                disabled={!mealPlan.lunch}
 
-                                        }}
+                                                onClick={() => {
 
-                                        className={`
+                                                    if (
+                                                        isEditing &&
+                                                        mealPlan.lunch
+                                                    ) {
 
-p-4
-rounded-xl
-font-bold
+                                                        setLunch(true)
 
-${lunch
-                                                ?
-                                                "bg-green-700"
-                                                :
-                                                "bg-white text-black"
-                                            }
+                                                    }
 
-`}
+                                                }}
 
-                                    >
+                                                className={`
+            p-4
+            rounded-xl
+            font-bold
 
-                                        ✅ I am Coming
+            ${lunch
+                                                        ?
+                                                        "bg-green-700"
+                                                        :
+                                                        "bg-white text-black"
+                                                    }
+            `}
+                                            >
 
-                                    </button>
+                                                ✅ I am Coming
 
-                                    <button
+                                            </button>
 
-                                        onClick={() => {
+                                            <button
 
-                                            if (isEditing) {
+                                                disabled={!mealPlan.lunch}
 
-                                                setLunch(false)
+                                                onClick={() => {
 
-                                            }
+                                                    if (
+                                                        isEditing &&
+                                                        mealPlan.lunch
+                                                    ) {
 
-                                        }}
+                                                        setLunch(false)
 
-                                        className={`
+                                                    }
 
-p-4
-rounded-xl
-font-bold
+                                                }}
 
-${lunch === false
-                                                ?
-                                                "bg-red-600"
-                                                :
-                                                "bg-white text-black"
-                                            }
+                                                className={`
+            p-4
+            rounded-xl
+            font-bold
 
-`}
+            ${lunch === false
+                                                        ?
+                                                        "bg-red-600"
+                                                        :
+                                                        "bg-white text-black"
+                                                    }
+            `}
+                                            >
 
-                                    >
+                                                ❌ Not Coming
 
-                                        ❌ Not Coming
+                                            </button>
 
-                                    </button>
-
-                                </div>
-
+                                        </div>
+                                }
                             </div>
 
 
@@ -1331,79 +1341,64 @@ break-words
 
                                 </div>
 
-                                <div className="
-grid
-grid-cols-2
-gap-3
-">
+                                {
+                                    !mealPlan.dinner ?
 
-                                    <button
+                                        <div className="
+    bg-gray-700
+    text-white
+    p-4
+    rounded-xl
+    text-center
+    font-bold
+    ">
+                                            🔒 Dinner Not Included In Your Plan
+                                        </div>
 
-                                        onClick={() => {
+                                        :
 
-                                            if (isEditing) {
+                                        <div className="
+    grid
+    grid-cols-2
+    gap-3
+    ">
 
-                                                setDinner(true)
+                                            <button
+                                                onClick={() => {
+                                                    if (isEditing && mealPlan.dinner) {
+                                                        setDinner(true);
+                                                    }
+                                                }}
+                                                className={`
+    p-4
+    rounded-xl
+    font-bold
+    ${dinner ? "bg-green-700" : "bg-white text-black"}
+    `}
+                                            >
+                                                ✅ I am Coming
+                                            </button>
 
-                                            }
+                                            <button
+                                                onClick={() => {
+                                                    if (isEditing && mealPlan.dinner) {
+                                                        setDinner(false);
+                                                    }
+                                                }}
+                                                className={`
+    p-4
+    rounded-xl
+    font-bold
+    ${dinner === false ? "bg-red-600" : "bg-white text-black"}
+    `}
+                                            >
+                                                ❌ Not Coming
+                                            </button>
 
-                                        }}
+                                        </div>
+                                }
 
-                                        className={`
 
-p-4
-rounded-xl
-font-bold
-
-${dinner
-                                                ?
-                                                "bg-green-700"
-                                                :
-                                                "bg-white text-black"
-                                            }
-
-`}
-
-                                    >
-
-                                        ✅ I am Coming
-
-                                    </button>
-
-                                    <button
-
-                                        onClick={() => {
-
-                                            if (isEditing) {
-
-                                                setDinner(false)
-
-                                            }
-
-                                        }}
-
-                                        className={`
-
-p-4
-rounded-xl
-font-bold
-
-${dinner === false
-                                                ?
-                                                "bg-red-600"
-                                                :
-                                                "bg-white text-black"
-                                            }
-
-`}
-
-                                    >
-
-                                        ❌ Not Coming
-
-                                    </button>
-
-                                </div>
 
                             </div>
                             <div
@@ -1601,18 +1596,18 @@ text-white
 
                                 </div>
                                 {orderStatus && (
-    <div className="bg-white text-black rounded-xl p-4 mt-4">
-        <h3 className="text-lg font-bold mb-2">
-            📦 Extra Order Status
-        </h3>
+                                    <div className="bg-white text-black rounded-xl p-4 mt-4">
+                                        <h3 className="text-lg font-bold mb-2">
+                                            📦 Extra Order Status
+                                        </h3>
 
-        <p className="font-bold">
-            {orderStatus === "confirmed"
-                ? "✅ Order Confirmed"
-                : "⏳ Order Pending"}
-        </p>
-    </div>
-)}
+                                        <p className="font-bold">
+                                            {orderStatus === "confirmed"
+                                                ? "✅ Order Confirmed"
+                                                : "⏳ Order Pending"}
+                                        </p>
+                                    </div>
+                                )}
 
                             </div>
                             {
@@ -1702,20 +1697,20 @@ text-black
 
                                     />
                                     {transactionId && (
-  <button
-    onClick={async () => {
-      try {
-        await navigator.clipboard.writeText(transactionId);
-        alert("✅ UTR Copied Successfully");
-      } catch (error) {
-        alert("❌ Copy failed");
-      }
-    }}
-    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-  >
-    📋 Copy UTR
-  </button>
-)}
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await navigator.clipboard.writeText(transactionId);
+                                                    alert("✅ UTR Copied Successfully");
+                                                } catch (error) {
+                                                    alert("❌ Copy failed");
+                                                }
+                                            }}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                        >
+                                            📋 Copy UTR
+                                        </button>
+                                    )}
 
                                     <button
 
@@ -1924,74 +1919,74 @@ space-y-3
                     </div>
                 }
                 {
-    activePage === "history" &&
+                    activePage === "history" &&
 
-    <div className="bg-white p-6 rounded-3xl">
+                    <div className="bg-white p-6 rounded-3xl">
 
-        <h1 className="text-2xl font-bold mb-6">
-            📜 Order History
-        </h1>
+                        <h1 className="text-2xl font-bold mb-6">
+                            📜 Order History
+                        </h1>
 
-        {orderHistory.length === 0 ? (
+                        {orderHistory.length === 0 ? (
 
-            <p>No Orders Found</p>
+                            <p>No Orders Found</p>
 
-        ) : (
+                        ) : (
 
-            orderHistory.map((order) => (
+                            orderHistory.map((order) => (
 
-                <div
-                    key={order._id}
-                    className="bg-slate-100 p-4 rounded-xl mb-4"
-                >
+                                <div
+                                    key={order._id}
+                                    className="bg-slate-100 p-4 rounded-xl mb-4"
+                                >
 
-                    <p>
-                        📅 Date:
-                        <b>
-                           {new Date(order.createdAt).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-})}
-                        </b>
-                    </p>
+                                    <p>
+                                        📅 Date:
+                                        <b>
+                                            {new Date(order.createdAt).toLocaleString("en-IN", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit"
+                                            })}
+                                        </b>
+                                    </p>
 
-                    <p>
-                        💰 Amount:
-                        <b>
-                            ₹{order.extraTotal}
-                        </b>
-                    </p>
+                                    <p>
+                                        💰 Amount:
+                                        <b>
+                                            ₹{order.extraTotal}
+                                        </b>
+                                    </p>
 
-                    <p>
-                        💳 UTR:
-                        <b>
-                            {order.transactionId || "Not Provided"}
-                        </b>
-                    </p>
+                                    <p>
+                                        💳 UTR:
+                                        <b>
+                                            {order.transactionId || "Not Provided"}
+                                        </b>
+                                    </p>
 
-                    <p>
-                        Status:
-                        <b>
-                            {
-                                order.orderStatus === "confirmed"
-                                    ? " ✅ Confirmed"
-                                    : " ⏳ Pending"
-                            }
-                        </b>
-                    </p>
+                                    <p>
+                                        Status:
+                                        <b>
+                                            {
+                                                order.orderStatus === "confirmed"
+                                                    ? " ✅ Confirmed"
+                                                    : " ⏳ Pending"
+                                            }
+                                        </b>
+                                    </p>
 
-                </div>
+                                </div>
 
-            ))
+                            ))
 
-        )}
+                        )}
 
-    </div>
-}
+                    </div>
+                }
 
             </div>
 
