@@ -121,7 +121,7 @@ router.post(
                     }
 
                 });
-            
+
             res.status(201).json({
 
                 success: true,
@@ -164,7 +164,7 @@ router.get(
 
                 }).select("-password");
 
-           
+
 
             res.status(200).json({
 
@@ -511,14 +511,8 @@ router.get(
 
                             const booking =
                                 await Booking.findOne({
-
-                                    studentId:
-                                        student.studentId,
-
-                                    messId:
-                                        req.params.messId,
-
-                                    orderStatus: "confirmed",
+                                    studentId: student.studentId,
+                                    messId: req.params.messId,
 
                                     bookingDate: {
                                         $gte: selectedDate,
