@@ -5,69 +5,65 @@ const saveBooking = async (req, res) => {
     try {
 
         const {
-
             studentId,
             messId,
             breakfast,
             lunch,
             dinner,
-
+            tiffinParcel,
             extraItems = [],
-
             extraTotal = 0,
-
             transactionId = ""
-
         } = req.body;
         const cleanExtraItems = (extraItems || []).map((item) => ({
-    itemId: item.itemId || item._id,
-    itemName: item.itemName,
-    quantity: Number(item.quantity || 0),
-    price: Number(item.price || 0),
-    mealType: item.mealType
-}));
+            itemId: item.itemId || item._id,
+            itemName: item.itemName,
+            quantity: Number(item.quantity || 0),
+            price: Number(item.price || 0),
+            mealType: item.mealType
+        }));
 
-const mergeSameItems = (items) => {
-    const map = {};
+        const mergeSameItems = (items) => {
+            const map = {};
 
-    items.forEach((item) => {
-        const key = `${item.itemName}-${item.mealType}`;
+            items.forEach((item) => {
+                const key = `${item.itemName}-${item.mealType}`;
 
-        if (!map[key]) {
-            map[key] = { ...item };
-        } else {
-            map[key].quantity += Number(item.quantity || 0);
-        }
-    });
+                if (!map[key]) {
+                    map[key] = { ...item };
+                } else {
+                    map[key].quantity += Number(item.quantity || 0);
+                }
+            });
 
-    return Object.values(map);
-};
+            return Object.values(map);
+        };
 
-const newPaymentItems = mergeSameItems(cleanExtraItems);
+        const newPaymentItems = mergeSameItems(cleanExtraItems);
         if (Number(extraTotal) > 0 && transactionId?.trim()) {
 
-    const usedTransaction =
-        await Booking.findOne({
+            const usedTransaction =
+                await Booking.findOne({
 
-            messId,
+                    messId,
 
-            "paymentHistory.transactionId":
-                transactionId.trim()
+                    "paymentHistory.transactionId":
+                        transactionId.trim()
 
-        });
+                });
 
-    if (usedTransaction) {
+            if (usedTransaction) {
 
-        return res.status(400).json({
+                return res.status(400).json({
 
-            message:
-                "This UTR is already used"
+                    message:
+                        "This UTR is already used"
 
-        });
+                });
 
-    }
+            }
 
-}
+        }
 
         /* close time */
 
@@ -137,68 +133,69 @@ const newPaymentItems = mergeSameItems(cleanExtraItems);
 
             existingBooking.dinner =
                 dinner;
-const cleanExtraItems = (extraItems || []).map((item) => ({
-    itemId: item.itemId || item._id,
-    itemName: item.itemName,
-    quantity: Number(item.quantity || 0),
-    price: Number(item.price || 0),
-    mealType: item.mealType
-}));
-const mergedItems = [...(existingBooking.extraItems || [])];
+            existingBooking.tiffinParcel = tiffinParcel;
+            const cleanExtraItems = (extraItems || []).map((item) => ({
+                itemId: item.itemId || item._id,
+                itemName: item.itemName,
+                quantity: Number(item.quantity || 0),
+                price: Number(item.price || 0),
+                mealType: item.mealType
+            }));
+            const mergedItems = [...(existingBooking.extraItems || [])];
 
-newPaymentItems.forEach((newItem) => {
-    const oldItem = mergedItems.find(
-        (item) =>
-            String(item.itemId) === String(newItem.itemId) &&
-            item.mealType === newItem.mealType
-    );
+            newPaymentItems.forEach((newItem) => {
+                const oldItem = mergedItems.find(
+                    (item) =>
+                        String(item.itemId) === String(newItem.itemId) &&
+                        item.mealType === newItem.mealType
+                );
 
-    if (oldItem) {
-        oldItem.quantity =
-            Number(oldItem.quantity || 0) +
-            Number(newItem.quantity || 0);
-    } else {
-        mergedItems.push({
-            ...newItem,
-            quantity: Number(newItem.quantity || 0)
-        });
-    }
-});
+                if (oldItem) {
+                    oldItem.quantity =
+                        Number(oldItem.quantity || 0) +
+                        Number(newItem.quantity || 0);
+                } else {
+                    mergedItems.push({
+                        ...newItem,
+                        quantity: Number(newItem.quantity || 0)
+                    });
+                }
+            });
 
-existingBooking.extraItems = mergedItems;
+            existingBooking.extraItems = mergedItems;
 
-existingBooking.extraTotal =
-    mergedItems.reduce(
-        (total, item) =>
-            total + Number(item.price || 0) * Number(item.quantity || 0),
-        0
-    );
+            existingBooking.extraTotal =
+                mergedItems.reduce(
+                    (total, item) =>
+                        total + Number(item.price || 0) * Number(item.quantity || 0),
+                    0
+                );
 
-existingBooking.paymentHistory =
-    existingBooking.paymentHistory || [];
+            existingBooking.paymentHistory =
+                existingBooking.paymentHistory || [];
 
-existingBooking.paymentHistory.push({
-    transactionId: transactionId || "",
-    amount: Number(extraTotal) || 0,
-    status: "pending",
-    items: newPaymentItems
-});
+            existingBooking.paymentHistory.push({
+                transactionId: transactionId || "",
+                amount: Number(extraTotal) || 0,
+                status: "pending",
+                items: newPaymentItems
+            });
 
-await OrderHistory.create({
-    studentId,
-    messId,
-    bookingDate: existingBooking.bookingDate,
-    extraItems: newPaymentItems,
-    extraTotal: Number(extraTotal) || 0,
-    transactionId: transactionId || "",
-    orderStatus: "pending"
-});
+            await OrderHistory.create({
+                studentId,
+                messId,
+                bookingDate: existingBooking.bookingDate,
+                extraItems: newPaymentItems,
+                extraTotal: Number(extraTotal) || 0,
+                transactionId: transactionId || "",
+                orderStatus: "pending"
+            });
 
-existingBooking.orderStatus = "pending";
+            existingBooking.orderStatus = "pending";
 
-existingBooking.transactionId =
-    transactionId || "";
-                existingBooking.orderStatus = "pending";
+            existingBooking.transactionId =
+                transactionId || "";
+            existingBooking.orderStatus = "pending";
             await existingBooking.save();
 
             return res.status(200).json({
@@ -228,6 +225,8 @@ existingBooking.transactionId =
                 breakfast,
                 lunch,
                 dinner,
+                tiffinParcel,
+
 
                 extraItems:
                     extraItems || [],
@@ -236,29 +235,29 @@ existingBooking.transactionId =
                     Number(extraTotal) || 0,
 
                 transactionId:
-    transactionId || "",
+                    transactionId || "",
 
-paymentHistory:
-    Number(extraTotal) > 0
-        ? [
-            {
-                transactionId: transactionId || "",
-                amount: Number(extraTotal) || 0,
-                status: "pending",
-                 items: extraItems || []
-            }
-        ]
-        : []
+                paymentHistory:
+                    Number(extraTotal) > 0
+                        ? [
+                            {
+                                transactionId: transactionId || "",
+                                amount: Number(extraTotal) || 0,
+                                status: "pending",
+                                items: extraItems || []
+                            }
+                        ]
+                        : []
             });
-            await OrderHistory.create({
-    studentId,
-    messId,
-    bookingDate: tomorrow,
-    extraItems: extraItems || [],
-    extraTotal: Number(extraTotal) || 0,
-    transactionId: transactionId || "",
-    orderStatus: "pending"
-});
+        await OrderHistory.create({
+            studentId,
+            messId,
+            bookingDate: tomorrow,
+            extraItems: extraItems || [],
+            extraTotal: Number(extraTotal) || 0,
+            transactionId: transactionId || "",
+            orderStatus: "pending"
+        });
 
         res.status(201).json({
 
@@ -470,7 +469,8 @@ const getStudentAttendance =
                     booking?.dinner,
 
                 extraItems:
-                    booking?.extraItems || []
+                    booking?.extraItems || [],
+                tiffinParcel: booking?.tiffinParcel || false,
 
             });
 
@@ -843,23 +843,23 @@ const getExtraOrders =
 
                     },
 
-                   {
-    $addFields: {
-        statusPriority: {
-            $cond: [
-                { $eq: ["$orderStatus", "pending"] },
-                0,
-                1
-            ]
-        }
-    }
-},
-{
-    $sort: {
-        statusPriority: 1,
-        updatedAt: -1
-    }
-}
+                    {
+                        $addFields: {
+                            statusPriority: {
+                                $cond: [
+                                    { $eq: ["$orderStatus", "pending"] },
+                                    0,
+                                    1
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $sort: {
+                            statusPriority: 1,
+                            updatedAt: -1
+                        }
+                    }
 
                 ]);
 
@@ -1016,7 +1016,7 @@ const getTodayExtraSummary =
         }
 
     };
-    const getLatestOrderStatus = async (req, res) => {
+const getLatestOrderStatus = async (req, res) => {
     try {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1065,18 +1065,18 @@ const confirmPayment = async (req, res) => {
         }
 
         booking.paymentHistory[paymentIndex].status = "confirmed";
-       const confirmedTransactionId =
-    booking.paymentHistory[paymentIndex].transactionId?.trim();
+        const confirmedTransactionId =
+            booking.paymentHistory[paymentIndex].transactionId?.trim();
 
-await OrderHistory.updateMany(
-    {
-        studentId: booking.studentId,
-        transactionId: confirmedTransactionId
-    },
-    {
-        orderStatus: "confirmed"
-    }
-);
+        await OrderHistory.updateMany(
+            {
+                studentId: booking.studentId,
+                transactionId: confirmedTransactionId
+            },
+            {
+                orderStatus: "confirmed"
+            }
+        );
 
         const allConfirmed = booking.paymentHistory.every(
             (payment) => payment.status === "confirmed"
@@ -1122,8 +1122,8 @@ module.exports = {
     getStudentAttendance,
     getExtraOrders,
     confirmOrder,
-        confirmPayment,
-        getOrderHistory,
+    confirmPayment,
+    getOrderHistory,
     getTodayExtraSummary,
     getLatestOrderStatus
 }

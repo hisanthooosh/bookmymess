@@ -24,6 +24,7 @@ function StudentDashboard() {
 
     const [dinner, setDinner] =
         useState(null);
+    const [tiffinParcel, setTiffinParcel] = useState(false);
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
     const [todayMenu, setTodayMenu] =
@@ -241,7 +242,9 @@ function StudentDashboard() {
                     setDinner(
                         res.data.dinner
                     );
-
+                    setTiffinParcel(
+                        res.data.tiffinParcel || false
+                    );
                     setBookingSaved(
                         true
                     );
@@ -345,7 +348,7 @@ function StudentDashboard() {
 
                     (mealPlan.breakfast && breakfast === null) ||
 
-                    (mealPlan.lunch && lunch === null) ||
+                    (mealPlan.lunch && lunch === null && !tiffinParcel) ||
 
                     (mealPlan.dinner && dinner === null)
 
@@ -388,6 +391,7 @@ function StudentDashboard() {
                         breakfast,
                         lunch,
                         dinner,
+                        tiffinParcel,
 
                         extraItems:
                             selectedExtras,
@@ -653,7 +657,7 @@ text-left
 
                     </button>
 
-                  
+
                     <button
                         className="
 w-full
@@ -1102,7 +1106,33 @@ break-words
                                             >
                                                 ❌ Not Coming
                                             </button>
+                                            <div className="mt-3">
+                                                <button
+                                                    onClick={() => {
+                                                        if (isEditing && mealPlan.breakfast) {
 
+                                                            const newValue = !tiffinParcel;
+
+                                                            setTiffinParcel(newValue);
+
+                                                            if (newValue) {
+                                                                setLunch(false);
+                                                            }
+                                                        }
+                                                    }}
+                                                    className={`
+p-4
+rounded-xl
+font-bold
+w-full
+${tiffinParcel
+                                                            ? "bg-yellow-500 text-white"
+                                                            : "bg-white text-black"}
+`}
+                                                >
+                                                    📦 Take Extra Tiffin For Lunch
+                                                </button>
+                                            </div>
                                         </div>
                                 }
 
@@ -1190,10 +1220,24 @@ break-words
     grid-cols-2
     gap-3
     ">
+                                            {
+                                                tiffinParcel &&
 
+                                                <div className="
+bg-yellow-500
+text-white
+p-4
+rounded-xl
+text-center
+font-bold
+mb-3
+">
+                                                    📦 Lunch Locked - Extra Tiffin Taken
+                                                </div>
+                                            }
                                             <button
 
-                                                disabled={!mealPlan.lunch}
+                                                disabled={!mealPlan.lunch || tiffinParcel}
 
                                                 onClick={() => {
 
@@ -1227,8 +1271,10 @@ break-words
                                             </button>
 
                                             <button
+                                                disabled={!mealPlan.lunch || tiffinParcel}
 
-                                                disabled={!mealPlan.lunch}
+
+
 
                                                 onClick={() => {
 
