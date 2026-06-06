@@ -653,22 +653,7 @@ text-left
 
                     </button>
 
-                    <button
-                        className="
-w-full
-p-4
-bg-slate-800
-rounded-xl
-text-left
-"
-                        onClick={() =>
-                            setSidebarOpen(false)
-                        }
-                    >
-
-                        📋 Meal Booking
-
-                    </button>
+                  
                     <button
                         className="
 w-full
@@ -1842,8 +1827,6 @@ font-bold
                                         </button>
 
                             }
-
-                            📋 Book Meal
 
                         </div>
 
