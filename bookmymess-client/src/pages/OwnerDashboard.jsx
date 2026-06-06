@@ -171,7 +171,7 @@ function OwnerDashboard() {
     try {
       const res = await API.get(`/booking/extra-orders/${user.messId}`);
 
-      
+
 
       setOrders(res.data);
     } catch (error) {
@@ -336,7 +336,7 @@ function OwnerDashboard() {
         `/student/attendance-list/${user.messId}?date=${formattedDate}`,
       );
 
-      
+
 
       setAttendanceList(res.data);
     } catch (error) {
@@ -485,7 +485,7 @@ function OwnerDashboard() {
     }
 
     try {
-     
+
       await API.post(
         "/student/add",
         {
@@ -1982,9 +1982,12 @@ rounded-xl
 w-full
 sm:w-auto
 bg-red-500
+hover:bg-red-600
 text-white
-px-6
+px-5
+py-3
 rounded-xl
+duration-300
 "
                       >
                         ✕
