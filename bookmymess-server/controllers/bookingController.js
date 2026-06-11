@@ -1216,6 +1216,73 @@ const getLatestOrderStatus = async (req, res) => {
         });
     }
 };
+const getTodayConfirmedExtraItems = async (req, res) => {
+
+    try {
+
+        const today = new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        const todayEnd = new Date(today);
+
+        todayEnd.setHours(
+            23,
+            59,
+            59,
+            999
+        );
+
+        const booking =
+            await Booking.findOne({
+
+                studentId:
+                    req.params.studentId,
+
+                messId:
+                    req.params.messId,
+
+                orderStatus:
+                    "confirmed",
+
+                bookingDate: {
+
+                    $gte: today,
+                    $lte: todayEnd
+
+                }
+
+            });
+
+        res.json({
+
+            success: true,
+
+            extraItems:
+                booking?.extraItems || []
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: error.message
+
+        });
+
+    }
+
+};
 const confirmPayment = async (req, res) => {
     try {
         const { bookingId, paymentIndex } = req.params;
@@ -1297,5 +1364,7 @@ module.exports = {
     getOrderHistory,
     getTodayExtraSummary,
     getLatestOrderStatus,
-    getTomorrowExtraSummary
+    getTomorrowExtraSummary,
+    getTodayConfirmedExtraItems
+
 }
