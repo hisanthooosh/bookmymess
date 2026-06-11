@@ -116,6 +116,7 @@ const saveBooking = async (req, res) => {
             await Booking.findOne({
 
                 studentId,
+                messId,
                 bookingDate: tomorrow
 
             });
@@ -295,7 +296,10 @@ const getStudentBookings =
                 await Booking.find({
 
                     studentId:
-                        req.params.studentId
+                        req.params.studentId,
+
+                    messId:
+                        req.params.messId
 
                 })
                     .sort({
@@ -344,6 +348,9 @@ const getTomorrowBooking = async (req, res) => {
                 studentId:
                     req.params.studentId,
 
+                messId:
+                    req.params.messId,
+
                 bookingDate:
                     tomorrow
 
@@ -381,7 +388,10 @@ const getStudentAttendance =
                 await User.findOne({
 
                     studentId:
-                        req.params.studentId
+                        req.params.studentId,
+
+                    messId:
+                        req.params.messId
 
                 });
 
@@ -420,6 +430,9 @@ const getStudentAttendance =
 
                     studentId:
                         req.params.studentId,
+
+                    messId:
+                        req.params.messId,
 
                     bookingDate:
                         tomorrow
@@ -748,6 +761,27 @@ const getOwnerStats =
 
                 totalStudents -
                 todayBookings.length;
+            /* parcel counts */
+
+            const breakfastParcel =
+
+                bookings.filter(
+                    item => item.breakfastParcel === true
+                ).length;
+
+            const lunchParcel =
+
+                bookings.filter(
+                    item =>
+                        item.lunchParcel === true ||
+                        item.tiffinParcel === true
+                ).length;
+
+            const dinnerParcel =
+
+                bookings.filter(
+                    item => item.dinnerParcel === true
+                ).length;
             res.json({
 
                 tomorrowTotal:
@@ -775,6 +809,10 @@ const getOwnerStats =
                 todayDinnerComing,
                 todayDinnerNotComing,
                 todayDinnerNoResponse,
+
+                breakfastParcel,
+                lunchParcel,
+                dinnerParcel,
 
             });
 
@@ -1016,6 +1054,113 @@ const getTodayExtraSummary =
         }
 
     };
+
+    const getTomorrowExtraSummary =
+    async (req, res) => {
+
+        try {
+
+            const tomorrow =
+                new Date();
+
+            tomorrow.setDate(
+                tomorrow.getDate() + 1
+            );
+
+            tomorrow.setHours(
+                0, 0, 0, 0
+            );
+
+            const tomorrowEnd =
+                new Date(tomorrow);
+
+            tomorrowEnd.setHours(
+                23, 59, 59, 999
+            );
+
+            const bookings =
+
+                await Booking.find({
+
+                    messId: req.params.messId,
+
+                    bookingDate: {
+
+                        $gte: tomorrow,
+                        $lte: tomorrowEnd
+
+                    }
+
+                });
+
+            const summary = {
+
+                breakfast: {},
+                lunch: {},
+                dinner: {}
+
+            };
+
+            bookings.forEach(
+
+                booking => {
+
+                    booking.extraItems.forEach(
+
+                        item => {
+
+                            if (
+
+                                !summary[
+                                item.mealType
+                                ][
+                                item.itemName
+                                ]
+
+                            ) {
+
+                                summary[
+                                    item.mealType
+                                ][
+                                    item.itemName
+                                ] = 0;
+
+                            }
+
+                            summary[
+                                item.mealType
+                            ][
+                                item.itemName
+                            ] +=
+                                item.quantity;
+
+                        }
+
+                    );
+
+                }
+
+            );
+
+            res.json(
+                summary
+            );
+
+        }
+
+        catch (error) {
+
+            res.status(500)
+                .json({
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    };
 const getLatestOrderStatus = async (req, res) => {
     try {
         const tomorrow = new Date();
@@ -1027,6 +1172,7 @@ const getLatestOrderStatus = async (req, res) => {
 
         const booking = await Booking.findOne({
             studentId: req.params.studentId,
+            messId: req.params.messId,
             extraTotal: { $gt: 0 },
             bookingDate: {
                 $gte: tomorrow,
@@ -1100,7 +1246,8 @@ const confirmPayment = async (req, res) => {
 const getOrderHistory = async (req, res) => {
     try {
         const history = await OrderHistory.find({
-            studentId: req.params.studentId
+            studentId: req.params.studentId,
+            messId: req.params.messId
         }).sort({
             createdAt: -1
         });
@@ -1125,5 +1272,6 @@ module.exports = {
     confirmPayment,
     getOrderHistory,
     getTodayExtraSummary,
-    getLatestOrderStatus
+    getLatestOrderStatus,
+    getTomorrowExtraSummary
 }

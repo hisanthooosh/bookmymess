@@ -1,10 +1,8 @@
 const express = require("express");
 
-const router =
-    express.Router();
+const router = express.Router();
 
 const {
-
     saveBooking,
     getStudentBookings,
     getTomorrowBooking,
@@ -15,75 +13,66 @@ const {
     confirmPayment,
     getOrderHistory,
     getTodayExtraSummary,
+    getTomorrowExtraSummary,
     getLatestOrderStatus
+} = require("../controllers/bookingController");
 
-}
-
-    = require(
-        "../controllers/bookingController"
-    );
 router.get(
-
     "/extra-orders/:messId",
-
     getExtraOrders
+);
 
+router.get(
+    "/extra-summary/:messId",
+    getTodayExtraSummary
 );
 router.get(
-
-    "/extra-summary/:messId",
-
-    getTodayExtraSummary
-
+    "/tomorrow-extra-summary/:messId",
+    getTomorrowExtraSummary
 );
 router.put(
-
     "/confirm-order/:id",
-
     confirmOrder
-
 );
+
 router.put(
     "/confirm-payment/:bookingId/:paymentIndex",
     confirmPayment
 );
-router.get(
 
-    "/extra-orders/:messId",
-
-    getExtraOrders
-
-);
 router.post(
     "/save",
     saveBooking
 );
+
 router.get(
-    "/tomorrow/:studentId",
+    "/tomorrow/:studentId/:messId",
     getTomorrowBooking
 );
+
 router.get(
-    "/student/:studentId",
+    "/student/:studentId/:messId",
     getStudentBookings
 );
+
 router.get(
     "/stats/:messId",
     getOwnerStats
 );
+
 router.get(
-
-    "/attendance/:studentId",
-
+    "/attendance/:studentId/:messId",
     getStudentAttendance
-
 );
+
 router.get(
-    "/status/:studentId",
+    "/status/:studentId/:messId",
     getLatestOrderStatus
 );
+
 router.get(
-    "/history/:studentId",
+    "/history/:studentId/:messId",
     getOrderHistory
 );
-module.exports =
-    router;
+
+module.exports = router;

@@ -226,7 +226,7 @@ function StudentDashboard() {
 
                 const res =
                     await API.get(
-                        `/booking/tomorrow/${user.studentId}`
+                        `/booking/tomorrow/${user.studentId}/${user.messId}`
                     );
 
                 if (res.data) {
@@ -268,7 +268,7 @@ function StudentDashboard() {
         try {
 
             const res = await API.get(
-                `/booking/status/${user.studentId}`
+                `/booking/status/${user.studentId}/${user.messId}`
             );
 
             if (res.data.booking) {
@@ -283,10 +283,10 @@ function StudentDashboard() {
     };
     const fetchOrderHistory = async () => {
         try {
-
-            const res = await API.get(
-                `/booking/history/${user.studentId}`
-            );
+            const res =
+                await API.get(
+                    `/booking/history/${user.studentId}/${user.messId}`
+                );
 
             setOrderHistory(res.data);
 

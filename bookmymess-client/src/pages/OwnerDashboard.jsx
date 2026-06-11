@@ -45,6 +45,11 @@ function OwnerDashboard() {
 
     dinner: {},
   });
+  const [tomorrowExtraSummary, setTomorrowExtraSummary] = useState({
+    breakfast: {},
+    lunch: {},
+    dinner: {},
+  });
   const [extraMealType, setExtraMealType] = useState("breakfast");
 
   const [extraDay, setExtraDay] = useState("Sunday");
@@ -152,6 +157,25 @@ function OwnerDashboard() {
     } catch (error) {
       console.log(error);
     }
+  };
+  const fetchTomorrowExtraSummary = async () => {
+
+    try {
+
+      const res = await API.get(
+        `/booking/tomorrow-extra-summary/${user.messId}`
+      );
+
+      setTomorrowExtraSummary(res.data);
+
+    }
+
+    catch (error) {
+
+      console.log(error);
+
+    }
+
   };
   const fetchExpiryStats = async () => {
     try {
@@ -300,7 +324,9 @@ function OwnerDashboard() {
     try {
       if (!bookingSearch.trim()) return;
 
-      const res = await API.get(`/booking/attendance/${bookingSearch}`);
+      const res = await API.get(
+        `/booking/attendance/${bookingSearch}/${user.messId}`
+      );
 
       setSelectedBookingStudent(res.data);
     } catch (error) {
@@ -420,6 +446,7 @@ function OwnerDashboard() {
     fetchOrders();
 
     fetchExtraSummary();
+    fetchTomorrowExtraSummary();
   }, []);
   useEffect(() => {
     fetchAttendanceList(attendanceDate);
@@ -1457,6 +1484,82 @@ leading-5
                     >
                       🍽 {meal.menu}
                     </p>
+                    <div
+                      className="
+    bg-red-50
+    border
+    border-red-200
+    rounded-xl
+    p-3
+    mb-4
+  "
+                    >
+                      <p className="text-xs font-semibold text-red-700 mb-2">
+                        🍗 Extra Orders
+                      </p>
+
+                      {
+                        Object.entries(
+
+                          index === 0
+                            ? tomorrowExtraSummary.breakfast || {}
+                            : index === 1
+                              ? tomorrowExtraSummary.lunch || {}
+                              : tomorrowExtraSummary.dinner || {}
+
+                        ).length === 0
+                          ? (
+                            <p className="text-sm text-gray-500">
+                              No Extra Orders
+                            </p>
+                          )
+                          : (
+                            Object.entries(
+
+                              index === 0
+                                ? tomorrowExtraSummary.breakfast || {}
+                                : index === 1
+                                  ? tomorrowExtraSummary.lunch || {}
+                                  : tomorrowExtraSummary.dinner || {}
+
+                            ).map(([name, qty]) => (
+
+                              <p
+                                key={name}
+                                className="text-sm font-medium"
+                              >
+                                {name} × {qty}
+                              </p>
+
+                            ))
+                          )
+                      }
+
+                    </div>
+                    <div
+                      className="
+    bg-orange-50
+    border
+    border-orange-200
+    rounded-xl
+    p-3
+    mb-4
+  "
+                    >
+                      <p className="text-xs font-semibold text-orange-700">
+                        📦 Parcel Orders
+                      </p>
+
+                      <p className="text-2xl font-bold text-orange-600">
+                        {
+                          index === 0
+                            ? bookingStats.breakfastParcel || 0
+                            : index === 1
+                              ? bookingStats.lunchParcel || 0
+                              : bookingStats.dinnerParcel || 0
+                        }
+                      </p>
+                    </div>
                     <div
                       className="
 space-y-3
@@ -2848,11 +2951,13 @@ text-2xl
                         >
                           {!student.mealPlan?.lunch
                             ? "🔒"
-                            : student.lunch === true
-                              ? "✅"
-                              : student.lunch === false
-                                ? "❌"
-                                : "⏳"}
+                            : student.tiffinParcel
+                              ? "📦"
+                              : student.lunch === true
+                                ? "✅"
+                                : student.lunch === false
+                                  ? "❌"
+                                  : "⏳"}
                         </td>
 
                         <td
