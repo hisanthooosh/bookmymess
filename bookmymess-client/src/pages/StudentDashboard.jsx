@@ -54,6 +54,12 @@ function StudentDashboard() {
         useState([]);
     const [orderStatus, setOrderStatus] =
         useState("");
+    const [confirmedExtraItems,
+        setConfirmedExtraItems] =
+        useState([]);
+    const [todayExtraItems,
+        setTodayExtraItems] =
+        useState([]);
     const [orderHistory, setOrderHistory] =
         useState([]);
     const closeTime = new Date();
@@ -272,14 +278,50 @@ function StudentDashboard() {
             );
 
             if (res.data.booking) {
+
                 setOrderStatus(
                     res.data.booking.orderStatus
                 );
+
+                if (
+                    res.data.booking.orderStatus ===
+                    "confirmed"
+                ) {
+
+                    setConfirmedExtraItems(
+                        res.data.booking.extraItems || []
+                    );
+
+                }
+
             }
 
         } catch (error) {
             console.log(error);
         }
+    };
+    const fetchTodayExtraItems = async () => {
+
+        try {
+
+            const res = await API.get(
+
+                `/booking/today-extra-items/${user.studentId}/${user.messId}`
+
+            );
+
+            setTodayExtraItems(
+                res.data.extraItems || []
+            );
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+        }
+
     };
     const fetchOrderHistory = async () => {
         try {
@@ -307,8 +349,8 @@ function StudentDashboard() {
         fetchExtraItems();
 
         fetchPaymentInfo();
-
         fetchOrderStatus();
+        fetchTodayExtraItems();
         fetchOrderHistory();
 
     }, []);
@@ -962,7 +1004,70 @@ space-y-3
                                 }
 
                             </p>
+                            {
+                                todayExtraItems.length > 0 && (
 
+                                    <div
+                                        className="
+bg-white/20
+rounded-xl
+p-4
+mt-4
+"
+                                    >
+
+                                        <h3
+                                            className="
+text-lg
+font-bold
+mb-3
+"
+                                        >
+                                            🍗 Today's Extra Items
+                                        </h3>
+
+                                        {
+                                            todayExtraItems.map(
+                                                (item, index) => (
+
+                                                    <div
+                                                        key={index}
+                                                        className="
+flex
+justify-between
+items-center
+border-b
+border-white/20
+py-2
+"
+                                                    >
+
+                                                        <div>
+
+                                                            <p className="font-semibold">
+                                                                {item.itemName}
+                                                            </p>
+
+                                                            <p className="text-sm opacity-80">
+                                                                🍽 {item.mealType}
+                                                            </p>
+
+                                                        </div>
+
+                                                        <span className="font-bold">
+                                                            × {item.quantity}
+                                                        </span>
+
+                                                    </div>
+
+                                                )
+                                            )
+                                        }
+
+                                    </div>
+
+                                )
+                            }
                         </div>
 
                         <div className="
@@ -1639,7 +1744,70 @@ text-white
                                         </p>
                                     </div>
                                 )}
+                                {
+                                    orderStatus === "confirmed" &&
+                                    confirmedExtraItems.length > 0 && (
 
+                                        <div
+                                            className="
+bg-white
+text-black
+rounded-xl
+p-4
+mt-4
+"
+                                        >
+
+                                            <h3
+                                                className="
+text-lg
+font-bold
+mb-3
+"
+                                            >
+                                                🍗 Confirmed Extra Items
+                                            </h3>
+
+                                            {
+                                                confirmedExtraItems.map(
+                                                    (item, index) => (
+
+                                                        <div
+                                                            key={index}
+                                                            className="
+flex
+justify-between
+border-b
+py-2
+"
+                                                        >
+
+                                                            <div>
+
+                                                                <p className="font-semibold">
+                                                                    {item.itemName}
+                                                                </p>
+
+                                                                <p className="text-xs text-gray-500">
+                                                                    🍽 {item.mealType}
+                                                                </p>
+
+                                                            </div>
+
+                                                            <span>
+                                                                × {item.quantity}
+                                                            </span>
+
+                                                        </div>
+
+                                                    )
+                                                )
+                                            }
+
+                                        </div>
+
+                                    )
+                                }
                             </div>
                             {
                                 totalAmount > 0

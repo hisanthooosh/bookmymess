@@ -14,7 +14,8 @@ const {
     getOrderHistory,
     getTodayExtraSummary,
     getTomorrowExtraSummary,
-    getLatestOrderStatus
+    getLatestOrderStatus,
+    getTodayConfirmedExtraItems
 } = require("../controllers/bookingController");
 
 router.get(
@@ -69,7 +70,10 @@ router.get(
     "/status/:studentId/:messId",
     getLatestOrderStatus
 );
-
+router.get(
+    "/today-extra-items/:studentId/:messId",
+    getTodayConfirmedExtraItems
+);
 router.get(
     "/history/:studentId/:messId",
     getOrderHistory
