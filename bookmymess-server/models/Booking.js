@@ -30,6 +30,9 @@ const bookingSchema = new mongoose.Schema(
         dinner: {
             type: Boolean,
             default: false
+        }, tiffinParcel: {
+            type: Boolean,
+            default: false
         },
         extraItems: [
 
@@ -79,30 +82,30 @@ const bookingSchema = new mongoose.Schema(
             default: ""
 
         },
-   paymentHistory: [
-    {
-        transactionId: String,
-        amount: Number,
-        status: {
-            type: String,
-            enum: ["pending", "confirmed"],
-            default: "pending"
-        },
-        items: [
+        paymentHistory: [
             {
-                itemId: String,
-                itemName: String,
-                quantity: Number,
-                price: Number,
-                mealType: String
+                transactionId: String,
+                amount: Number,
+                status: {
+                    type: String,
+                    enum: ["pending", "confirmed"],
+                    default: "pending"
+                },
+                items: [
+                    {
+                        itemId: String,
+                        itemName: String,
+                        quantity: Number,
+                        price: Number,
+                        mealType: String
+                    }
+                ],
+                createdAt: {
+                    type: Date,
+                    default: Date.now
+                }
             }
         ],
-        createdAt: {
-            type: Date,
-            default: Date.now
-        }
-    }
-],
     },
     {
         timestamps: true

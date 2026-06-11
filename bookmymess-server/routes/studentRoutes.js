@@ -570,6 +570,8 @@ router.get(
 
                                 dinner:
                                     booking?.dinner,
+                                tiffinParcel:
+                                    booking?.tiffinParcel || false,
 
                                 extraItems:
                                     booking?.extraItems || []
