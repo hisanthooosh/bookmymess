@@ -1264,6 +1264,30 @@ mb-1
                           ))
                       )}
                     </div>
+                    <div
+                      className="
+bg-orange-50
+border
+border-orange-200
+rounded-xl
+p-3
+mb-4
+"
+                    >
+                      <p className="text-xs font-semibold text-orange-700">
+                        📦 Parcel Orders
+                      </p>
+
+                      <p className="text-2xl font-bold text-orange-600">
+                        {
+                          index === 0
+                            ? bookingStats.todayBreakfastParcel || 0
+                            : index === 1
+                              ? bookingStats.todayLunchParcel || 0
+                              : bookingStats.todayDinnerParcel || 0
+                        }
+                      </p>
+                    </div>
                     <div className="space-y-3">
                       <div
                         className="

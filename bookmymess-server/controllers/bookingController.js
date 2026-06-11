@@ -782,6 +782,22 @@ const getOwnerStats =
                 bookings.filter(
                     item => item.dinnerParcel === true
                 ).length;
+            const todayBreakfastParcel =
+                todayBookings.filter(
+                    item => item.breakfastParcel === true
+                ).length;
+
+            const todayLunchParcel =
+                todayBookings.filter(
+                    item =>
+                        item.lunchParcel === true ||
+                        item.tiffinParcel === true
+                ).length;
+
+            const todayDinnerParcel =
+                todayBookings.filter(
+                    item => item.dinnerParcel === true
+                ).length;
             res.json({
 
                 tomorrowTotal:
@@ -809,6 +825,10 @@ const getOwnerStats =
                 todayDinnerComing,
                 todayDinnerNotComing,
                 todayDinnerNoResponse,
+
+                todayBreakfastParcel,
+                todayLunchParcel,
+                todayDinnerParcel,
 
                 breakfastParcel,
                 lunchParcel,
@@ -977,6 +997,8 @@ const getTodayExtraSummary =
 
                     messId: req.params.messId,
 
+                    orderStatus: "confirmed",
+
                     bookingDate: {
 
                         $gte: today,
@@ -1055,7 +1077,7 @@ const getTodayExtraSummary =
 
     };
 
-    const getTomorrowExtraSummary =
+const getTomorrowExtraSummary =
     async (req, res) => {
 
         try {
@@ -1083,6 +1105,8 @@ const getTodayExtraSummary =
                 await Booking.find({
 
                     messId: req.params.messId,
+
+                    orderStatus: "confirmed",
 
                     bookingDate: {
 
