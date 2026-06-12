@@ -4,95 +4,111 @@ function RefundPolicy() {
 
         <div className="min-h-screen bg-slate-100 p-8">
 
-            <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+            <div className="w-full">
 
-                <h1 className="text-4xl font-bold mb-6">
+                <h1 className="text-4xl font-bold mb-6 text-blue-700">
                     Refund Policy
                 </h1>
 
-                <p className="mb-4">
+                <p className="mb-4 text-blue-600 font-semibold">
                     Effective Date: June 2026
                 </p>
 
-                <p className="mb-6">
+                <p className="mb-6 text-gray-700 leading-8">
                     This Refund Policy applies to all payments
                     made for BookMyMess services operated by
                     Doneswari Technologies LLP.
                 </p>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Subscription Fees
-                </h2>
+                <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-6">
 
-                <p>
-                    Students may purchase a BookMyMess
-                    subscription to access the platform.
-                </p>
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Subscription Fees
+                    </h2>
 
-                <p className="mt-2">
-                    The current subscription fee is ₹10 for
-                    30 days of access.
-                </p>
+                    <p className="text-gray-700 leading-8">
+                        Students may purchase a BookMyMess
+                        subscription to access the platform.
+                    </p>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Refund Eligibility
-                </h2>
+                    <p className="mt-2 text-gray-700 leading-8">
+                        The current subscription fee is ₹10 for
+                        30 days of access.
+                    </p>
 
-                <p>
-                    Refunds are generally not provided once a
-                    subscription has been successfully activated.
-                </p>
+                </div>
 
-                <p className="mt-2">
-                    Refund requests may be considered only in
-                    cases of:
-                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-6">
 
-                <ul className="list-disc pl-6 mt-2 space-y-2">
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Refund Eligibility
+                    </h2>
 
-                    <li>
-                        Duplicate payments.
-                    </li>
+                    <p className="text-gray-700 leading-8">
+                        Refunds are generally not provided once a
+                        subscription has been successfully activated.
+                    </p>
 
-                    <li>
-                        Technical errors resulting in multiple
-                        charges.
-                    </li>
+                    <p className="mt-2 text-gray-700 leading-8">
+                        Refund requests may be considered only in
+                        cases of:
+                    </p>
 
-                    <li>
-                        Payment collected but subscription not
-                        activated due to system failure.
-                    </li>
+                    <ul className="list-disc pl-6 mt-2 space-y-2 text-gray-700">
 
-                </ul>
+                        <li>
+                            Duplicate payments.
+                        </li>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Refund Processing
-                </h2>
+                        <li>
+                            Technical errors resulting in multiple
+                            charges.
+                        </li>
 
-                <p>
-                    Approved refunds will be processed to the
-                    original payment method within 7-10
-                    business days.
-                </p>
+                        <li>
+                            Payment collected but subscription not
+                            activated due to system failure.
+                        </li>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Contact Us
-                </h2>
+                    </ul>
 
-                <p>
-                    Doneswari Technologies LLP
-                </p>
+                </div>
 
-                <p>
-                    Email:
-                    doneswarisoftwaresolutions@gmail.com
-                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-6">
 
-                <p>
-                    Phone:
-                    +91 9182845569
-                </p>
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Refund Processing
+                    </h2>
+
+                    <p className="text-gray-700 leading-8">
+                        Approved refunds will be processed to the
+                        original payment method within 7-10
+                        business days.
+                    </p>
+
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6">
+
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Contact Us
+                    </h2>
+
+                    <p className="text-gray-700">
+                        Doneswari Technologies LLP
+                    </p>
+
+                    <p className="text-gray-700">
+                        Email:
+                        doneswarisoftwaresolutions@gmail.com
+                    </p>
+
+                    <p className="text-gray-700">
+                        Phone:
+                        +91 9182845569
+                    </p>
+
+                </div>
 
             </div>
 
