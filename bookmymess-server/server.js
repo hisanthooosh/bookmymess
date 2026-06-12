@@ -1,24 +1,29 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const connectDB = require("./config/db");
 
 dotenv.config();
 
-connectDB();
-const bookingRoutes =
-    require("./routes/bookingRoutes");
+const connectDB = require("./config/db");
 
+connectDB();
 
 const app = express();
 
-app.use(cors());
+// Middleware
+app.use(
+    cors({
+        origin: [
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ],
+        credentials: true
+    })
+);
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("BookMyMess API Running 🚀");
-});
+// Routes
 app.use(
     "/api/auth",
     require("./routes/authRoutes")
@@ -43,20 +48,33 @@ app.use(
     "/api/menu",
     require("./routes/menuRoutes")
 );
+
 app.use(
     "/api/booking",
-    bookingRoutes
+    require("./routes/bookingRoutes")
 );
+
 app.use(
-
     "/api/extra-item",
-
-    require(
-        "./routes/extraItemRoutes"
-    )
-
+    require("./routes/extraItemRoutes")
 );
-const PORT = process.env.PORT || 5000;
+
+app.use(
+    "/api/subscription",
+    require("./routes/subscriptionRoutes")
+);
+
+// Health Check
+app.get("/", (req, res) => {
+
+    res.send(
+        "BookMyMess API Running 🚀"
+    );
+
+});
+
+const PORT =
+    process.env.PORT || 5000;
 
 app.listen(PORT, () => {
 

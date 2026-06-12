@@ -594,7 +594,34 @@ function StudentDashboard() {
 
     const isExpired =
         remainingDays <= 0;
+    useEffect(() => {
 
+        if (!user) {
+
+            navigate("/");
+            return;
+
+        }
+
+        const today = new Date();
+
+        const hasSubscription =
+
+            user.subscriptionActive &&
+
+            user.subscriptionEndDate &&
+
+            new Date(
+                user.subscriptionEndDate
+            ) > today;
+
+        if (!hasSubscription) {
+
+            navigate("/subscription");
+
+        }
+
+    }, []);
 
     return (
 
