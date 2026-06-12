@@ -32,7 +32,12 @@ function Dashboard() {
     const [pin, setPin] = useState("");
     const [messes, setMesses] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const [stats, setStats] = useState({
+        totalMesses: 0,
+        totalStudents: 0,
+        activeStudents: 0,
+        inactiveStudents: 0
+    });
     const handleAddMess = async (e) => {
 
         e.preventDefault();
@@ -134,11 +139,36 @@ function Dashboard() {
         }
 
     }
+    const fetchDashboardStats = async () => {
+
+        try {
+
+            const res =
+                await API.get(
+                    "/mess/dashboard-stats"
+                );
+
+            setStats(res.data);
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+    useEffect(() => {
+
+        fetchDashboardStats();
+
+    }, []);
 
     useEffect(() => {
 
         if (
-            activePage === "viewmess"
+            activePage === "messmanagement"
         ) {
 
             fetchMesses();
@@ -250,7 +280,7 @@ ${activePage === "dashboard"
 
                         <button
                             onClick={() => {
-                                setActivePage("addmess");
+                                setActivePage("messmanagement");
                                 setSidebarOpen(false);
                             }}
                             className={`
@@ -276,43 +306,12 @@ ${activePage === "addmess"
 `}
                         >
 
-                            🍽 Add Mess
+                            🍽 Mess Management
 
                         </button>
 
 
 
-                        <button
-                            onClick={() => {
-                                setActivePage("viewmess");
-                                setSidebarOpen(false);
-                            }}
-                            className={`
-
-w-full
-text-left
-p-4
-rounded-2xl
-duration-300
-
-${activePage === "viewmess"
-
-                                    ?
-
-                                    "bg-gradient-to-r from-blue-600 to-purple-600"
-
-                                    :
-
-                                    "bg-slate-900 hover:bg-slate-800"
-
-                                }
-
-`}
-                        >
-
-                            📋 View Messes
-
-                        </button>
 
                     </div>
 
@@ -451,15 +450,13 @@ ${activePage === "viewmess"
                                     </p>
 
                                     <h1 className="text-4xl font-bold mt-4">
-
-                                        100
-
+                                        {stats.totalMesses}
                                     </h1>
 
                                 </div>
 
 
-                               
+
 
 
                                 <div className="bg-white p-6 rounded-3xl shadow">
@@ -471,15 +468,35 @@ ${activePage === "viewmess"
                                     </p>
 
                                     <h1 className="text-4xl font-bold mt-4">
-
-                                        500
-
+                                        {stats.totalStudents}
                                     </h1>
 
                                 </div>
 
 
-                               
+                                <div className="bg-white p-6 rounded-3xl shadow">
+
+                                    <p className="text-gray-500">
+                                        Active Students
+                                    </p>
+
+                                    <h1 className="text-4xl font-bold mt-4 text-green-600">
+                                        {stats.activeStudents}
+                                    </h1>
+
+                                </div>
+
+                                <div className="bg-white p-6 rounded-3xl shadow">
+
+                                    <p className="text-gray-500">
+                                        Inactive Students
+                                    </p>
+
+                                    <h1 className="text-4xl font-bold mt-4 text-red-600">
+                                        {stats.inactiveStudents}
+                                    </h1>
+
+                                </div>
 
                             </div>
 
@@ -490,9 +507,9 @@ ${activePage === "viewmess"
 
 
                     {
-                        activePage === "addmess" && (
+                        activePage === "messmanagement" && (
 
-                            <div className="bg-white rounded-[30px] shadow-lg p-6 md:p-10">
+                            <div className="space-y-6">
 
                                 <div className="mb-8">
 
@@ -651,13 +668,13 @@ ${activePage === "viewmess"
 
 
                     {
-                        activePage === "viewmess" && (
+                        activePage === "messmanagement" && (
 
                             <>
 
                                 {/* Stats Cards */}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 mb-6">
 
                                     <div className="bg-white p-6 rounded-[30px] shadow-lg">
 
@@ -696,23 +713,18 @@ ${activePage === "viewmess"
 
 
                                 {/* View Messes Card */}
-
-                                <div className="bg-white p-6 rounded-[30px] shadow-lg">
+                                <div className="mt-16">
 
                                     <div className="flex justify-between items-center mb-6">
 
                                         <div>
 
                                             <h1 className="text-3xl font-bold">
-
-                                                📋 View Messes
-
+                                                📋 All Messes
                                             </h1>
 
                                             <p className="text-gray-500">
-
-                                                Manage all messes
-
+                                                View and manage all messes from one place
                                             </p>
 
                                         </div>

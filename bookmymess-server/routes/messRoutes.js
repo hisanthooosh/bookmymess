@@ -4,7 +4,8 @@ const router = express.Router();
 
 const {
     addMess,
-    getAllMesses
+    getAllMesses,
+    getDashboardStats
 } = require(
     "../controllers/messController"
 );
@@ -18,5 +19,8 @@ router.get(
     "/all",
     getAllMesses
 );
-
+router.get(
+    "/dashboard-stats",
+    getDashboardStats
+);
 module.exports = router;

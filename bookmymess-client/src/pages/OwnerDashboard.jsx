@@ -656,7 +656,13 @@ function OwnerDashboard() {
 
     return Object.values(grouped);
   };
+  const pendingOrders = orders.filter(
+    (order) => order.orderStatus !== "confirmed"
+  );
 
+  const historyOrders = orders.filter(
+    (order) => order.orderStatus === "confirmed"
+  );
   return (
     <div className="min-h-screen flex bg-slate-100 relative">
       {sidebarOpen && (
@@ -2253,18 +2259,31 @@ ${extraTab === "items" ? "bg-blue-600 text-white" : "bg-slate-100"}
               </button>
 
               <button
-                onClick={() => setExtraTab("orders")}
+                onClick={() => setExtraTab("pending")}
                 className={`
-
 px-5
 py-3
 rounded-xl
-
-${extraTab === "orders" ? "bg-blue-600 text-white" : "bg-slate-100"}
-
+${extraTab === "pending"
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-100"}
 `}
               >
-                📋 Orders
+                📋 Pending Orders
+              </button>
+
+              <button
+                onClick={() => setExtraTab("history")}
+                className={`
+px-5
+py-3
+rounded-xl
+${extraTab === "history"
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-100"}
+`}
+              >
+                📜 Order History
               </button>
             </div>
 
@@ -2496,237 +2515,334 @@ rounded-lg
                 </div>
               </div>
             )}
-            {extraTab === "orders" && (
-              <div
-                className="
-space-y-4
-"
-              >
+            {extraTab === "pending" && (
+              <div className="space-y-4">
+
                 <h1
                   className="
 text-2xl
 font-bold
+mb-4
 "
                 >
-                  📋 Extra Orders
+                  📋 Pending Orders
                 </h1>
 
-                {orders.length === 0 ? (
-                  <p>No Orders</p>
-                ) : (
-                  orders.map((order) => (
-                    <div
-                      key={order._id}
-                      className="
+                {pendingOrders.length === 0 ? (
+
+                  <div
+                    className="
 bg-slate-100
+p-6
 rounded-xl
-p-5
-space-y-3
+text-center
 "
-                    >
-                      <p>
-                        🆔
-                        {order.studentId}
-                      </p>
+                  >
+                    No Pending Orders
+                  </div>
 
-                      <div className="bg-white rounded-xl p-3 space-y-2">
-                        <h3 className="font-bold">💳 Payment History</h3>
+                ) : (
 
-                        {order.paymentHistory?.length > 0 ? (
-                          order.paymentHistory.map((payment, index) => (
-                            <div
-                              key={index}
-                              className="border rounded-lg p-2 text-sm"
-                            >
-                              <p>Payment {index + 1}</p>
+                  <div className="overflow-x-auto rounded-xl border">
 
-                              <p>💰 ₹{payment.amount}</p>
+                    <table className="w-full">
 
-                              <div className="flex items-center gap-2">
-                                <span>
-                                  💳 Transaction:
-                                  <b>
-                                    {payment.transactionId || "Not Provided"}
-                                  </b>
-                                </span>
+                      <thead>
 
-                                {payment.transactionId && (
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        await navigator.clipboard.writeText(
-                                          payment.transactionId || "",
-                                        );
-                                        alert("✅ UTR Copied Successfully");
-                                      } catch (error) {
-                                        alert("❌ Copy failed");
-                                      }
-                                    }}
-                                    className="
-      ml-2
-      bg-blue-600
-      hover:bg-blue-700
-      text-white
-      px-3
-      py-1
-      rounded-lg
-      text-sm
-      font-medium
-    "
-                                  >
-                                    Copy UTR
-                                  </button>
-                                )}
-                              </div>
+                        <tr className="bg-slate-900 text-white">
 
-                              <div className="mt-2">
-                                <p className="font-semibold">
-                                  🍗 Ordered Items:
-                                </p>
+                          <th className="p-4">No</th>
 
-                                {payment.items?.length > 0 ? (
-                                  payment.items.map((item, i) => (
-                                    <p key={i}>
-                                      • {item.itemName} x{item.quantity}
-                                    </p>
-                                  ))
-                                ) : (
-                                  <p>No items found</p>
-                                )}
-                              </div>
+                          <th className="p-4">Student ID</th>
 
-                              <p>
-                                {payment.status === "confirmed"
-                                  ? "✅ Confirmed"
-                                  : "⏳ Waiting"}
-                              </p>
+                          <th className="p-4">Student Name</th>
 
-                              {payment.status !== "confirmed" && (
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await API.put(
-                                        `/booking/confirm-payment/${order._id}/${index}`,
-                                      );
+                          <th className="p-4">Meal Type</th>
 
-                                      toast.success("Payment Confirmed 🎉");
+                          <th className="p-4">Items</th>
 
-                                      fetchOrders();
-                                    } catch (error) {
-                                      toast.error("Failed");
-                                    }
-                                  }}
-                                  className="
-bg-green-600
-text-white
-px-4
-py-2
-rounded-lg
-mt-2
+                          <th className="p-4">Amount</th>
+
+                          <th className="p-4">UTR Number</th>
+
+                          <th className="p-4">Copy</th>
+
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Action</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {pendingOrders.map((order, index) => (
+
+                          <tr
+                            key={order._id}
+                            className="
+border-b
+hover:bg-slate-100
 "
-                                >
-                                  ✅ Confirm Payment
-                                </button>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <>
-                            <p>💰 ₹{order.extraTotal}</p>
-                            <p>
-                              💳 Transaction:
-                              <b>{order.transactionId || "Not Provided"}</b>
-                            </p>
-                          </>
-                        )}
-                      </div>
-                      <div>
-                        🍗 Items:
-                        {order.extraItems?.length > 0 ? (
-                          groupItems(order.extraItems).map((item) => (
-                            <div
-                              key={item.itemId}
-                              className="
-bg-white
-p-3
-rounded-lg
-mb-2
-"
-                            >
-                              <div>
-                                🍗 {item.itemName}x{item.quantity}
-                              </div>
+                          >
 
-                              <div
+                            <td className="p-4">
+                              {index + 1}
+                            </td>
+
+                            <td className="p-4">
+                              {order.studentId}
+                            </td>
+
+                            <td className="p-4">
+                              {order.student?.name}
+                            </td>
+
+                            <td className="p-4">
+                              {order.extraItems?.[0]?.mealType
+                                ?.charAt(0)
+                                .toUpperCase() +
+                                order.extraItems?.[0]?.mealType?.slice(1)}
+                            </td>
+
+                            <td className="p-4">
+                              {groupItems(order.extraItems)
+                                .map(
+                                  (item) =>
+                                    `${item.itemName} x${item.quantity}`
+                                )
+                                .join(", ")}
+                            </td>
+
+                            <td className="p-4">
+                              ₹{order.extraTotal}
+                            </td>
+
+                            <td className="p-4">
+                              {order.paymentHistory?.[0]?.transactionId ||
+                                order.transactionId ||
+                                "Not Provided"}
+                            </td>
+
+                            <td className="p-4">
+
+                              <button
+                                onClick={async () => {
+
+                                  try {
+
+                                    const utr =
+                                      order.paymentHistory?.[0]?.transactionId ||
+                                      order.transactionId ||
+                                      "";
+
+                                    await navigator.clipboard.writeText(utr);
+
+                                    toast.success("UTR Copied");
+
+                                  } catch (error) {
+
+                                    toast.error("Copy Failed");
+
+                                  }
+
+                                }}
                                 className="
-text-sm
-text-gray-500
-"
-                              >
-                                🍽
-                                {item.mealType?.charAt(0).toUpperCase() +
-                                  item.mealType?.slice(1)}
-                              </div>
-
-                              <div
-                                className="
-text-sm
-text-gray-500
-"
-                              >
-                                📅
-                                {new Date(order.bookingDate).toLocaleDateString(
-                                  "en-US",
-
-                                  {
-                                    weekday: "long",
-                                  },
-                                )}
-                              </div>
-
-                              <div>₹{item.price * item.quantity}</div>
-                            </div>
-                          ))
-                        ) : (
-                          <p>No extra items</p>
-                        )}
-                      </div>
-
-                      <div
-                        className={`
-
-text-white
-px-4
-py-2
-rounded-xl
-inline-block
-
-${order.orderStatus === "confirmed" ? "bg-green-500" : "bg-yellow-500"}
-
-`}
-                      >
-                        {order.orderStatus === "confirmed"
-                          ? "✅ Confirmed"
-                          : "⏳ Waiting"}
-                      </div>
-
-                      {order.orderStatus !== "confirmed" && (
-                        <button
-                          onClick={() => openOrder(order)}
-                          className="
 bg-blue-600
 text-white
-px-5
-py-3
-rounded-xl
+px-3
+py-2
+rounded-lg
 "
-                        >
-                          👁 View
-                        </button>
-                      )}
-                    </div>
-                  ))
+                              >
+                                Copy
+                              </button>
+
+                            </td>
+
+                            <td className="p-4">
+                              <span
+                                className="
+bg-yellow-500
+text-white
+px-3
+py-1
+rounded-lg
+"
+                              >
+                                Waiting
+                              </span>
+                            </td>
+                            <td className="p-4">
+
+                              <button
+                                onClick={() => confirmOrder(order._id)}
+                                className="
+bg-green-600
+hover:bg-green-700
+text-white
+px-4
+py-2
+rounded-lg
+font-medium
+"
+                              >
+                                ✅ Confirm
+                              </button>
+
+                            </td>
+                          </tr>
+
+                        ))}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
                 )}
+
+              </div>
+            )}
+            {extraTab === "history" && (
+              <div className="space-y-4">
+
+                <h1
+                  className="
+text-2xl
+font-bold
+mb-4
+"
+                >
+                  📜 Order History
+                </h1>
+
+                {historyOrders.length === 0 ? (
+
+                  <div
+                    className="
+bg-slate-100
+p-6
+rounded-xl
+text-center
+"
+                  >
+                    No Confirmed Orders
+                  </div>
+
+                ) : (
+
+                  <div className="overflow-x-auto rounded-xl border">
+
+                    <table className="w-full">
+
+                      <thead>
+
+                        <tr className="bg-slate-900 text-white">
+
+                          <th className="p-4">No</th>
+
+                          <th className="p-4">Date</th>
+
+                          <th className="p-4">Student ID</th>
+
+                          <th className="p-4">Student Name</th>
+
+                          <th className="p-4">Meal Type</th>
+
+                          <th className="p-4">Items</th>
+
+                          <th className="p-4">Amount</th>
+
+                          <th className="p-4">UTR Number</th>
+
+                          <th className="p-4">Status</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {historyOrders.map((order, index) => (
+
+                          <tr
+                            key={order._id}
+                            className="
+border-b
+hover:bg-slate-100
+"
+                          >
+
+                            <td className="p-4">
+                              {index + 1}
+                            </td>
+
+                            <td className="p-4">
+                              {new Date(order.createdAt).toLocaleDateString()}
+                            </td>
+
+                            <td className="p-4">
+                              {order.studentId}
+                            </td>
+
+                            <td className="p-4">
+                              {order.student?.name}
+                            </td>
+
+                            <td className="p-4">
+                              {order.extraItems?.[0]?.mealType
+                                ?.charAt(0)
+                                .toUpperCase() +
+                                order.extraItems?.[0]?.mealType?.slice(1)}
+                            </td>
+
+                            <td className="p-4">
+                              {groupItems(order.extraItems)
+                                .map(
+                                  (item) =>
+                                    `${item.itemName} x${item.quantity}`
+                                )
+                                .join(", ")}
+                            </td>
+
+                            <td className="p-4">
+                              ₹{order.extraTotal}
+                            </td>
+
+                            <td className="p-4">
+                              {order.paymentHistory?.[0]?.transactionId ||
+                                order.transactionId ||
+                                "Not Provided"}
+                            </td>
+
+                            <td className="p-4">
+                              <span
+                                className="
+bg-green-600
+text-white
+px-3
+py-1
+rounded-lg
+"
+                              >
+                                Confirmed
+                              </span>
+                            </td>
+
+                          </tr>
+
+                        ))}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+                )}
+
               </div>
             )}
           </div>

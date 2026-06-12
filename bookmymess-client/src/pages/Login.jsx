@@ -19,7 +19,7 @@ function Login() {
             setLoading(true);
 
             const res = await API.post(
-                "/api/auth/login",
+                "/auth/login",
                 {
                     phone,
                     password
@@ -145,7 +145,7 @@ function Login() {
                     >
 
                         <img
-                            src="./public/icon.jpg"
+                            src="/icon.jpg"
                             alt="BookMyMess"
                             className="w-24 h-24 object-contain"
                         />

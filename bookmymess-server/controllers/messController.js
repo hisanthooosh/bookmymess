@@ -121,10 +121,67 @@ const getAllMesses = async (req, res) => {
     }
 
 };
+const getDashboardStats = async (req, res) => {
 
+    try {
+
+        const totalMesses =
+            await Mess.countDocuments();
+
+        const totalStudents =
+            await User.countDocuments({
+                role: "student"
+            });
+
+        const activeStudents =
+            await User.countDocuments({
+                role: "student",
+                studentEndDate: {
+                    $gt: new Date()
+                }
+            });
+
+        const inactiveStudents =
+            await User.countDocuments({
+                role: "student",
+                studentEndDate: {
+                    $lte: new Date()
+                }
+            });
+
+        res.status(200).json({
+
+            success: true,
+
+            totalMesses,
+
+            totalStudents,
+
+            activeStudents,
+
+            inactiveStudents
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: error.message
+
+        });
+
+    }
+
+};
 module.exports = {
 
     addMess,
-    getAllMesses
+    getAllMesses,
+    getDashboardStats
 
 };
