@@ -9,6 +9,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
+import ContactUs from "./pages/ContactUs";
+import SubscriptionPage from "./pages/SubscriptionPage";
 
 
 function App() {
@@ -36,6 +41,29 @@ function App() {
         <Route
           path="/student-dashboard"
           element={<StudentDashboard />}
+        />
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
+        />
+
+        <Route
+          path="/terms-and-conditions"
+          element={<TermsAndConditions />}
+        />
+
+        <Route
+          path="/refund-policy"
+          element={<RefundPolicy />}
+        />
+
+        <Route
+          path="/contact-us"
+          element={<ContactUs />}
+        />
+        <Route
+          path="/subscription"
+          element={<SubscriptionPage />}
         />
       </Routes>
 

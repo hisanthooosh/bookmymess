@@ -56,9 +56,34 @@ function Login() {
                 res.data.user.role === "student"
             ) {
 
-                navigate(
-                    "/student-dashboard"
-                );
+                const user = res.data.user;
+
+                const today = new Date();
+
+                const hasSubscription =
+
+                    user.subscriptionActive &&
+
+                    user.subscriptionEndDate &&
+
+                    new Date(
+                        user.subscriptionEndDate
+                    ) > today;
+
+                if (hasSubscription) {
+
+                    navigate(
+                        "/student-dashboard"
+                    );
+
+                }
+                else {
+
+                    navigate(
+                        "/subscription"
+                    );
+
+                }
 
             }
 
@@ -255,7 +280,105 @@ function Login() {
                     Book smarter • Reduce food wastage
 
                 </div>
+                <div
+                    className="
+mt-8
+pt-6
+border-t
+border-white/10
+text-center
+"
+                >
 
+                    <p
+                        className="
+text-gray-400
+text-sm
+mb-4
+px-2
+"
+                    >
+                        Book smarter • Reduce food wastage
+                    </p>
+
+                    <div
+                        className="
+flex
+flex-wrap
+justify-center
+items-center
+gap-x-6
+gap-y-3
+text-xs
+sm:text-sm
+text-gray-300
+px-2
+"
+                    >
+
+                        <a
+                            href="/privacy-policy"
+                            className="
+hover:text-white
+duration-300
+"
+                        >
+                            Privacy Policy
+                        </a>
+
+                        <a
+                            href="/terms-and-conditions"
+                            className="
+hover:text-white
+duration-300
+"
+                        >
+                            Terms & Conditions
+                        </a>
+
+                        <a
+                            href="/refund-policy"
+                            className="
+hover:text-white
+duration-300
+"
+                        >
+                            Refund Policy
+                        </a>
+
+                        <a
+                            href="/contact-us"
+                            className="
+hover:text-white
+duration-300
+"
+                        >
+                            Contact Us
+                        </a>
+
+                    </div>
+
+                    <div
+                        className="
+mt-4
+space-y-1
+text-xs
+text-gray-500
+px-2
+"
+                    >
+
+                        <p>
+                            © 2026 BookMyMess
+                        </p>
+
+                        <p>
+                            Doneswari Technologies LLP
+                        </p>
+
+                    </div>
+
+                </div>
             </div>
 
         </div>

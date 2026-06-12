@@ -44,7 +44,32 @@ const userSchema = new mongoose.Schema(
         studentEndDate: {
             type: Date,
             default: null
-        }, upiId: {
+        },
+        subscriptionActive: {
+            type: Boolean,
+            default: false
+        },
+
+        subscriptionPlan: {
+            type: String,
+            default: ""
+        },
+
+        subscriptionStartDate: {
+            type: Date,
+            default: null
+        },
+
+        subscriptionEndDate: {
+            type: Date,
+            default: null
+        },
+
+        subscriptionPaymentId: {
+            type: String,
+            default: ""
+        },
+        upiId: {
 
             type: String,
 
