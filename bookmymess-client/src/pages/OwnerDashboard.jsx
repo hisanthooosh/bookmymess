@@ -45,11 +45,6 @@ function OwnerDashboard() {
 
     dinner: {},
   });
-  const [tomorrowExtraSummary, setTomorrowExtraSummary] = useState({
-    breakfast: {},
-    lunch: {},
-    dinner: {},
-  });
   const [extraMealType, setExtraMealType] = useState("breakfast");
 
   const [extraDay, setExtraDay] = useState("Sunday");
@@ -157,25 +152,6 @@ function OwnerDashboard() {
     } catch (error) {
       console.log(error);
     }
-  };
-  const fetchTomorrowExtraSummary = async () => {
-
-    try {
-
-      const res = await API.get(
-        `/booking/tomorrow-extra-summary/${user.messId}`
-      );
-
-      setTomorrowExtraSummary(res.data);
-
-    }
-
-    catch (error) {
-
-      console.log(error);
-
-    }
-
   };
   const fetchExpiryStats = async () => {
     try {
@@ -324,9 +300,7 @@ function OwnerDashboard() {
     try {
       if (!bookingSearch.trim()) return;
 
-      const res = await API.get(
-        `/booking/attendance/${bookingSearch}/${user.messId}`
-      );
+      const res = await API.get(`/booking/attendance/${bookingSearch}`);
 
       setSelectedBookingStudent(res.data);
     } catch (error) {
@@ -446,7 +420,6 @@ function OwnerDashboard() {
     fetchOrders();
 
     fetchExtraSummary();
-    fetchTomorrowExtraSummary();
   }, []);
   useEffect(() => {
     fetchAttendanceList(attendanceDate);
@@ -1264,30 +1237,6 @@ mb-1
                           ))
                       )}
                     </div>
-                    <div
-                      className="
-bg-orange-50
-border
-border-orange-200
-rounded-xl
-p-3
-mb-4
-"
-                    >
-                      <p className="text-xs font-semibold text-orange-700">
-                        📦 Parcel Orders
-                      </p>
-
-                      <p className="text-2xl font-bold text-orange-600">
-                        {
-                          index === 0
-                            ? bookingStats.todayBreakfastParcel || 0
-                            : index === 1
-                              ? bookingStats.todayLunchParcel || 0
-                              : bookingStats.todayDinnerParcel || 0
-                        }
-                      </p>
-                    </div>
                     <div className="space-y-3">
                       <div
                         className="
@@ -1508,82 +1457,6 @@ leading-5
                     >
                       🍽 {meal.menu}
                     </p>
-                    <div
-                      className="
-    bg-red-50
-    border
-    border-red-200
-    rounded-xl
-    p-3
-    mb-4
-  "
-                    >
-                      <p className="text-xs font-semibold text-red-700 mb-2">
-                        🍗 Extra Orders
-                      </p>
-
-                      {
-                        Object.entries(
-
-                          index === 0
-                            ? tomorrowExtraSummary.breakfast || {}
-                            : index === 1
-                              ? tomorrowExtraSummary.lunch || {}
-                              : tomorrowExtraSummary.dinner || {}
-
-                        ).length === 0
-                          ? (
-                            <p className="text-sm text-gray-500">
-                              No Extra Orders
-                            </p>
-                          )
-                          : (
-                            Object.entries(
-
-                              index === 0
-                                ? tomorrowExtraSummary.breakfast || {}
-                                : index === 1
-                                  ? tomorrowExtraSummary.lunch || {}
-                                  : tomorrowExtraSummary.dinner || {}
-
-                            ).map(([name, qty]) => (
-
-                              <p
-                                key={name}
-                                className="text-sm font-medium"
-                              >
-                                {name} × {qty}
-                              </p>
-
-                            ))
-                          )
-                      }
-
-                    </div>
-                    <div
-                      className="
-    bg-orange-50
-    border
-    border-orange-200
-    rounded-xl
-    p-3
-    mb-4
-  "
-                    >
-                      <p className="text-xs font-semibold text-orange-700">
-                        📦 Parcel Orders
-                      </p>
-
-                      <p className="text-2xl font-bold text-orange-600">
-                        {
-                          index === 0
-                            ? bookingStats.breakfastParcel || 0
-                            : index === 1
-                              ? bookingStats.lunchParcel || 0
-                              : bookingStats.dinnerParcel || 0
-                        }
-                      </p>
-                    </div>
                     <div
                       className="
 space-y-3
@@ -2517,128 +2390,168 @@ font-bold
                   orders.map((order) => (
                     <div
                       key={order._id}
-                      className="
-bg-slate-100
-rounded-xl
-p-5
-space-y-3
-"
+                      className="bg-slate-100 rounded-xl p-5 space-y-3"
                     >
-                      <p>
-                        🆔
-                        {order.studentId}
-                      </p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="bg-indigo-600 text-white px-2 py-1 rounded text-xs font-bold">
+                          ID
+                        </span>
+
+                        <span className="font-semibold">{order.studentId}</span>
+
+                        <span>•</span>
+
+                        <span className="font-semibold">
+                          {order.student?.name || "Student"}
+                        </span>
+                      </div>
 
                       <div className="bg-white rounded-xl p-3 space-y-2">
                         <h3 className="font-bold">💳 Payment History</h3>
 
-                        {order.paymentHistory?.length > 0 ? (
-                          order.paymentHistory.map((payment, index) => (
-                            <div
-                              key={index}
-                              className="border rounded-lg p-2 text-sm"
-                            >
-                              <p>Payment {index + 1}</p>
+                        <div className="overflow-x-auto rounded-xl border">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-slate-50 border-b">
+                                <th className="p-3 text-left">ID</th>
+                                <th className="p-3 text-left">Item Name</th>
+                                <th className="p-3 text-left">Date</th>
+                                <th className="p-3 text-left">Payment</th>
+                                <th className="p-3 text-left">Amount</th>
+                                <th className="p-3 text-left">Transaction</th>
+                                <th className="p-3 text-left">Status</th>
+                                <th className="p-3 text-left">Details</th>
+                              </tr>
+                            </thead>
 
-                              <p>💰 ₹{payment.amount}</p>
+                            <tbody>
+                              {order.paymentHistory?.length > 0 ? (
+                                order.paymentHistory.map((payment, index) => (
+                                  <tr key={index} className="border-b">
+                                    <td className="p-3">{index + 1}</td>
 
-                              <div className="flex items-center gap-2">
-                                <span>
-                                  💳 Transaction:
-                                  <b>
-                                    {payment.transactionId || "Not Provided"}
-                                  </b>
-                                </span>
+                                    <td className="p-3">
+                                      {payment.items?.length > 0
+                                        ? payment.items
+                                          .map((item) => `${item.itemName} x${item.quantity}`)
+                                          .join(", ")
+                                        : groupItems(order.extraItems)
+                                          .map((item) => `${item.itemName} x${item.quantity}`)
+                                          .join(", ")}
+                                    </td>
 
-                                {payment.transactionId && (
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        await navigator.clipboard.writeText(
-                                          payment.transactionId || "",
-                                        );
-                                        alert("✅ UTR Copied Successfully");
-                                      } catch (error) {
-                                        alert("❌ Copy failed");
-                                      }
-                                    }}
-                                    className="
-      ml-2
-      bg-blue-600
-      hover:bg-blue-700
-      text-white
-      px-3
-      py-1
-      rounded-lg
-      text-sm
-      font-medium
-    "
-                                  >
-                                    Copy UTR
-                                  </button>
-                                )}
-                              </div>
+                                    <td className="p-3">
+                                      {new Date(order.bookingDate).toLocaleDateString()}
+                                      <br />
+                                      <span className="text-xs text-gray-500">
+                                        {new Date(order.createdAt).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      </span>
+                                    </td>
 
-                              <div className="mt-2">
-                                <p className="font-semibold">
-                                  🍗 Ordered Items:
-                                </p>
+                                    <td className="p-3">Payment {index + 1}</td>
 
-                                {payment.items?.length > 0 ? (
-                                  payment.items.map((item, i) => (
-                                    <p key={i}>
-                                      • {item.itemName} x{item.quantity}
-                                    </p>
-                                  ))
-                                ) : (
-                                  <p>No items found</p>
-                                )}
-                              </div>
+                                    <td className="p-3 font-semibold">₹{payment.amount}</td>
 
-                              <p>
-                                {payment.status === "confirmed"
-                                  ? "✅ Confirmed"
-                                  : "⏳ Waiting"}
-                              </p>
+                                    <td className="p-3">
+                                      <div className="flex items-center gap-2">
+                                        <span>{payment.transactionId || "Not Provided"}</span>
 
-                              {payment.status !== "confirmed" && (
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await API.put(
-                                        `/booking/confirm-payment/${order._id}/${index}`,
-                                      );
+                                        {payment.transactionId && (
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                await navigator.clipboard.writeText(
+                                                  payment.transactionId || ""
+                                                );
+                                                alert("✅ UTR Copied Successfully");
+                                              } catch (error) {
+                                                alert("❌ Copy failed");
+                                              }
+                                            }}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs font-medium"
+                                          >
+                                            Copy UTR
+                                          </button>
+                                        )}
+                                      </div>
+                                    </td>
 
-                                      toast.success("Payment Confirmed 🎉");
+                                    <td className="p-3">
+                                      {payment.status === "confirmed" ? (
+                                        <span className="bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-lg text-xs font-semibold">
+                                          ✅ Confirmed
+                                        </span>
+                                      ) : (
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              await API.put(
+                                                `/booking/confirm-payment/${order._id}/${index}`
+                                              );
 
-                                      fetchOrders();
-                                    } catch (error) {
-                                      toast.error("Failed");
-                                    }
-                                  }}
-                                  className="
-bg-green-600
-text-white
-px-4
-py-2
-rounded-lg
-mt-2
-"
-                                >
-                                  ✅ Confirm Payment
-                                </button>
+                                              toast.success("Payment Confirmed 🎉");
+
+                                              fetchOrders();
+                                            } catch (error) {
+                                              toast.error("Failed");
+                                            }
+                                          }}
+                                          className="bg-green-600 text-white px-3 py-1 rounded-lg text-xs"
+                                        >
+                                          Confirm
+                                        </button>
+                                      )}
+                                    </td>
+
+                                    <td className="p-3">
+                                      {groupItems(order.extraItems).map((item, i) => (
+                                        <ul key={i} className="list-disc ml-4">
+                                          <li>
+                                            Meal:{" "}
+                                            {item.mealType?.charAt(0).toUpperCase() +
+                                              item.mealType?.slice(1)}
+                                          </li>
+                                          <li>
+                                            Day:{" "}
+                                            {new Date(order.bookingDate).toLocaleDateString(
+                                              "en-US",
+                                              { weekday: "long" }
+                                            )}
+                                          </li>
+                                          <li>Quantity: {item.quantity}</li>
+                                        </ul>
+                                      ))}
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td className="p-3">1</td>
+                                  <td className="p-3">
+                                    {groupItems(order.extraItems)
+                                      .map((item) => `${item.itemName} x${item.quantity}`)
+                                      .join(", ")}
+                                  </td>
+                                  <td className="p-3">
+                                    {new Date(order.bookingDate).toLocaleDateString()}
+                                  </td>
+                                  <td className="p-3">Payment 1</td>
+                                  <td className="p-3 font-semibold">₹{order.extraTotal}</td>
+                                  <td className="p-3">{order.transactionId || "Not Provided"}</td>
+                                  <td className="p-3">
+                                    <span className="bg-yellow-100 text-yellow-700 border border-yellow-300 px-3 py-1 rounded-lg text-xs font-semibold">
+                                      ⏳ Waiting
+                                    </span>
+                                  </td>
+                                  <td className="p-3">-</td>
+                                </tr>
                               )}
-                            </div>
-                          ))
-                        ) : (
-                          <>
-                            <p>💰 ₹{order.extraTotal}</p>
-                            <p>
-                              💳 Transaction:
-                              <b>{order.transactionId || "Not Provided"}</b>
-                            </p>
-                          </>
-                        )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                       <div>
                         🍗 Items:
@@ -2975,13 +2888,11 @@ text-2xl
                         >
                           {!student.mealPlan?.lunch
                             ? "🔒"
-                            : student.tiffinParcel
-                              ? "📦"
-                              : student.lunch === true
-                                ? "✅"
-                                : student.lunch === false
-                                  ? "❌"
-                                  : "⏳"}
+                            : student.lunch === true
+                              ? "✅"
+                              : student.lunch === false
+                                ? "❌"
+                                : "⏳"}
                         </td>
 
                         <td
