@@ -19,7 +19,7 @@ function Login() {
             setLoading(true);
 
             const res = await API.post(
-                "/auth/login",
+                "/api/auth/login",
                 {
                     phone,
                     password

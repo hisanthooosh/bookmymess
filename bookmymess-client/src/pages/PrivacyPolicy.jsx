@@ -1,20 +1,18 @@
 function PrivacyPolicy() {
-
     return (
+        <div className="min-h-screen bg-white">
 
-        <div className="min-h-screen bg-slate-100 p-8">
+            <div className="w-full bg-white p-6 md:p-12">
 
-            <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-
-                <h1 className="text-4xl font-bold mb-6">
+                <h1 className="text-4xl font-bold mb-2 text-blue-700">
                     Privacy Policy
                 </h1>
 
-                <p className="mb-4">
+                <p className="mb-6 text-blue-600 font-semibold">
                     Effective Date: June 2026
                 </p>
 
-                <p className="mb-6">
+                <p className="mb-6 text-gray-700 leading-7">
                     BookMyMess is a product owned and operated by
                     Doneswari Technologies LLP.
                     This Privacy Policy explains how we collect,
@@ -23,89 +21,65 @@ function PrivacyPolicy() {
                     BookMyMess.
                 </p>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Information We Collect
-                </h2>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-5">
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Information We Collect
+                    </h2>
 
-                <ul className="list-disc pl-6 space-y-2">
+                    <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                        <li>Name, phone number, and student details.</li>
+                        <li>Mess subscription and booking information.</li>
+                        <li>Payment and transaction details.</li>
+                        <li>
+                            Device and usage information required
+                            for platform operation.
+                        </li>
+                    </ul>
+                </div>
 
-                    <li>
-                        Name, phone number, and student details.
-                    </li>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-5">
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        How We Use Information
+                    </h2>
 
-                    <li>
-                        Mess subscription and booking information.
-                    </li>
+                    <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                        <li>To provide mess booking services.</li>
+                        <li>To process payments and subscriptions.</li>
+                        <li>To communicate service updates.</li>
+                        <li>To improve platform functionality.</li>
+                    </ul>
+                </div>
 
-                    <li>
-                        Payment and transaction details.
-                    </li>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-5">
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Data Security
+                    </h2>
 
-                    <li>
-                        Device and usage information required
-                        for platform operation.
-                    </li>
+                    <p className="text-gray-700 leading-7">
+                        We implement reasonable security measures
+                        to protect user information from
+                        unauthorized access, disclosure, or misuse.
+                    </p>
+                </div>
 
-                </ul>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+                    <h2 className="text-2xl font-bold mb-3 text-blue-700">
+                        Contact Us
+                    </h2>
 
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    How We Use Information
-                </h2>
-
-                <ul className="list-disc pl-6 space-y-2">
-
-                    <li>
-                        To provide mess booking services.
-                    </li>
-
-                    <li>
-                        To process payments and subscriptions.
-                    </li>
-
-                    <li>
-                        To communicate service updates.
-                    </li>
-
-                    <li>
-                        To improve platform functionality.
-                    </li>
-
-                </ul>
-
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Data Security
-                </h2>
-
-                <p>
-                    We implement reasonable security measures
-                    to protect user information from
-                    unauthorized access, disclosure, or misuse.
-                </p>
-
-                <h2 className="text-2xl font-bold mt-6 mb-3">
-                    Contact Us
-                </h2>
-
-                <p>
-                    Doneswari Technologies LLP
-                </p>
-
-                <p>
-                    Email:
-                    doneswarisoftwaresolutions@gmail.com
-                </p>
-
-                <p>
-                    Phone:
-                    +91 9182845569
-                </p>
+                    <p className="text-gray-700">Doneswari Technologies LLP</p>
+                    <p className="text-gray-700">
+                        Email: doneswarisoftwaresolutions@gmail.com
+                    </p>
+                    <p className="text-gray-700">
+                        Phone: +91 9182845569
+                    </p>
+                </div>
 
             </div>
 
         </div>
-
     );
-
 }
 
 export default PrivacyPolicy;
