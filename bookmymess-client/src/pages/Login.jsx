@@ -144,11 +144,11 @@ function Login() {
                     mb-4"
                     >
 
-                        <span
-                            className="text-3xl"
-                        >
-                            🍽️
-                        </span>
+                        <img
+                            src="./public/icon.jpg"
+                            alt="BookMyMess"
+                            className="w-24 h-24 object-contain"
+                        />
 
                     </div>
 
