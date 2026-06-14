@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
@@ -9,7 +9,25 @@ function Login() {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] =
+        useState(null);
+    const installApp = async () => {
 
+        if (deferredPrompt) {
+
+            deferredPrompt.prompt();
+
+            await deferredPrompt.userChoice;
+
+        } else {
+
+            alert(
+                "For iPhone: Share → Add to Home Screen"
+            );
+
+        }
+
+    };
     const handleLogin = async (e) => {
 
         e.preventDefault();
@@ -102,8 +120,33 @@ function Login() {
 
         }
 
-    }
+    };
 
+    useEffect(() => {
+
+        const handler = (e) => {
+
+            e.preventDefault();
+
+            setDeferredPrompt(e);
+
+        };
+
+        window.addEventListener(
+            "beforeinstallprompt",
+            handler
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "beforeinstallprompt",
+                handler
+            );
+
+        };
+
+    }, []);
     return (
 
         <div
@@ -133,21 +176,29 @@ function Login() {
                 <div className="text-center mb-8">
 
                     <div
-                        className="w-20
-                    h-20
-                    rounded-full
-                    bg-white
-                    flex
-                    items-center
-                    justify-center
-                    mx-auto
-                    mb-4"
+                        className="
+w-24
+h-24
+rounded-3xl
+bg-white
+flex
+items-center
+justify-center
+mx-auto
+mb-5
+shadow-xl
+overflow-hidden
+"
                     >
 
                         <img
                             src="/icon.jpg"
                             alt="BookMyMess"
-                            className="w-24 h-24 object-contain"
+                            className="
+w-full
+h-full
+object-cover
+"
                         />
 
                     </div>
@@ -269,7 +320,22 @@ function Login() {
                     </button>
 
                 </form>
-
+                <button
+                    type="button"
+                    onClick={installApp}
+                    className="
+w-full
+mt-3
+p-4
+rounded-xl
+bg-green-600
+hover:bg-green-700
+text-white
+font-semibold
+"
+                >
+                    📱 Get The App
+                </button>
                 <div
                     className="mt-8
                 text-center
