@@ -5,7 +5,9 @@ const router = express.Router();
 const {
     addMess,
     getAllMesses,
-    getDashboardStats
+    getDashboardStats,
+    updateMess,
+    deleteMess
 } = require(
     "../controllers/messController"
 );
@@ -22,5 +24,13 @@ router.get(
 router.get(
     "/dashboard-stats",
     getDashboardStats
+);
+router.put(
+    "/update/:id",
+    updateMess
+);
+router.delete(
+    "/delete/:id",
+    deleteMess
 );
 module.exports = router;

@@ -25,7 +25,19 @@ function Dashboard() {
         navigate("/");
 
     }
+    const [editModal, setEditModal] = useState(false);
 
+    const [selectedMess, setSelectedMess] =
+        useState(null);
+
+    const [editMessName, setEditMessName] =
+        useState("");
+
+    const [editOwnerName, setEditOwnerName] =
+        useState("");
+
+    const [editOwnerPhone, setEditOwnerPhone] =
+        useState("");
     const [messName, setMessName] = useState("");
     const [ownerName, setOwnerName] = useState("");
     const [ownerPhone, setOwnerPhone] = useState("");
@@ -108,7 +120,40 @@ function Dashboard() {
         }
 
     };
+    const handleDeleteMess = async (id) => {
 
+        const confirmDelete =
+            window.confirm(
+                "Are you sure you want to delete this mess?"
+            );
+
+        if (!confirmDelete) return;
+
+        try {
+
+            await API.delete(
+                `/mess/delete/${id}`
+            );
+
+            alert(
+                "Mess deleted successfully"
+            );
+
+            fetchMesses();
+
+        }
+
+        catch (error) {
+
+            alert(
+                error.response?.data?.message
+                ||
+                "Delete failed"
+            );
+
+        }
+
+    };
     const fetchMesses = async () => {
 
         try {
@@ -139,6 +184,25 @@ function Dashboard() {
         }
 
     }
+    const openEditModal = (mess) => {
+
+        setSelectedMess(mess);
+
+        setEditMessName(
+            mess.messName
+        );
+
+        setEditOwnerName(
+            mess.ownerName
+        );
+
+        setEditOwnerPhone(
+            mess.ownerPhone
+        );
+
+        setEditModal(true);
+
+    };
     const fetchDashboardStats = async () => {
 
         try {
@@ -155,6 +219,43 @@ function Dashboard() {
         catch (error) {
 
             console.log(error);
+
+        }
+
+    };
+    const handleUpdateMess = async () => {
+
+        try {
+
+            await API.put(
+
+                `/mess/update/${selectedMess._id}`,
+
+                {
+                    messName: editMessName,
+                    ownerName: editOwnerName,
+                    ownerPhone: editOwnerPhone
+                }
+
+            );
+
+            alert(
+                "Mess Updated Successfully"
+            );
+
+            setEditModal(false);
+
+            fetchMesses();
+
+        }
+
+        catch (error) {
+
+            alert(
+                error.response?.data?.message
+                ||
+                "Update Failed"
+            );
 
         }
 
@@ -764,6 +865,18 @@ ${activePage === "addmess"
                                                             </th>
 
                                                             <th className="text-left p-4">
+                                                                Students
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Active
+                                                            </th>
+
+                                                            <th className="text-left p-4">
+                                                                Inactive
+                                                            </th>
+
+                                                            <th className="text-left p-4">
                                                                 Created
                                                             </th>
 
@@ -807,6 +920,23 @@ ${activePage === "addmess"
 
                                                                     </td>
 
+                                                                    <td className="p-4 font-semibold text-blue-600">
+
+                                                                        {mess.totalStudents}
+
+                                                                    </td>
+
+                                                                    <td className="p-4 font-semibold text-green-600">
+
+                                                                        {mess.activeStudents}
+
+                                                                    </td>
+
+                                                                    <td className="p-4 font-semibold text-red-600">
+
+                                                                        {mess.inactiveStudents}
+
+                                                                    </td>
 
                                                                     <td className="p-4">
 
@@ -822,19 +952,23 @@ ${activePage === "addmess"
                                                                     <td className="p-4 flex gap-3">
 
                                                                         <button
+                                                                            onClick={() =>
+                                                                                openEditModal(mess)
+                                                                            }
                                                                             className="bg-blue-500 px-4 py-2 rounded-xl text-white"
                                                                         >
-
                                                                             Edit
-
                                                                         </button>
 
                                                                         <button
+                                                                            onClick={() =>
+                                                                                handleDeleteMess(
+                                                                                    mess._id
+                                                                                )
+                                                                            }
                                                                             className="bg-red-500 px-4 py-2 rounded-xl text-white"
                                                                         >
-
                                                                             Delete
-
                                                                         </button>
 
                                                                     </td>
@@ -864,7 +998,134 @@ ${activePage === "addmess"
                 </div>
 
             </div>
+            {
+                editModal && (
 
+                    <div
+                        className="
+fixed
+inset-0
+bg-black/50
+flex
+items-center
+justify-center
+z-50
+"
+                    >
+
+                        <div
+                            className="
+bg-white
+p-6
+rounded-3xl
+w-full
+max-w-md
+space-y-4
+"
+                        >
+
+                            <h2
+                                className="
+text-2xl
+font-bold
+"
+                            >
+                                Edit Mess
+                            </h2>
+
+                            <input
+                                value={editMessName}
+                                onChange={(e) =>
+                                    setEditMessName(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Mess Name"
+                                className="
+w-full
+p-3
+border
+rounded-xl
+"
+                            />
+
+                            <input
+                                value={editOwnerName}
+                                onChange={(e) =>
+                                    setEditOwnerName(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Owner Name"
+                                className="
+w-full
+p-3
+border
+rounded-xl
+"
+                            />
+
+                            <input
+                                value={editOwnerPhone}
+                                onChange={(e) =>
+                                    setEditOwnerPhone(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Owner Phone"
+                                className="
+w-full
+p-3
+border
+rounded-xl
+"
+                            />
+
+                            <div
+                                className="
+flex
+gap-3
+"
+                            >
+
+                                <button
+                                    onClick={
+                                        handleUpdateMess
+                                    }
+                                    className="
+flex-1
+bg-green-600
+text-white
+p-3
+rounded-xl
+"
+                                >
+                                    Update
+                                </button>
+
+                                <button
+                                    onClick={() =>
+                                        setEditModal(false)
+                                    }
+                                    className="
+flex-1
+bg-gray-500
+text-white
+p-3
+rounded-xl
+"
+                                >
+                                    Cancel
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )
+            }
         </div>
 
     )
