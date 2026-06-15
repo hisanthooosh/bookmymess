@@ -617,7 +617,7 @@ function StudentDashboard() {
 
         if (!hasSubscription) {
 
-            navigate("/subscription");
+            navigate("/");
 
         }
 

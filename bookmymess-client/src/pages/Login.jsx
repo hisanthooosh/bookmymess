@@ -11,6 +11,10 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [deferredPrompt, setDeferredPrompt] =
         useState(null);
+
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState("3_months");
+    const [paymentLoading, setPaymentLoading] = useState(false);
     const installApp = async () => {
 
         if (deferredPrompt) {
@@ -90,16 +94,11 @@ function Login() {
 
                 if (hasSubscription) {
 
-                    navigate(
-                        "/student-dashboard"
-                    );
+                    navigate("/student-dashboard");
 
                 }
                 else {
-
-                    navigate(
-                        "/subscription"
-                    );
+                    setShowSubscriptionModal(true);
 
                 }
 
@@ -136,7 +135,14 @@ function Login() {
             "beforeinstallprompt",
             handler
         );
+        const script = document.createElement("script");
 
+        script.src =
+            "https://checkout.razorpay.com/v1/checkout.js";
+
+        script.async = true;
+
+        document.body.appendChild(script);
         return () => {
 
             window.removeEventListener(
@@ -147,6 +153,113 @@ function Login() {
         };
 
     }, []);
+
+    const handleSubscriptionPayment = async () => {
+
+        try {
+
+            setPaymentLoading(true);
+
+            const res = await API.post(
+                "/subscription/create-order",
+                {
+                    plan: selectedPlan
+                }
+            );
+
+            const { order, key } = res.data;
+
+            const options = {
+
+                key,
+
+                amount: order.amount,
+
+                currency: order.currency,
+
+                name: "BookMyMess",
+
+                description: "Student Subscription",
+
+                order_id: order.id,
+
+                handler: async function (response) {
+
+                    try {
+
+                        const user = JSON.parse(
+                            localStorage.getItem("user")
+                        );
+
+                        const verifyRes =
+                            await API.post(
+                                "/subscription/verify-payment",
+                                {
+                                    userId: user._id,
+                                    plan: selectedPlan,
+                                    razorpay_order_id:
+                                        response.razorpay_order_id,
+                                    razorpay_payment_id:
+                                        response.razorpay_payment_id,
+                                    razorpay_signature:
+                                        response.razorpay_signature
+                                }
+                            );
+
+                        if (verifyRes.data.success) {
+                            const updatedUser = {
+
+                                ...user,
+
+                                subscriptionActive: true,
+
+                                subscriptionPlan: selectedPlan
+
+                            };
+
+                            localStorage.setItem(
+                                "user",
+                                JSON.stringify(updatedUser)
+                            );
+
+                            setShowSubscriptionModal(false);
+
+                            navigate("/student-dashboard");
+
+                        }
+
+                    }
+
+                    catch (error) {
+
+                        alert("Payment verification failed");
+
+                    }
+
+                }
+
+            };
+
+            const razorpay =
+                new window.Razorpay(options);
+
+            razorpay.open();
+
+        }
+
+        catch (error) {
+
+            alert("Unable to start payment");
+
+        }
+
+        finally {
+
+            setPaymentLoading(false);
+
+        }
+
+    };
     return (
 
         <div
@@ -446,7 +559,203 @@ px-2
 
                 </div>
             </div>
+            {
+                showSubscriptionModal && (
 
+                    <div className="
+fixed
+inset-0
+bg-black/80
+backdrop-blur-sm
+flex
+justify-center
+items-center
+z-50
+p-4
+">
+
+                        <div className="
+w-full
+max-w-md
+bg-gradient-to-br
+from-slate-900
+to-slate-800
+border
+border-slate-700
+rounded-3xl
+p-6
+shadow-2xl
+">
+
+                            <div className="text-center mb-6">
+
+                                <div className="
+w-16
+h-16
+mx-auto
+mb-4
+rounded-2xl
+bg-blue-600/20
+flex
+items-center
+justify-center
+text-3xl
+">
+                                    🍽️
+                                </div>
+
+                                <h2 className="
+text-3xl
+font-bold
+text-white
+mb-2
+">
+                                    BookMyMess Premium
+                                </h2>
+
+                                <p className="
+text-gray-300
+text-sm
+leading-6
+">
+                                    Activate your subscription to continue
+                                    booking meals and managing your mess
+                                    seamlessly.
+                                </p>
+
+                            </div>
+
+                            <div className="space-y-3">
+
+                                <div
+                                    onClick={() => setSelectedPlan("1_month")}
+                                    className={`
+cursor-pointer
+p-4
+rounded-2xl
+border
+transition-all
+duration-300
+${selectedPlan === "1_month"
+                                            ? "border-green-500 bg-green-500/20"
+                                            : "border-slate-600 hover:border-slate-500"
+                                        }
+`}
+                                >
+                                    <div className="flex justify-between items-center text-white">
+                                        <span>1 Month</span>
+                                        <span className="font-bold">₹10</span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPlan("3_months")}
+                                    className={`
+cursor-pointer
+p-4
+rounded-2xl
+border
+transition-all
+duration-300
+${selectedPlan === "3_months"
+                                            ? "border-green-500 bg-green-500/20"
+                                            : "border-slate-600 hover:border-slate-500"
+                                        }
+`}
+                                >
+                                    <div className="flex justify-between items-center text-white">
+                                        <span>3 Months</span>
+                                        <span className="font-bold">₹30</span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPlan("6_months")}
+                                    className={`
+cursor-pointer
+p-4
+rounded-2xl
+border
+transition-all
+duration-300
+${selectedPlan === "6_months"
+                                            ? "border-green-500 bg-green-500/20"
+                                            : "border-slate-600 hover:border-slate-500"
+                                        }
+`}
+                                >
+                                    <div className="flex justify-between items-center text-white">
+                                        <span>6 Months</span>
+                                        <span className="font-bold">₹60</span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPlan("12_months")}
+                                    className={`
+cursor-pointer
+p-4
+rounded-2xl
+border
+transition-all
+duration-300
+${selectedPlan === "12_months"
+                                            ? "border-green-500 bg-green-500/20"
+                                            : "border-slate-600 hover:border-slate-500"
+                                        }
+`}
+                                >
+                                    <div className="flex justify-between items-center text-white">
+                                        <span>12 Months</span>
+                                        <span className="font-bold">₹120</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button
+                                onClick={handleSubscriptionPayment}
+                                disabled={paymentLoading}
+                                className="
+w-full
+mt-6
+bg-gradient-to-r
+from-blue-600
+to-indigo-600
+hover:from-blue-700
+hover:to-indigo-700
+text-white
+font-bold
+py-4
+rounded-2xl
+transition-all
+duration-300
+"
+                            >
+
+                                {
+                                    paymentLoading
+                                        ? "Opening Razorpay..."
+                                        : "🔒 Secure Payment"
+                                }
+
+                            </button>
+
+                            <p className="
+text-center
+text-xs
+text-gray-400
+mt-4
+">
+                                Secure payments powered by Razorpay
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                )
+            }
         </div>
 
     );
