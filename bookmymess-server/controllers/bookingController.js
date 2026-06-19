@@ -9,7 +9,9 @@ const saveBooking = async (req, res) => {
             messId,
             breakfast,
             lunch,
+            lunchType,
             dinner,
+            dinnerType,
             tiffinParcel,
             extraItems = [],
             extraTotal = 0,
@@ -132,8 +134,14 @@ const saveBooking = async (req, res) => {
             existingBooking.lunch =
                 lunch;
 
+            existingBooking.lunchType =
+                lunchType || "veg";
+
             existingBooking.dinner =
                 dinner;
+
+            existingBooking.dinnerType =
+                dinnerType || "veg";
             existingBooking.tiffinParcel = tiffinParcel;
             const cleanExtraItems = (extraItems || []).map((item) => ({
                 itemId: item.itemId || item._id,
@@ -224,8 +232,17 @@ const saveBooking = async (req, res) => {
                     tomorrow,
 
                 breakfast,
+
                 lunch,
+                lunchType:
+
+                    lunchType || "veg",
+
                 dinner,
+                dinnerType:
+
+                    dinnerType || "veg",
+
                 tiffinParcel,
 
 
@@ -477,9 +494,13 @@ const getStudentAttendance =
 
                 lunch:
                     booking?.lunch,
+                lunchType:
+                    booking?.lunchType || "",
 
                 dinner:
                     booking?.dinner,
+                dinnerType:
+                    booking?.dinnerType || "",
 
                 extraItems:
                     booking?.extraItems || [],
@@ -702,7 +723,33 @@ const getOwnerStats =
                 totalStudents -
 
                 bookings.length;
+            /* lunch veg/nonveg */
 
+            const lunchVegCount = bookings.filter(
+                item =>
+                    item.lunch === true &&
+                    item.lunchType === "veg"
+            ).length;
+
+            const lunchNonVegCount = bookings.filter(
+                item =>
+                    item.lunch === true &&
+                    item.lunchType === "nonveg"
+            ).length;
+
+            /* dinner veg/nonveg */
+
+            const dinnerVegCount = bookings.filter(
+                item =>
+                    item.dinner === true &&
+                    item.dinnerType === "veg"
+            ).length;
+
+            const dinnerNonVegCount = bookings.filter(
+                item =>
+                    item.dinner === true &&
+                    item.dinnerType === "nonveg"
+            ).length;
             /* today breakfast */
 
             const todayBreakfastComing =
@@ -750,7 +797,37 @@ const getOwnerStats =
                 todayBookings.filter(
                     item => item.dinner === true
                 ).length;
+            /* today lunch veg/nonveg */
 
+            const todayLunchVegCount =
+                todayBookings.filter(
+                    item =>
+                        item.lunch === true &&
+                        item.lunchType === "veg"
+                ).length;
+
+            const todayLunchNonVegCount =
+                todayBookings.filter(
+                    item =>
+                        item.lunch === true &&
+                        item.lunchType === "nonveg"
+                ).length;
+
+            /* today dinner veg/nonveg */
+
+            const todayDinnerVegCount =
+                todayBookings.filter(
+                    item =>
+                        item.dinner === true &&
+                        item.dinnerType === "veg"
+                ).length;
+
+            const todayDinnerNonVegCount =
+                todayBookings.filter(
+                    item =>
+                        item.dinner === true &&
+                        item.dinnerType === "nonveg"
+                ).length;
             const todayDinnerNotComing =
 
                 todayBookings.filter(
@@ -810,10 +887,15 @@ const getOwnerStats =
                 lunchComing,
                 lunchNotComing,
                 lunchNoResponse,
+                lunchVegCount,
+                lunchNonVegCount,
+
 
                 dinnerComing,
                 dinnerNotComing,
                 dinnerNoResponse,
+                dinnerVegCount,
+                dinnerNonVegCount,
                 todayBreakfastComing,
                 todayBreakfastNotComing,
                 todayBreakfastNoResponse,
@@ -821,11 +903,15 @@ const getOwnerStats =
                 todayLunchComing,
                 todayLunchNotComing,
                 todayLunchNoResponse,
+                todayLunchVegCount,
+                todayLunchNonVegCount,
+
 
                 todayDinnerComing,
                 todayDinnerNotComing,
                 todayDinnerNoResponse,
-
+                todayDinnerVegCount,
+                todayDinnerNonVegCount,
                 todayBreakfastParcel,
                 todayLunchParcel,
                 todayDinnerParcel,

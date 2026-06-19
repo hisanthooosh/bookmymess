@@ -24,6 +24,11 @@ function StudentDashboard() {
 
     const [dinner, setDinner] =
         useState(null);
+    const [lunchType, setLunchType] =
+        useState("");
+
+    const [dinnerType, setDinnerType] =
+        useState("");
     const [tiffinParcel, setTiffinParcel] = useState(false);
     const [sidebarOpen, setSidebarOpen] =
         useState(false);
@@ -248,6 +253,13 @@ function StudentDashboard() {
                     setDinner(
                         res.data.dinner
                     );
+                    setLunchType(
+                        res.data.lunchType || ""
+                    );
+
+                    setDinnerType(
+                        res.data.dinnerType || ""
+                    );
                     setTiffinParcel(
                         res.data.tiffinParcel || false
                     );
@@ -417,7 +429,25 @@ function StudentDashboard() {
                     );
 
                 }
+                if (
+                    lunch === true &&
+                    tomorrowMenu?.nonVegMeals?.includes("lunch") &&
+                    !lunchType
+                ) {
+                    return alert(
+                        "Please select Lunch Type"
+                    );
+                }
 
+                if (
+                    dinner === true &&
+                    tomorrowMenu?.nonVegMeals?.includes("dinner") &&
+                    !dinnerType
+                ) {
+                    return alert(
+                        "Please select Dinner Type"
+                    );
+                }
                 await API.post(
 
                     "/booking/save",
@@ -432,7 +462,10 @@ function StudentDashboard() {
 
                         breakfast,
                         lunch,
+                        lunchType,
+
                         dinner,
+                        dinnerType,
                         tiffinParcel,
 
                         extraItems:
@@ -594,6 +627,27 @@ function StudentDashboard() {
 
     const isExpired =
         remainingDays <= 0;
+
+    const appEndDate =
+        user?.subscriptionEndDate
+            ? new Date(user.subscriptionEndDate)
+            : null;
+
+    const appStartDate =
+        user?.subscriptionStartDate
+            ? new Date(user.subscriptionStartDate)
+            : null;
+
+    const appRemainingDays =
+        appEndDate
+            ? Math.max(
+                0,
+                Math.ceil(
+                    (appEndDate - new Date()) /
+                    (1000 * 60 * 60 * 24)
+                )
+            )
+            : 0;
     useEffect(() => {
 
         if (!user) {
@@ -1440,6 +1494,67 @@ mb-3
                                             </button>
 
                                         </div>
+
+                                }
+                                {
+                                    lunch === true &&
+                                    tomorrowMenu?.nonVegMeals?.includes("lunch") && (
+
+                                        <div className="
+        mt-4
+        bg-white
+        text-black
+        p-4
+        rounded-xl
+        ">
+
+                                            <p className="font-bold mb-3">
+                                                🍛 Select Lunch Type
+                                            </p>
+
+                                            <div className="flex gap-4">
+
+                                                <button
+                                                    onClick={() =>
+                                                        setLunchType("veg")
+                                                    }
+                                                    className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    font-bold
+
+                    ${lunchType === "veg"
+                                                            ? "bg-green-600 text-white"
+                                                            : "bg-gray-200"}
+                    `}
+                                                >
+                                                    🥗 Veg
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        setLunchType("nonveg")
+                                                    }
+                                                    className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    font-bold
+
+                    ${lunchType === "nonveg"
+                                                            ? "bg-red-600 text-white"
+                                                            : "bg-gray-200"}
+                    `}
+                                                >
+                                                    🍗 Non-Veg
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    )
                                 }
                             </div>
 
@@ -1559,8 +1674,68 @@ break-words
                                             </button>
 
                                         </div>
-                                }
 
+                                }
+                                {
+                                    dinner === true &&
+                                    tomorrowMenu?.nonVegMeals?.includes("dinner") && (
+
+                                        <div className="
+        mt-4
+        bg-white
+        text-black
+        p-4
+        rounded-xl
+        ">
+
+                                            <p className="font-bold mb-3">
+                                                🌙 Select Dinner Type
+                                            </p>
+
+                                            <div className="flex gap-4">
+
+                                                <button
+                                                    onClick={() =>
+                                                        setDinnerType("veg")
+                                                    }
+                                                    className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    font-bold
+
+                    ${dinnerType === "veg"
+                                                            ? "bg-green-600 text-white"
+                                                            : "bg-gray-200"}
+                    `}
+                                                >
+                                                    🥗 Veg
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        setDinnerType("nonveg")
+                                                    }
+                                                    className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    font-bold
+
+                    ${dinnerType === "nonveg"
+                                                            ? "bg-red-600 text-white"
+                                                            : "bg-gray-200"}
+                    `}
+                                                >
+                                                    🍗 Non-Veg
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    )
+                                }
 
 
                             </div>
@@ -2070,7 +2245,83 @@ font-bold
                             }
 
                         </div>
+                        <div className="
+bg-slate-900
+text-white
+p-6
+rounded-3xl
+space-y-4
+">
 
+                            <h2 className="
+    text-2xl
+    font-bold
+    ">
+                                📱 BookMyMess Subscription
+                            </h2>
+
+                            <p>
+                                📦 Plan:
+                                <b>
+                                    {" "}
+                                    {user?.subscriptionPlan || "No Plan"}
+                                </b>
+                            </p>
+
+                            <p>
+                                🚀 Start Date:
+                                <b>
+                                    {" "}
+                                    {
+                                        appStartDate
+                                            ? appStartDate.toLocaleDateString()
+                                            : "-"
+                                    }
+                                </b>
+                            </p>
+
+                            <p>
+                                📅 End Date:
+                                <b>
+                                    {" "}
+                                    {
+                                        appEndDate
+                                            ? appEndDate.toLocaleDateString()
+                                            : "-"
+                                    }
+                                </b>
+                            </p>
+
+                            <div>
+
+                                <span className={`
+px-4
+py-2
+rounded-full
+text-sm
+font-bold
+
+${appRemainingDays > 0
+                                        ? "bg-green-600"
+                                        : "bg-red-600"}
+`}>
+                                    {
+                                        appRemainingDays > 0
+                                            ? "🟢 Active"
+                                            : "🔴 Expired"
+                                    }
+                                </span>
+
+                            </div>
+
+                            <p className="
+    text-3xl
+    font-bold
+    ">
+                                ⏳ {appRemainingDays} Days Left
+                            </p>
+
+                        </div>
 
                     </div>
                 }

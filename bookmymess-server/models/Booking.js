@@ -26,11 +26,23 @@ const bookingSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        lunchType: {
+            type: String,
+            enum: ["veg", "nonveg"],
+            default: "veg"
+        },
+
 
         dinner: {
             type: Boolean,
             default: false
-        }, tiffinParcel: {
+        },
+        dinnerType: {
+            type: String,
+            enum: ["veg", "nonveg"],
+            default: "veg"
+        },
+        tiffinParcel: {
             type: Boolean,
             default: false
         },

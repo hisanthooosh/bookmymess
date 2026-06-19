@@ -9,7 +9,8 @@ const saveMenu = async (req, res) => {
             day,
             breakfast,
             lunch,
-            dinner
+            dinner,
+            nonVegMeals
         } = req.body;
 
 
@@ -33,7 +34,8 @@ const saveMenu = async (req, res) => {
 
             existing.dinner =
                 dinner;
-
+            existing.nonVegMeals =
+                nonVegMeals || [];
             await existing.save();
 
             return res.status(200).json({
@@ -52,7 +54,8 @@ const saveMenu = async (req, res) => {
             day,
             breakfast,
             lunch,
-            dinner
+            dinner,
+            nonVegMeals
 
         });
 

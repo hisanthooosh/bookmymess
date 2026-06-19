@@ -29,6 +29,7 @@ function OwnerDashboard() {
 
   const [newEndDate, setNewEndDate] = useState("");
   const [selectedDay, setSelectedDay] = useState("Sunday");
+  const [nonVegMeals, setNonVegMeals] = useState([]);
   const [extraTab, setExtraTab] = useState("payment");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -375,14 +376,14 @@ function OwnerDashboard() {
 
     if (menu) {
       setBreakfast(menu.breakfast);
-
       setLunch(menu.lunch);
-
       setDinner(menu.dinner);
+      setNonVegMeals(menu.nonVegMeals || []);
     } else {
       setBreakfast([""]);
       setLunch([""]);
       setDinner([""]);
+      setNonVegMeals([]);
     }
   }, [selectedDay, savedMenus]);
 
@@ -390,10 +391,8 @@ function OwnerDashboard() {
     try {
       await API.post(
         "/menu/save",
-
         {
           messId: user.messId,
-
           day: selectedDay,
 
           breakfast: breakfast.filter((item) => item.trim()),
@@ -401,6 +400,8 @@ function OwnerDashboard() {
           lunch: lunch.filter((item) => item.trim()),
 
           dinner: dinner.filter((item) => item.trim()),
+
+          nonVegMeals,
         },
       );
 
@@ -1373,6 +1374,53 @@ font-bold
                         </span>
                       </div>
                     </div>
+                    {
+                      index === 1 && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mt-4">
+                          <p className="font-semibold text-sm mb-2">
+                            🍛 Meal Preference
+                          </p>
+
+                          <div className="flex justify-between">
+                            <span>🥗 Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.todayLunchVegCount || 0}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>🍗 Non-Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.todayLunchNonVegCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    {
+                      index === 2 && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mt-4">
+                          <p className="font-semibold text-sm mb-2">
+                            🌙 Meal Preference
+                          </p>
+
+                          <div className="flex justify-between">
+                            <span>🥗 Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.todayDinnerVegCount || 0}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>🍗 Non-Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.todayDinnerNonVegCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
                   </div>
                 ))}
               </div>
@@ -1673,6 +1721,53 @@ font-bold
                         </span>
                       </div>
                     </div>
+                    {
+                      index === 1 && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mt-4">
+                          <p className="font-semibold text-sm mb-2">
+                            🍛 Meal Preference
+                          </p>
+
+                          <div className="flex justify-between">
+                            <span>🥗 Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.lunchVegCount || 0}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>🍗 Non-Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.lunchNonVegCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    {
+                      index === 2 && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mt-4">
+                          <p className="font-semibold text-sm mb-2">
+                            🌙 Meal Preference
+                          </p>
+
+                          <div className="flex justify-between">
+                            <span>🥗 Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.dinnerVegCount || 0}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>🍗 Non-Veg</span>
+                            <span className="font-bold">
+                              {bookingStats.dinnerNonVegCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
                   </div>
                 ))}
               </div>
@@ -2130,7 +2225,110 @@ duration-300
                 </div>
               </div>
             ))}
+            <div className="mt-8 bg-red-50 p-6 rounded-3xl">
 
+              <h2 className="font-bold text-xl mb-4">
+                🍗 Non-Veg Availability
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <label className="flex items-center gap-3 p-4 bg-white rounded-xl border">
+
+                  <input
+                    type="checkbox"
+                    checked={nonVegMeals.includes("breakfast")}
+                    onChange={(e) => {
+
+                      if (e.target.checked) {
+
+                        setNonVegMeals([
+                          ...nonVegMeals,
+                          "breakfast"
+                        ]);
+
+                      } else {
+
+                        setNonVegMeals(
+                          nonVegMeals.filter(
+                            meal => meal !== "breakfast"
+                          )
+                        );
+
+                      }
+
+                    }}
+                  />
+
+                  🍳 Breakfast
+
+                </label>
+
+                <label className="flex items-center gap-3 p-4 bg-white rounded-xl border">
+
+                  <input
+                    type="checkbox"
+                    checked={nonVegMeals.includes("lunch")}
+                    onChange={(e) => {
+
+                      if (e.target.checked) {
+
+                        setNonVegMeals([
+                          ...nonVegMeals,
+                          "lunch"
+                        ]);
+
+                      } else {
+
+                        setNonVegMeals(
+                          nonVegMeals.filter(
+                            meal => meal !== "lunch"
+                          )
+                        );
+
+                      }
+
+                    }}
+                  />
+
+                  🍛 Lunch
+
+                </label>
+
+                <label className="flex items-center gap-3 p-4 bg-white rounded-xl border">
+
+                  <input
+                    type="checkbox"
+                    checked={nonVegMeals.includes("dinner")}
+                    onChange={(e) => {
+
+                      if (e.target.checked) {
+
+                        setNonVegMeals([
+                          ...nonVegMeals,
+                          "dinner"
+                        ]);
+
+                      } else {
+
+                        setNonVegMeals(
+                          nonVegMeals.filter(
+                            meal => meal !== "dinner"
+                          )
+                        );
+
+                      }
+
+                    }}
+                  />
+
+                  🌙 Dinner
+
+                </label>
+
+              </div>
+
+            </div>
             <button
               onClick={saveMenu}
               className="
@@ -2203,6 +2401,39 @@ shadow
                         {menu.dinner.map((item, i) => (
                           <p key={i}>• {item}</p>
                         ))}
+                      </div>
+                      <div className="mt-4">
+
+                        <p className="font-semibold">
+                          🍗 Non-Veg Meals
+                        </p>
+
+                        <div className="mt-2 space-y-2">
+
+                          {menu.nonVegMeals?.length > 0 ? (
+                            <>
+                              <p className="text-red-600 font-semibold">
+                                🔴 Non-Veg:
+                                {menu.nonVegMeals.join(", ")}
+                              </p>
+
+                              <p className="text-green-600 font-semibold">
+                                🟢 Veg:
+                                {["breakfast", "lunch", "dinner"]
+                                  .filter(
+                                    meal => !menu.nonVegMeals.includes(meal)
+                                  )
+                                  .join(", ")}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-green-600 font-semibold">
+                              🟢 Full Day Veg Menu
+                            </p>
+                          )}
+
+                        </div>
+
                       </div>
                     </div>
                   ))
@@ -3093,8 +3324,17 @@ text-2xl
                             ? "🔒"
                             : student.tiffinParcel
                               ? "📦"
-                              : student.lunch === true
-                                ? "✅"
+                              : student.lunch === true ? (
+                                student.lunchType === "nonveg" ? (
+                                  <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold">
+                                    🔴 Non-Veg
+                                  </span>
+                                ) : (
+                                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                                    🟢 Veg
+                                  </span>
+                                )
+                              )
                                 : student.lunch === false
                                   ? "❌"
                                   : "⏳"}
@@ -3109,8 +3349,17 @@ text-2xl
                         >
                           {!student.mealPlan?.dinner
                             ? "🔒"
-                            : student.dinner === true
-                              ? "✅"
+                            : student.dinner === true ? (
+                              student.dinnerType === "nonveg" ? (
+                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold">
+                                  🔴 Non-Veg
+                                </span>
+                              ) : (
+                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                                  🟢 Veg
+                                </span>
+                              )
+                            )
                               : student.dinner === false
                                 ? "❌"
                                 : "⏳"}

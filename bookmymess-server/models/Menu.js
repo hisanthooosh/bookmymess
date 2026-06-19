@@ -25,7 +25,11 @@ const menuSchema =
 
         lunch: [String],
 
-        dinner: [String]
+        dinner: [String],
+        nonVegMeals: {
+            type: [String],
+            default: []
+        }
 
     },
         {
