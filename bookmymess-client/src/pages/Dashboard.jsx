@@ -844,7 +844,7 @@ ${activePage === "addmess"
 
                                         ) : (
 
-                                            <div className="overflow-x-auto">
+                                            <div className="">
 
                                                 <table className="w-full">
 

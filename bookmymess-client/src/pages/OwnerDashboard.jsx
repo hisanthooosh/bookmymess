@@ -2457,12 +2457,14 @@ flex
 gap-3
 border-b
 pb-4
-"
+overflow-x-auto
+    whitespace-nowrap
+    scrollbar-hide"
             >
               <button
                 onClick={() => setExtraTab("payment")}
                 className={`
-
+shrink-0
 px-5
 py-3
 rounded-xl
@@ -2477,7 +2479,7 @@ ${extraTab === "payment" ? "bg-blue-600 text-white" : "bg-slate-100"}
               <button
                 onClick={() => setExtraTab("items")}
                 className={`
-
+shrink-0
 px-5
 py-3
 rounded-xl
@@ -2492,6 +2494,7 @@ ${extraTab === "items" ? "bg-blue-600 text-white" : "bg-slate-100"}
               <button
                 onClick={() => setExtraTab("pending")}
                 className={`
+shrink-0                 
 px-5
 py-3
 rounded-xl
@@ -2506,6 +2509,7 @@ ${extraTab === "pending"
               <button
                 onClick={() => setExtraTab("history")}
                 className={`
+shrink-0                  
 px-5
 py-3
 rounded-xl
